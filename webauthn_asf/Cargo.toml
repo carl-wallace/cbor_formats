@@ -1,0 +1,16 @@
+[package]
+name = "webauthn_asf"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cbor_derive = { version = "0.1.0", path = "../cbor_derive" }
+common = { version = "0.1.0", path = "../common" }
+ciborium = "0.2.0"
+subtle-encoding = "0.5.1"
+serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
+hex-literal = "0.3.4"
+serde_bytes = "0.11"
+serde_json = "1.0.89"

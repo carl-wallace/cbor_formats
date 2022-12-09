@@ -1,0 +1,30 @@
+[package]
+name = "cbor_derive"
+description = "Custom derive support to map structs and arrays onto types used by Ciborium"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/carl-wallace/cbor-formats/tree/main/cbor_derive"
+categories = ["cryptography", "data-structures", "encoding", "no-std", "parser-implementations"]
+keywords = ["cbor", "json", "crypto", "ietf", "corim", "eat"]
+readme = "README.md"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.63"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1"
+proc-macro-error = "1"
+quote = "1"
+syn = { version = "1.0.58", features = ["extra-traits"] }
+ciborium = "0.2.0"
+subtle-encoding = "0.5.1"
+serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
+hex-literal = "0.3.4"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

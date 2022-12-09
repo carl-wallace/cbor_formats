@@ -1,0 +1,16 @@
+# Trigger a full workspace run
+[workspace]
+resolver = "2"
+members = [
+    "cbor_derive",
+    "cfcli",
+    "common",
+    "corim",
+    "coswid",
+    "cots",
+    "eat",
+    "webauthn_asf"
+]
+
+[profile.dev]
+opt-level = 2

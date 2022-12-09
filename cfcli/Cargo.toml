@@ -1,0 +1,21 @@
+[package]
+name = "cfcli"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cbor_derive = { version = "0.1.0", path = "../cbor_derive" }
+common = { version = "0.1.0", path = "../common" }
+corim = { version = "0.1.0", path = "../corim" }
+coswid = { version = "0.1.0", path = "../coswid" }
+cots = { version = "0.1.0", path = "../cots" }
+eat = { version = "0.1.0", path = "../eat" }
+clap = {version = "3.2.23", default-features = false, features=["std", "derive"]}
+walkdir = { version = "2"}
+ciborium = "0.2.0"
+serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
+serde_bytes = "0.11"
+serde_json = "1.0.89"
+
