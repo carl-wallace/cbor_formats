@@ -1063,7 +1063,6 @@ impl TryFrom<&MeasuredElementTypeChoice> for MeasuredElementTypeChoiceCbor {
 impl TryFrom<Value> for MeasuredElementTypeChoiceCbor {
     type Error = String;
     fn try_from(value: Value) -> Result<Self, Self::Error> {
-        println!("{:?}", value);
         match value {
             Value::Tag(111, b) => Ok(Self::Oid(TaggedOidTypeCbor {
                 0: OidType::Oid(match b.as_bytes() {
@@ -1098,7 +1097,6 @@ impl TryFrom<Value> for MeasuredElementTypeChoiceCbor {
 impl TryFrom<&Value> for MeasuredElementTypeChoiceCbor {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        println!("{:?}", value);
         match value {
             Value::Tag(111, b) => Ok(Self::Oid(TaggedOidTypeCbor {
                 0: OidType::Oid(match b.as_bytes() {
