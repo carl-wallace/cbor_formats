@@ -71,7 +71,7 @@ fn concise_ta_store_test() {
 #[test]
 fn cots_test() {
     let expected = read_cbor(&Some(
-        "/Users/cwallace/devel/carl-wallace/cbor_formats/cots/tests/examples/cots_trunc.cbor"
+        "./tests/examples/cots_trunc.cbor"
             .to_string(),
     ));
 

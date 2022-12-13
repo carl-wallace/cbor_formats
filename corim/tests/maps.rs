@@ -126,40 +126,6 @@ fn concise_mid_tag_test() {
 }
 
 #[test]
-fn concise_mid_tag_test2() {
-    let comid_cbor_bytes = read_cbor(&Some(
-        "/Users/cwallace/devel/carl-wallace/corim/cocli/comid-dice-refval.cbor".to_string(),
-    ));
-    println!(
-        "Encoded ConciseMidTag from veraison: {:?}",
-        buffer_to_hex(comid_cbor_bytes.as_slice())
-    );
-    let comid_d: ConciseMidTagCbor = from_reader(comid_cbor_bytes.clone().as_slice()).unwrap();
-    //println!("Decoded ConciseMidTag: {:?}", comid_d);
-    let mut encoded_token = vec![];
-    let _ = into_writer(&comid_d, &mut encoded_token);
-    assert_eq!(comid_cbor_bytes, encoded_token);
-
-    let comid_json: ConciseMidTag = comid_d.try_into().unwrap();
-    println!("{}", serde_json::to_string(&comid_json).unwrap());
-
-    let mut encoded_token2 = vec![];
-    let _ = into_writer(&comid_json, &mut encoded_token2);
-    println!(
-        "Encoded ConciseMidTag with string keys: {:?}",
-        buffer_to_hex(encoded_token2.as_slice())
-    );
-
-    let comid_cbor: ConciseMidTagCbor = comid_json.try_into().unwrap();
-    let mut encoded_token3 = vec![];
-    let _ = into_writer(&comid_cbor, &mut encoded_token3);
-    assert_eq!(comid_cbor_bytes, encoded_token3);
-    println!(
-        "Re-encoded ConciseMidTag with integer keys: {:?}",
-        buffer_to_hex(comid_cbor_bytes.as_slice())
-    );
-}
-#[test]
 fn corim_locator_map_test() {
     //todo fix to feature hashentry
     // let mut encoded_token = vec![];
