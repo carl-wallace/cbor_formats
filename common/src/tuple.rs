@@ -1,7 +1,8 @@
 //! General-purpose Tuple and TupleCbor types
 
-use alloc::string::String;
-use alloc::vec::Vec;
+use alloc::boxed::Box;
+use alloc::string::{String, ToString};
+use alloc::{vec, vec::Vec};
 use ciborium::value::{Integer, Value};
 use core::{fmt, marker::PhantomData};
 use serde::de::Error;

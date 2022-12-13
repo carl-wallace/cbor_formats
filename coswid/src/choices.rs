@@ -3,7 +3,8 @@
 use ciborium::value::Value;
 use serde::{Deserialize, Serialize};
 
-use alloc::string::String;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 
 use crate::maps::{EvidenceEntry, PayloadEntry};
 use common::IntType;

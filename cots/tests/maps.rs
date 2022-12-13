@@ -70,10 +70,7 @@ fn concise_ta_store_test() {
 
 #[test]
 fn cots_test() {
-    let expected = read_cbor(&Some(
-        "./tests/examples/cots_trunc.cbor"
-            .to_string(),
-    ));
+    let expected = read_cbor(&Some("./tests/examples/cots_trunc.cbor".to_string()));
 
     let csc_d: ConciseTaStoresCbor = from_reader(expected.clone().as_slice()).unwrap();
     //println!("Decoded ConciseMidTag: {:?}", comid_d);

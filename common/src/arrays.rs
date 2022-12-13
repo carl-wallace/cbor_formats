@@ -8,6 +8,8 @@ use serde::{__private::size_hint, de::Error, de::Visitor};
 
 use alloc::{vec, vec::Vec};
 
+use alloc::format;
+use alloc::string::{String, ToString};
 use cbor_derive::StructToArray;
 
 /// The `hash-entry` type is defined in [CoRIM Section 1.3.8].

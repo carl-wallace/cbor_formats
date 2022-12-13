@@ -1,5 +1,7 @@
 //! Choice-based structs from the Concise Reference Integrity Manifest (CoRIM) spec
 
+use alloc::format;
+use alloc::string::{String, ToString};
 use ciborium::value::{Integer, Value};
 use common::*;
 use serde::__private::de::Content;
@@ -7,7 +9,6 @@ use serde::{Deserialize, Serialize};
 use serde_repr::Deserialize_repr;
 use serde_repr::Serialize_repr;
 
-use alloc::string::{String, ToString};
 use ciborium::tag::Required;
 
 use crate::maps::*;
@@ -487,14 +488,7 @@ impl<'de> serde::Deserialize<'de> for CorimIdTypeChoice {
 /// ```
 ///
 /// [CoRIM Section 3.1.2]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.2
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    PartialEq,
-    serde_enum_str::Deserialize_enum_str,
-    serde_enum_str::Serialize_enum_str,
-)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[allow(non_camel_case_types)]
 #[allow(missing_docs)]
 pub enum CorimRoleTypeChoice {
@@ -504,7 +498,6 @@ pub enum CorimRoleTypeChoice {
     Creator,
     #[serde(rename = "maintainer")]
     Maintainer,
-    #[serde(other)]
     other(String),
 }
 
