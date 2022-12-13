@@ -9,7 +9,7 @@ edition = "2021"
 cbor_derive = { version = "0.1.0", path = "../cbor_derive" }
 common = { version = "0.1.0", path = "../common" }
 ciborium = "0.2.0"
-subtle-encoding = "0.5.1"
+subtle-encoding = {version = "0.5.1", default-features = false, features = ["hex", "alloc"]}
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
 hex-literal = "0.3.4"
 serde_bytes = "0.11"

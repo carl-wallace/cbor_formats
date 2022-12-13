@@ -3,7 +3,7 @@
 use ciborium::value::Value;
 use serde::{Deserialize, Serialize};
 
-use alloc::string::String;
+use alloc::string::{String, ToString};
 
 use num_enum::TryFromPrimitive;
 use serde_repr::Deserialize_repr;

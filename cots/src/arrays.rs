@@ -1,4 +1,6 @@
 //! Array-based structs from the Concise Trust Anchor Store (CoTS) spec
+use alloc::format;
+use alloc::string::{String, ToString};
 use ciborium::{cbor, value::Value};
 use core::{fmt, marker::PhantomData};
 use serde::{Deserialize, Serialize};

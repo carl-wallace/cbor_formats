@@ -21,7 +21,7 @@ proc-macro-error = "1"
 quote = "1"
 syn = { version = "1.0.58", features = ["extra-traits"] }
 ciborium = "0.2.0"
-subtle-encoding = "0.5.1"
+subtle-encoding = {version = "0.5.1", default-features = false, features = ["hex", "alloc"]}
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
 hex-literal = "0.3.4"
 

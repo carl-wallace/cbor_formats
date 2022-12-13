@@ -10,6 +10,8 @@ use alloc::{vec, vec::Vec};
 
 use crate::choices::*;
 use crate::maps::*;
+use alloc::format;
+use alloc::string::{String, ToString};
 use cbor_derive::StructToArray;
 use common::TextOrBinary;
 

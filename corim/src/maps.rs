@@ -1,6 +1,7 @@
 //! Map-based structs from the Concise Reference Integrity Manifest (CoRIM) spec
 
 use alloc::collections::BTreeMap;
+use alloc::format;
 use alloc::string::{String, ToString};
 use alloc::{vec, vec::Vec};
 use ciborium::value::Integer;

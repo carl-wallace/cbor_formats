@@ -1,7 +1,8 @@
 //! General-purpose TupleMap and TupleMapCbor types
 
 use crate::tuple::*;
-use alloc::vec::Vec;
+use alloc::string::{String, ToString};
+use alloc::{vec, vec::Vec};
 use ciborium::value::Value;
 use core::{fmt, marker::PhantomData};
 use serde::de::MapAccess;

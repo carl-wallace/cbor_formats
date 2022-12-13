@@ -5,6 +5,7 @@ use core::{fmt, marker::PhantomData};
 use serde::{Deserialize, Serialize};
 use serde::{__private::size_hint, de::Error, de::Visitor};
 
+use alloc::format;
 use alloc::string::{String, ToString};
 use alloc::{vec, vec::Vec};
 use serde::ser::Error as OtherError;
