@@ -159,7 +159,7 @@ fn corim_map_test() {
         "Encoded CorimMap from veraison: {:?}",
         buffer_to_hex(comid_cbor_bytes.as_slice())
     );
-    let comid_d: CorimMapCbor = from_reader(comid_cbor_bytes.clone().as_slice()).unwrap();
+    let comid_d: CorimMapCbor = from_reader(comid_cbor_bytes.as_slice()).unwrap();
     println!("Decoded CorimMapCbor: {:?}", comid_d);
     let mut encoded_token = vec![];
     let _ = into_writer(&comid_d, &mut encoded_token);

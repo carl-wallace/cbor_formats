@@ -5,6 +5,8 @@ use cots::maps::*;
 use hex_literal::hex;
 mod utils;
 use crate::utils::*;
+extern crate alloc;
+use alloc::vec::Vec;
 
 #[test]
 fn concise_ta_stores_test() {
@@ -13,7 +15,7 @@ fn concise_ta_stores_test() {
         "./tests/examples/tas2.cbor",
         "./tests/examples/tas3.cbor",
     ];
-    let mut fab = ConciseTaStoresCbor { 0: vec![] };
+    let mut fab = ConciseTaStoresCbor(Vec::new());
     for f in valid {
         let expected = read_cbor(&Some(f.to_string()));
         let csc_d: ConciseTaStoreMapCbor = from_reader(expected.clone().as_slice()).unwrap();

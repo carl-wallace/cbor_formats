@@ -72,7 +72,7 @@ fn concise_ta_store_test() {
 fn cots_test() {
     let expected = read_cbor(&Some("./tests/examples/cots_trunc.cbor".to_string()));
 
-    let csc_d: ConciseTaStoresCbor = from_reader(expected.clone().as_slice()).unwrap();
+    let csc_d: ConciseTaStoresCbor = from_reader(expected.as_slice()).unwrap();
     //println!("Decoded ConciseMidTag: {:?}", comid_d);
     let mut encoded_token = vec![];
     let _ = into_writer(&csc_d, &mut encoded_token);

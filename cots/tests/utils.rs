@@ -15,8 +15,8 @@ lazy_static! {
 
 #[allow(dead_code)]
 pub fn get_file_as_byte_vec(filename: &Path) -> Vec<u8> {
-    match File::open(&filename) {
-        Ok(mut f) => match std::fs::metadata(&filename) {
+    match File::open(filename) {
+        Ok(mut f) => match std::fs::metadata(filename) {
             Ok(metadata) => {
                 let mut buffer = vec![0; metadata.len() as usize];
                 match f.read_exact(&mut buffer) {

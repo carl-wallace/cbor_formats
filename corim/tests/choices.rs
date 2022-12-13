@@ -14,7 +14,7 @@ fn class_id_type_choice_test() {
     let v = vec![0x01, 0x02, 0x03];
     let fab = ClassIdTypeChoiceCbor::Oid(Required(OidType::Oid(v)));
     let mut encoded_token = vec![];
-    let _ = into_writer(&fab, &mut encoded_token).unwrap();
+    into_writer(&fab, &mut encoded_token).unwrap();
 
     let fab_j: ClassIdTypeChoice = fab.clone().try_into().unwrap();
     let _ = serde_json::to_string(&fab_j).unwrap();
@@ -25,7 +25,7 @@ fn class_id_type_choice_test() {
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ])));
     let mut encoded_token2 = vec![];
-    let _ = into_writer(&fab2, &mut encoded_token2).unwrap();
+    into_writer(&fab2, &mut encoded_token2).unwrap();
 
     let fab2_j: ClassIdTypeChoice = fab2.clone().try_into().unwrap();
     let _ = serde_json::to_string(&fab2_j).unwrap();
@@ -34,7 +34,7 @@ fn class_id_type_choice_test() {
 
     let fab3 = ClassIdTypeChoiceCbor::Int(Required(IntType::Int([0x01].to_vec())));
     let mut encoded_token3 = vec![];
-    let _ = into_writer(&fab3, &mut encoded_token3).unwrap();
+    into_writer(&fab3, &mut encoded_token3).unwrap();
 
     let fab3_j: ClassIdTypeChoice = fab3.clone().try_into().unwrap();
     let _ = serde_json::to_string(&fab3_j).unwrap();
@@ -47,7 +47,7 @@ fn corim_id_type_choice_test() {
     use common::*;
     let mut encoded_token = vec![];
     let citc = CorimIdTypeChoice::Str("bah".to_string());
-    let _ = into_writer(&citc, &mut encoded_token);
+    into_writer(&citc, &mut encoded_token).unwrap();
     let citc_d: CorimIdTypeChoice = from_reader(encoded_token.clone().as_slice()).unwrap();
     assert_eq!(citc, citc_d);
 
@@ -55,7 +55,7 @@ fn corim_id_type_choice_test() {
     let citc2 = CorimIdTypeChoice::Uuid(UuidType::Uuid(vec![
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ]));
-    let _ = into_writer(&citc2, &mut encoded_token2);
+    into_writer(&citc2, &mut encoded_token2).unwrap();
     let citc_d2: CorimIdTypeChoice = from_reader(encoded_token2.clone().as_slice()).unwrap();
     assert_eq!(citc2, citc_d2);
 }
@@ -64,7 +64,7 @@ fn corim_id_type_choice_test() {
 fn corim_role_type_choice_test() {
     let cr = CorimRoleTypeChoiceKnownCbor::Creator;
     let mut encoded_token = vec![];
-    let _ = into_writer(&cr, &mut encoded_token);
+    into_writer(&cr, &mut encoded_token).unwrap();
     println!(
         "Encoded CorimRoleTypeChoiceCbor: {:?}",
         buffer_to_hex(encoded_token.as_slice())
@@ -79,7 +79,7 @@ fn corim_role_type_choice_test() {
         CorimRoleTypeChoiceCbor::Extensions(55),
     ];
     let mut encoded_token2 = vec![];
-    let _ = into_writer(&vcr, &mut encoded_token2);
+    into_writer(&vcr, &mut encoded_token2).unwrap();
     println!(
         "Encoded Vec<CorimRoleTypeChoiceCbor>: {:?}",
         buffer_to_hex(encoded_token2.as_slice())
@@ -113,29 +113,29 @@ l4wOuDwKQa+upc8GftXE2C//4mKANBC6It01gUaTIpo=
 
     let fab = CryptoKeyTypeChoice::Key(Required(base64_key.to_string()));
     let mut encoded_token = vec![];
-    let _ = into_writer(&fab, &mut encoded_token).unwrap();
+    into_writer(&fab, &mut encoded_token).unwrap();
 
-    let fab_j: CryptoKeyTypeChoice = fab.clone().try_into().unwrap();
+    let fab_j: CryptoKeyTypeChoice = fab.clone();
     let _ = serde_json::to_string(&fab_j).unwrap();
-    let fab_c: CryptoKeyTypeChoice = fab_j.try_into().unwrap();
+    let fab_c: CryptoKeyTypeChoice = fab_j;
     assert_eq!(fab, fab_c);
 
     let fab2 = CryptoKeyTypeChoice::Cert(Required(base64_cert.to_string()));
     let mut encoded_token2 = vec![];
-    let _ = into_writer(&fab2, &mut encoded_token2).unwrap();
+    into_writer(&fab2, &mut encoded_token2).unwrap();
 
-    let fab_j2: CryptoKeyTypeChoice = fab2.clone().try_into().unwrap();
+    let fab_j2: CryptoKeyTypeChoice = fab2.clone();
     let _ = serde_json::to_string(&fab_j2).unwrap();
-    let fab_c2: CryptoKeyTypeChoice = fab_j2.try_into().unwrap();
+    let fab_c2: CryptoKeyTypeChoice = fab_j2;
     assert_eq!(fab2, fab_c2);
 
     let fab3 = CryptoKeyTypeChoice::Cert(Required(base64_cert.to_string()));
     let mut encoded_token3 = vec![];
-    let _ = into_writer(&fab3, &mut encoded_token3).unwrap();
+    into_writer(&fab3, &mut encoded_token3).unwrap();
 
-    let fab_j3: CryptoKeyTypeChoice = fab3.clone().try_into().unwrap();
+    let fab_j3: CryptoKeyTypeChoice = fab3.clone();
     let _ = serde_json::to_string(&fab_j3).unwrap();
-    let fab_c3: CryptoKeyTypeChoice = fab_j3.try_into().unwrap();
+    let fab_c3: CryptoKeyTypeChoice = fab_j3;
     assert_eq!(fab3, fab_c3);
 }
 
@@ -143,31 +143,31 @@ l4wOuDwKQa+upc8GftXE2C//4mKANBC6It01gUaTIpo=
 fn domain_type_choice_test() {
     let fab = DomainTypeChoice::U64(5);
     let mut encoded_token = vec![];
-    let _ = into_writer(&fab, &mut encoded_token).unwrap();
+    into_writer(&fab, &mut encoded_token).unwrap();
 
-    let fab_j: DomainTypeChoice = fab.clone().try_into().unwrap();
+    let fab_j: DomainTypeChoice = fab.clone();
     let _ = serde_json::to_string(&fab_j).unwrap();
-    let fab_c: DomainTypeChoice = fab_j.try_into().unwrap();
+    let fab_c: DomainTypeChoice = fab_j;
     assert_eq!(fab, fab_c);
 
     let fab2 = DomainTypeChoice::Uuid(Required(UuidType::Uuid(vec![
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ])));
     let mut encoded_token2 = vec![];
-    let _ = into_writer(&fab2, &mut encoded_token2).unwrap();
+    into_writer(&fab2, &mut encoded_token2).unwrap();
 
-    let fab2_j: DomainTypeChoice = fab2.clone().try_into().unwrap();
+    let fab2_j: DomainTypeChoice = fab2.clone();
     let _ = serde_json::to_string(&fab2_j).unwrap();
-    let fab2_c: DomainTypeChoice = fab2_j.try_into().unwrap();
+    let fab2_c: DomainTypeChoice = fab2_j;
     assert_eq!(fab2, fab2_c);
 
     let fab3 = DomainTypeChoice::Text("bah".to_string());
     let mut encoded_token3 = vec![];
-    let _ = into_writer(&fab3, &mut encoded_token3).unwrap();
+    into_writer(&fab3, &mut encoded_token3).unwrap();
 
-    let fab3_j: DomainTypeChoice = fab3.clone().try_into().unwrap();
+    let fab3_j: DomainTypeChoice = fab3.clone();
     let _ = serde_json::to_string(&fab3_j).unwrap();
-    let fab3_c: DomainTypeChoice = fab3_j.try_into().unwrap();
+    let fab3_c: DomainTypeChoice = fab3_j;
     assert_eq!(fab3, fab3_c);
 }
 
@@ -175,7 +175,7 @@ fn domain_type_choice_test() {
 fn entity_name_type_choice_test() {
     let mut encoded_token = vec![];
     let entc = EntityNameTypeChoice::Text("bah".to_string());
-    let _ = into_writer(&entc, &mut encoded_token);
+    into_writer(&entc, &mut encoded_token).unwrap();
     let entc_d: EntityNameTypeChoice = from_reader(encoded_token.clone().as_slice()).unwrap();
     assert_eq!(entc, entc_d);
 }
@@ -186,11 +186,11 @@ fn group_id_type_choice_test() {
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ])));
     let mut encoded_token2 = vec![];
-    let _ = into_writer(&fab2, &mut encoded_token2).unwrap();
+    into_writer(&fab2, &mut encoded_token2).unwrap();
 
-    let fab2_j: GroupIdTypeChoice = fab2.clone().try_into().unwrap();
+    let fab2_j: GroupIdTypeChoice = fab2.clone();
     let _ = serde_json::to_string(&fab2_j).unwrap();
-    let fab2_c: GroupIdTypeChoice = fab2_j.try_into().unwrap();
+    let fab2_c: GroupIdTypeChoice = fab2_j;
     assert_eq!(fab2, fab2_c);
 }
 
@@ -200,22 +200,22 @@ fn instance_id_type_choice_test() {
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ])));
     let mut encoded_token = vec![];
-    let _ = into_writer(&fab, &mut encoded_token).unwrap();
+    into_writer(&fab, &mut encoded_token).unwrap();
 
-    let fab_j: InstanceIdTypeChoice = fab.clone().try_into().unwrap();
+    let fab_j: InstanceIdTypeChoice = fab.clone();
     let _ = serde_json::to_string(&fab_j).unwrap();
-    let fab_c: InstanceIdTypeChoice = fab_j.try_into().unwrap();
+    let fab_c: InstanceIdTypeChoice = fab_j;
     assert_eq!(fab, fab_c);
 
     let fab2 = InstanceIdTypeChoice::Ueid(Required(UeidType::Ueid(vec![
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ])));
     let mut encoded_token2 = vec![];
-    let _ = into_writer(&fab2, &mut encoded_token2).unwrap();
+    into_writer(&fab2, &mut encoded_token2).unwrap();
 
-    let fab2_j: InstanceIdTypeChoice = fab2.clone().try_into().unwrap();
+    let fab2_j: InstanceIdTypeChoice = fab2.clone();
     let _ = serde_json::to_string(&fab2_j).unwrap();
-    let fab2_c: InstanceIdTypeChoice = fab2_j.try_into().unwrap();
+    let fab2_c: InstanceIdTypeChoice = fab2_j;
     assert_eq!(fab2, fab2_c);
 }
 
@@ -224,7 +224,7 @@ fn measured_element_type_choice_test() {
     let v = vec![0x01, 0x02, 0x03];
     let fab = MeasuredElementTypeChoiceCbor::Oid(Required(OidType::Oid(v)));
     let mut encoded_token = vec![];
-    let _ = into_writer(&fab, &mut encoded_token).unwrap();
+    into_writer(&fab, &mut encoded_token).unwrap();
 
     let fab_j: MeasuredElementTypeChoice = fab.clone().try_into().unwrap();
     let _ = serde_json::to_string(&fab_j).unwrap();
@@ -235,7 +235,7 @@ fn measured_element_type_choice_test() {
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ])));
     let mut encoded_token2 = vec![];
-    let _ = into_writer(&fab2, &mut encoded_token2).unwrap();
+    into_writer(&fab2, &mut encoded_token2).unwrap();
 
     let fab2_j: MeasuredElementTypeChoice = fab2.clone().try_into().unwrap();
     let _ = serde_json::to_string(&fab2_j).unwrap();
@@ -248,7 +248,7 @@ fn profile_type_choice_test() {
     let v = vec![0x01, 0x02, 0x03];
     let fab = ProfileTypeChoiceCbor::Oid(Required(OidType::Oid(v)));
     let mut encoded_token = vec![];
-    let _ = into_writer(&fab, &mut encoded_token).unwrap();
+    into_writer(&fab, &mut encoded_token).unwrap();
 
     let fab_j: ProfileTypeChoice = fab.clone().try_into().unwrap();
     let _ = serde_json::to_string(&fab_j).unwrap();
@@ -257,7 +257,7 @@ fn profile_type_choice_test() {
 
     let fab2 = ProfileTypeChoiceCbor::Uri("www.example.com".to_string());
     let mut encoded_token = vec![];
-    let _ = into_writer(&fab2, &mut encoded_token).unwrap();
+    into_writer(&fab2, &mut encoded_token).unwrap();
 
     let fab2_j: ProfileTypeChoice = fab2.clone().try_into().unwrap();
     let _ = serde_json::to_string(&fab2_j).unwrap();
@@ -269,20 +269,20 @@ fn profile_type_choice_test() {
 fn svn_type_choice_test() {
     let fab = SvnTypeChoice::TaggedSvn(Required(2));
     let mut encoded_token = vec![];
-    let _ = into_writer(&fab, &mut encoded_token).unwrap();
+    into_writer(&fab, &mut encoded_token).unwrap();
 
-    let fab_j: SvnTypeChoice = fab.clone().try_into().unwrap();
+    let fab_j: SvnTypeChoice = fab.clone();
     let _ = serde_json::to_string(&fab_j).unwrap();
-    let fab_c: SvnTypeChoice = fab_j.try_into().unwrap();
+    let fab_c: SvnTypeChoice = fab_j;
     assert_eq!(fab, fab_c);
 
     let fab2 = SvnTypeChoice::TaggedMinSvn(Required(1));
     let mut encoded_token = vec![];
-    let _ = into_writer(&fab2, &mut encoded_token).unwrap();
+    into_writer(&fab2, &mut encoded_token).unwrap();
 
-    let fab2_j: SvnTypeChoice = fab2.clone().try_into().unwrap();
+    let fab2_j: SvnTypeChoice = fab2.clone();
     let _ = serde_json::to_string(&fab2_j).unwrap();
-    let fab2_c: SvnTypeChoice = fab2_j.try_into().unwrap();
+    let fab2_c: SvnTypeChoice = fab2_j;
     assert_eq!(fab2, fab2_c);
 }
 
@@ -291,7 +291,7 @@ fn tag_id_type_choice_test() {
     use common::*;
     let titc = TagIdTypeChoiceCbor::Str("bah".to_string());
     let mut encoded_token = vec![];
-    let _ = into_writer(&titc, &mut encoded_token).unwrap();
+    into_writer(&titc, &mut encoded_token).unwrap();
 
     let titc_j: TagIdTypeChoice = titc.clone().try_into().unwrap();
     let _ = serde_json::to_string(&titc_j).unwrap();
@@ -302,7 +302,7 @@ fn tag_id_type_choice_test() {
     let titc2 = TagIdTypeChoiceCbor::Uuid(UuidType::Uuid(vec![
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ]));
-    let _ = into_writer(&titc2, &mut encoded_token2).unwrap();
+    into_writer(&titc2, &mut encoded_token2).unwrap();
 
     let titc2_j: TagIdTypeChoice = titc2.clone().try_into().unwrap();
     let _ = serde_json::to_string(&titc2_j).unwrap();
@@ -314,30 +314,30 @@ fn tag_id_type_choice_test() {
 fn tag_rel_type_choice_test() {
     let rtc = TagRelTypeChoice::Known(TagRelTypeChoiceKnown::Replaces);
     let mut encoded_token = vec![];
-    let _ = into_writer(&rtc, &mut encoded_token).unwrap();
+    into_writer(&rtc, &mut encoded_token).unwrap();
     assert_eq!([0x01], encoded_token.as_slice());
 
-    let rtc_j: TagRelTypeChoice = rtc.clone().try_into().unwrap();
+    let rtc_j: TagRelTypeChoice = rtc.clone();
     let _ = serde_json::to_string(&rtc_j).unwrap();
-    let rtc_cbor: TagRelTypeChoice = rtc_j.try_into().unwrap();
+    let rtc_cbor: TagRelTypeChoice = rtc_j;
     assert_eq!(rtc, rtc_cbor);
 
     let mut encoded_token2 = vec![];
-    let _ = into_writer(&rtc_cbor, &mut encoded_token2).unwrap();
+    into_writer(&rtc_cbor, &mut encoded_token2).unwrap();
     assert_eq!([0x01], encoded_token2.as_slice());
 
     let rtc2 = TagRelTypeChoice::Extensions(32);
     let mut encoded_token = vec![];
-    let _ = into_writer(&rtc2, &mut encoded_token).unwrap();
+    into_writer(&rtc2, &mut encoded_token).unwrap();
     assert_eq!([0x18, 0x20], encoded_token.as_slice());
 
-    let rtc2_j: TagRelTypeChoice = rtc2.clone().try_into().unwrap();
+    let rtc2_j: TagRelTypeChoice = rtc2.clone();
     let _ = serde_json::to_string(&rtc2_j).unwrap();
-    let rtc2_cbor: TagRelTypeChoice = rtc2_j.try_into().unwrap();
+    let rtc2_cbor: TagRelTypeChoice = rtc2_j;
     assert_eq!(rtc2, rtc2_cbor);
 
     let mut encoded_token2 = vec![];
-    let _ = into_writer(&rtc2_cbor, &mut encoded_token2).unwrap();
+    into_writer(&rtc2_cbor, &mut encoded_token2).unwrap();
     assert_eq!([0x18, 0x20], encoded_token2.as_slice());
 }
 
@@ -345,16 +345,16 @@ fn tag_rel_type_choice_test() {
 fn tag_version_type_test() {
     let v = TagVersionType::U64(1);
     let mut encoded_token = vec![];
-    let _ = into_writer(&v, &mut encoded_token).unwrap();
+    into_writer(&v, &mut encoded_token).unwrap();
     assert_eq!([0x01], encoded_token.as_slice());
 
-    let v_j: TagVersionType = v.clone().try_into().unwrap();
+    let v_j: TagVersionType = v.clone();
     let _ = serde_json::to_string(&v_j).unwrap();
-    let v_cbor: TagVersionType = v_j.try_into().unwrap();
+    let v_cbor: TagVersionType = v_j;
     assert_eq!(v, v_cbor);
 
     let mut encoded_token2 = vec![];
-    let _ = into_writer(&v_cbor, &mut encoded_token2).unwrap();
+    into_writer(&v_cbor, &mut encoded_token2).unwrap();
     assert_eq!([0x01], encoded_token2.as_slice());
 }
 
@@ -362,7 +362,7 @@ fn tag_version_type_test() {
 fn version_scheme_test() {
     let vs = VersionSchemeCbor::Known(VersionSchemeKnownCbor::AlphaNumeric);
     let mut encoded_token = vec![];
-    let _ = into_writer(&vs, &mut encoded_token).unwrap();
+    into_writer(&vs, &mut encoded_token).unwrap();
     assert_eq!([0x03], encoded_token.as_slice());
 
     let vs_j: VersionScheme = vs.clone().try_into().unwrap();
@@ -375,7 +375,7 @@ fn version_scheme_test() {
 
     let vs3 = VersionSchemeCbor::Text("custom".to_string());
     let mut encoded_token3 = vec![];
-    let _ = into_writer(&vs3, &mut encoded_token3).unwrap();
+    into_writer(&vs3, &mut encoded_token3).unwrap();
     let vs3b: VersionSchemeCbor = from_reader(encoded_token3.as_slice()).unwrap();
     assert_eq!(vs3b, vs3);
 
@@ -390,7 +390,7 @@ fn version_scheme_test() {
     let vs4: VersionSchemeCbor = unknown_as_value.try_into().unwrap();
     assert_eq!(vs4, VersionSchemeCbor::IntExtensions(99999));
     let mut encoded_token4 = vec![];
-    let _ = into_writer(&vs4, &mut encoded_token4).unwrap();
+    into_writer(&vs4, &mut encoded_token4).unwrap();
     let vs4b: VersionSchemeCbor = from_reader(encoded_token4.as_slice()).unwrap();
     assert_eq!(vs4, vs4b);
 

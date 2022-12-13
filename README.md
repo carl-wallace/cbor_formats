@@ -12,7 +12,6 @@ along with a command line utility to generate and parse artifacts from these spe
 - [coswid](./coswid/index.html) provides support for the [Concise Software Identification Tags](https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22) specification
 - [cots](./cots/index.html) provides support for the [Concise TA Stores](https://datatracker.ietf.org/doc/html/draft-wallace-rats-concise-ta-stores-01) specification
 - [eat](./eat/index.html) provides support for the [Entity Attestation Token](https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat-17) specification
-- [suit](./suit/index.html) provides support for the [Concise Binary Object Representation (CBOR)-based Serialization Format for the Software Updates for Internet of Things (SUIT) Manifest](https://datatracker.ietf.org/doc/html/draft-ietf-suit-manifest-21) specification
 - [webauthn_asf](./webauthn_asf/index.html) provides support for attestation statement formats as defined in [Web Authentication: An API for accessing Public Key Credentials Level 2](https://www.w3.org/TR/webauthn-2/) specification
 
 CBOR support is provided by the [ciborium](https://crates.io/crates/ciborium) library and JSON support is provided by the [serde-json](https://crates.io/crates/serde_json) library.
