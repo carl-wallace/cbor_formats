@@ -488,6 +488,8 @@ impl<'de> serde::Deserialize<'de> for CorimIdTypeChoice {
 /// ```
 ///
 /// [CoRIM Section 3.1.2]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.2
+// restore this derive, the serde(other) line below and the serde-enum-str once no-std support is released
+//#[derive(Clone, Debug, Eq, PartialEq, serde_enum_str::Deserialize_enum_str, serde_enum_str::Serialize_enum_str)]
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[allow(non_camel_case_types)]
 #[allow(missing_docs)]
@@ -498,6 +500,7 @@ pub enum CorimRoleTypeChoice {
     Creator,
     #[serde(rename = "maintainer")]
     Maintainer,
+    //#[serde(other)]
     other(String),
 }
 

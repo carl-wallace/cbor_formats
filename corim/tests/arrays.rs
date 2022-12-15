@@ -1,12 +1,10 @@
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
 use ciborium::tag::Required;
-use common::arrays::*;
 use common::{TextOrBinary, UeidType, UuidType};
 use corim::arrays::*;
 use corim::choices::*;
 use corim::maps::*;
-use hex_literal::hex;
 
 mod utils;
 use utils::*;
@@ -230,31 +228,6 @@ fn endorsed_triple_record_test() {
     let dec_from_j: EndorsedTripleRecordCbor = dec_j.try_into().unwrap();
     let mut encoded_token3 = vec![];
     let _ = into_writer(&dec_from_j, &mut encoded_token3);
-    assert_eq!(encoded_token, encoded_token3);
-}
-
-#[test]
-fn hash_entry_test() {
-    let mut encoded_token = vec![];
-    let some_bytes = hex!("a200c11a637cffdc01c11a637d0decffa200c11a637cffdc01c11a637d0decff");
-    let fab = HashEntryCbor {
-        hash_alg_id: 1,
-        hash_value: some_bytes.to_vec(),
-    };
-    let _ = into_writer(&fab, &mut encoded_token);
-    let dec: HashEntryCbor = from_reader(encoded_token.clone().as_slice()).unwrap();
-    let mut encoded_token2 = vec![];
-    let _ = into_writer(&dec, &mut encoded_token2);
-    assert_eq!(encoded_token, encoded_token2);
-    assert_eq!(fab, dec);
-    assert_eq!(dec.hash_value, some_bytes);
-    assert_eq!(dec.hash_alg_id, 1);
-
-    let hej: HashEntry = dec.try_into().unwrap();
-    println!("{}", serde_json::to_string(&hej).unwrap());
-    let hec: HashEntryCbor = hej.try_into().unwrap();
-    let mut encoded_token3 = vec![];
-    let _ = into_writer(&hec, &mut encoded_token3);
     assert_eq!(encoded_token, encoded_token3);
 }
 
