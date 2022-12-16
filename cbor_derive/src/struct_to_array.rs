@@ -120,10 +120,10 @@ impl DeriveStructToArray {
 
     /// Lower the derived output into a [`TokenStream`].
     pub fn to_tokens(&self) -> TokenStream {
-        let ident2 = &self.ident;
+        let orig_ident = &self.ident;
         let alt_struct_name = format!("{}Cbor", self.ident);
-        let ident = syn::Ident::new(&alt_struct_name, self.ident.span());
-        let ident_name = format!("{}", ident);
+        let alt_ident = syn::Ident::new(&alt_struct_name, self.ident.span());
+        let alt_ident_name = format!("{}", alt_ident);
 
         let lifetime = match self.lifetime {
             Some(ref lifetime) => quote!(#lifetime),
@@ -163,82 +163,82 @@ impl DeriveStructToArray {
 
             #alt_struct
 
-            impl TryFrom<#ident> for #ident2<#lt_params> {
+            impl TryFrom<#alt_ident> for #orig_ident<#lt_params> {
                 type Error = String;
-                fn try_from(value: #ident) -> Result<Self, Self::Error> {
-                    Ok(#ident2 {
+                fn try_from(value: #alt_ident) -> Result<Self, Self::Error> {
+                    Ok(#orig_ident {
                       #(#from_cbor)*
                     })
                 }
             }
-            impl TryFrom<#ident2> for #ident<#lt_params> {
+            impl TryFrom<#orig_ident> for #alt_ident<#lt_params> {
                 type Error = String;
-                fn try_from(value: #ident2) -> Result<Self, Self::Error> {
-                    Ok(#ident {
+                fn try_from(value: #orig_ident) -> Result<Self, Self::Error> {
+                    Ok(#alt_ident {
                       #(#to_cbor)*
                     })
                 }
             }
-            impl TryFrom<&#ident> for #ident2<#lt_params> {
+            impl TryFrom<&#alt_ident> for #orig_ident<#lt_params> {
                 type Error = String;
-                fn try_from(value: &#ident) -> Result<Self, Self::Error> {
-                    Ok(#ident2 {
+                fn try_from(value: &#alt_ident) -> Result<Self, Self::Error> {
+                    Ok(#orig_ident {
                       #(#from_cbor)*
                     })
                 }
             }
-            impl TryFrom<&#ident2> for #ident<#lt_params> {
+            impl TryFrom<&#orig_ident> for #alt_ident<#lt_params> {
                 type Error = String;
-                fn try_from(value: &#ident2) -> Result<Self, Self::Error> {
-                    Ok(#ident {
+                fn try_from(value: &#orig_ident) -> Result<Self, Self::Error> {
+                    Ok(#alt_ident {
                       #(#to_cbor)*
                     })
                 }
             }
-            impl TryFrom<Value> for #ident<#lt_params> {
+            impl TryFrom<Value> for #alt_ident<#lt_params> {
                 type Error = String;
                 fn try_from(value: Value) -> Result<Self, Self::Error> {
                     match &value {
                         Value::Array(s) => match Self::try_from(s.clone()) {
                             Ok(val) => Ok(val),
-                            Err(e) => Err(format!("Failed to parse {} value from array. Error: {:?}", #ident_name, e))
+                            Err(e) => Err(format!("Failed to parse {} value from array. Error: {:?}", #alt_ident_name, e))
                         },
-                        _ => Err(format!("Expected array while parsing {} and found: {:?}", #ident_name, &value))
+                        _ => Err(format!("Expected array while parsing {} and found: {:?}", #alt_ident_name, &value))
                     }
                 }
             }
-            impl TryFrom<&Value> for #ident<#lt_params> {
+            impl TryFrom<&Value> for #alt_ident<#lt_params> {
                 type Error = String;
                 fn try_from(value: &Value) -> Result<Self, Self::Error> {
                     match &value {
                         Value::Array(s) => match Self::try_from(s.clone()) {
                             Ok(val) => Ok(val),
-                            Err(e) => Err(format!("Failed to parse {} value from array. Error: {:?}", #ident_name, e))
+                            Err(e) => Err(format!("Failed to parse {} value from array. Error: {:?}", #alt_ident_name, e))
                         },
-                        _ => Err(format!("Expected array while parsing {} and found: {:?}", #ident_name, &value))
+                        _ => Err(format!("Expected array while parsing {} and found: {:?}", #alt_ident_name, &value))
                     }
                 }
             }
-            impl TryFrom<&#ident> for Vec<Value> {
+            impl TryFrom<&#alt_ident> for Vec<Value> {
                 type Error = String;
 
-                fn try_from(value: &#ident) -> Result<Self, Self::Error> {
+                fn try_from(value: &#alt_ident) -> Result<Self, Self::Error> {
                     let mut v = vec![];
                     #(#decode_body)*
                     Ok(v)
                 }
             }
-            impl TryFrom<Vec<Value>> for #ident<#lt_params> {
+            impl TryFrom<Vec<Value>> for #alt_ident<#lt_params> {
                 type Error = String;
 
                 fn try_from(v: Vec<Value>) -> Result<Self, Self::Error> {
-                    Ok(#ident {
+                    Ok(#alt_ident {
                       #(#encode_body)*
                     })
                 }
             }
 
-            impl serde::Serialize for #ident<#lt_params>  {
+            impl serde::Serialize for #alt_ident<#lt_params>  {
                 fn serialize<__S>(
                     &self,
                     __serializer: __S,
@@ -257,7 +257,7 @@ impl DeriveStructToArray {
                 }
             }
 
-            impl<'de> Deserialize<'de> for #ident<#lt_params> {
+            impl<'de> Deserialize<'de> for #alt_ident<#lt_params> {
                 fn deserialize<__D>(
                     deserializer: __D,
                 ) -> serde::__private::Result<Self, __D::Error>
@@ -294,7 +294,7 @@ impl DeriveStructToArray {
                     };
                     match deserializer.deserialize_seq(visitor) {
                         Ok(v) => {
-                            match #ident::try_from(v) {
+                            match #alt_ident::try_from(v) {
                                 Ok(r) => Ok(r),
                                 Err(e) => Err(__D::Error::custom(e)),
                             }
