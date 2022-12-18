@@ -24,8 +24,7 @@ serde_repr = "0.1.9"
 subtle-encoding = {version = "0.5.1", default-features = false, features = ["hex", "alloc"]}
 hex-literal = "0.3.4"
 num_enum = "0.5.7"
-#serde-enum-str = {version = "0.2.5", default-features = false}
-#serde-enum-str = {version = "0.2.5", default-features = false, path = "../../../third-party/serde-ext-fork/serde-enum-str"}
+serde-enum-str = {version = "0.3.2", default-features = false}
 
 [dev-dependencies]
 lazy_static = "1.4.0"
