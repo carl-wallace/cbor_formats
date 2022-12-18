@@ -6,11 +6,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 extern crate alloc;
 
-// Submodule = CBOR-Submodule
-// Nested-Token = CBOR-Nested-Token
-
-// CBOR-Token-Inside-JSON-Token = base64-url-text
-
 // nonce-type = bstr .size (8..64)
 //
 // ueid-type = bstr .size (7..33)
@@ -44,36 +39,6 @@ extern crate alloc;
 //
 // cbor-wrapped-claims-set = bstr .cbor Claims-Set
 //
-// nonce-label            = 10
-// ueid-label             = 256
-// sueids-label           = 257
-// oemid-label            = 258
-// hardware-model-label   = 259
-// hardware-version-label = 260
-// secure-boot-label      = 262
-// debug-status-label     = 263
-// location-label         = 264
-// profile-label          = 265
-// submods-label          = 266
-// uptime-label           =    267
-// boot-seed-label        =    268
-// intended-use-label     =    269
-// dloas-label            =    270
-// sw-name-label          =    271
-// sw-version-label       =    272
-// manifests-label        =    273
-// measurements-label     =    274
-// measurement-results-label = 275
-// boot-count-label       =    276
-//
-// iss-claim-label = 1
-// sub-claim-label = 2
-// aud-claim-label = 3
-// exp-claim-label = 4
-// nbf-claim-label = 5
-// iat-claim-label = 6
-// cti-claim-label = 7  ; jti in JWT: different name and text
-//
 // string-or-uri = text
 //
 // oid = #6.111(bstr)
@@ -95,5 +60,7 @@ extern crate alloc;
 // ;$EAT-CBOR-Tagged-Token /= #6.601(Claims-Set)
 // ;$EAT-CBOR-Untagged-Token /= Claims-Set
 pub mod arrays;
+mod cbor_specific;
 pub mod choices;
+mod json_specific;
 pub mod maps;

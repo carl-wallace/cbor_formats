@@ -339,7 +339,8 @@ impl TryFrom<&i64> for TimeCbor {
 //
 //
 // ; CoAP Content-Format from RFC 7252 section 12.3
-// coap-content-format = uint .le 65535
+/// coap-content-format = uint .le 65535
+pub type CoapContentFormat = u16;
 
 /// svn-type = uint
 /// svn = svn-type
@@ -354,10 +355,11 @@ pub type TaggedMinSvn = Required<u64, 553>;
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum TextOrBinary {
+    Text(String),
     #[serde(with = "serde_bytes")]
     Binary(Vec<u8>),
-    Text(String),
 }
+
 impl TryFrom<&Value> for TextOrBinary {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {

@@ -10,34 +10,23 @@ use serde_repr::Serialize_repr;
 
 // BUNDLE-Messages = BUNDLE-Tagged-Message / BUNDLE-Untagged-Message
 
-// CBOR-Nested-Token =
-//     JSON-Token-Inside-CBOR-Token /
-//     CBOR-Token-Inside-CBOR-Token
-
-// CBOR-Submodule = Claims-Set / CBOR-Nested-Token /
-//             Detached-Submodule-Digest
-
-// ; The CBOR tag mechanism is used to select between the various types
-// ; of CBOR encoded tokens.
-// CBOR-Token-Inside-CBOR-Token = bstr .cbor $EAT-CBOR-Tagged-Token
-
 // Claim-Label = int / text
 // Use TextOrInt type from common
 
 // CWT-Messages = CWT-Tagged-Message / CWT-Untagged-Message
 // CWT-Untagged-Message = COSE_Messages
 
-// debug-status-type = ds-enabled /
-//                     disabled /
-//                     disabled-since-boot /
-//                     disabled-permanently /
-//                     disabled-fully-and-permanently
-//
-// ds-enabled                     = 0
-// disabled                       = 1
-// disabled-since-boot            = 2
-// disabled-permanently           = 3
-// disabled-fully-and-permanently = 4
+/// debug-status-type = ds-enabled /
+///                     disabled /
+///                     disabled-since-boot /
+///                     disabled-permanently /
+///                     disabled-fully-and-permanently
+///
+/// ds-enabled                     = 0
+/// disabled                       = 1
+/// disabled-since-boot            = 2
+/// disabled-permanently           = 3
+/// disabled-fully-and-permanently = 4
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -88,30 +77,17 @@ impl TryFrom<&Value> for DebugStatusType {
     }
 }
 
-// EAT-CBOR-Token = $EAT-CBOR-Tagged-Token / $EAT-CBOR-Untagged-Token
-//
-// $EAT-CBOR-Tagged-Token /= CWT-Tagged-Message
-// $EAT-CBOR-Tagged-Token /= BUNDLE-Tagged-Message
-//
-// $EAT-CBOR-Untagged-Token /= CWT-Untagged-Message
-// $EAT-CBOR-Untagged-Token /= BUNDLE-Untagged-Message
-//
-// EAT-JSON-Token = $EAT-JSON-Token-Formats
-//
-// $EAT-JSON-Token-Formats /= JWT-Message
-// $EAT-JSON-Token-Formats /= BUNDLE-Untagged-Message
-
-// intended-use-type = generic /
-//                     registration /
-//                     provisioning /
-//                     csr /
-//                     pop
-//
-// generic      = 1
-// registration = 2
-// provisioning = 3
-// csr          = 4
-// pop          = 5
+/// intended-use-type = generic /
+///                     registration /
+///                     provisioning /
+///                     csr /
+///                     pop
+///
+/// generic      = 1
+/// registration = 2
+/// provisioning = 3
+/// csr          = 4
+/// pop          = 5
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -162,43 +138,44 @@ impl TryFrom<&Value> for IntendedUseType {
     }
 }
 
-// $JSON-Selector-Type /= "JWT" / "CBOR" / "BUNDLE" / "DIGEST"
-// $JSON-Selector-Value /= JWT-Message /
-//                   CBOR-Token-Inside-JSON-Token /
-//                   Detached-EAT-Bundle /
-//                   Detached-Submodule-Digest
-
-// JSON-Submodule = Claims-Set / JSON-Selector
-
-// ; The contents of this text string MUST be a JSON-encoded
-// ; JSON-Selector.  See the definition of JSON-Selector. The
-// ; Detached-Submodule-Digest option MUST NOT be used when included
-// ; in a CBOR token
-// JSON-Token-Inside-CBOR-Token = tstr
-
-// $manifest-body-cbor /= cyclone-dx-json
-// $manifest-body-cbor /= cyclone-dx-xml
-// $manifest-body-json /= cyclone-dx-json
-// $manifest-body-json /= cyclone-dx-xml
-// $manifest-body-cbor /= spdx-json
-// $manifest-body-json /= spdx-json
-// $manifest-body-cbor /= bytes .cbor SUIT_Envelope
-// $manifest-body-json /= base64-url-text
-// $manifest-body-cbor /= bytes .cbor untagged-coswid
-// $manifest-body-json /= base64-url-text
+// The EAT specification provides CBOR-specific and JSON-specific definitions for the type
+// referenced by the manifest-format::content-format definition. The definitions are as follows:
+//
+//     $manifest-body-cbor /= cyclone-dx-json
+//     $manifest-body-cbor /= cyclone-dx-xml
+//     $manifest-body-cbor /= spdx-json
+//     $manifest-body-cbor /= bytes .cbor SUIT_Envelope
+//     $manifest-body-cbor /= bytes .cbor untagged-coswid
+//
+//     $manifest-body-json /= cyclone-dx-json
+//     $manifest-body-json /= cyclone-dx-xml
+//     $manifest-body-json /= spdx-json
+//     $manifest-body-json /= base64-url-text
+//     $manifest-body-json /= base64-url-text
+//
+// Setting aside the .cbor control operator, manifest-body-cbor is this:
+//     $manifest-body-cbor /= text / text / text / bytes / bytes
+//
+// Setting aside type aliases, manifest-body-json is this:
+//     $manifest-body-json /= text / text / text / base64-url-text / base64-url-text
+//
+// Since these definitions essentially boil down to the same things, are extensible and have the
+// type indicated in the  manifest-format::content-type field, the  TextOrBinary construction is
+// used instead of types for $manifest-body-cbor and $manifest-body-json.
 
 // $measurements-body-cbor /= bytes .cbor untagged-coswid
 // $measurements-body-json /= base64-url-text
+// Punting on the socket for now and just using TextOrBinary in measurements-format
 
-// result-type = comparison-successful /
-//               comparison-fail /
-//               comparison-not-run /
-//               measurement-absent
-//
-// comparison-successful    = 1
-// comparison-fail          = 2
-// comparison-not-run       = 3
-// measurement-absent       = 4
+/// result-type = comparison-successful /
+///               comparison-fail /
+///               comparison-not-run /
+///               measurement-absent
+///
+/// comparison-successful    = 1
+/// comparison-fail          = 2
+/// comparison-not-run       = 3
+/// measurement-absent       = 4
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]

@@ -346,6 +346,8 @@ fn debug_status_test() {
         sw_version: None,
         ueid: None,
         uptime: None,
+        manifests: None,
+        measurements: None,
         other: None,
     };
     let mut encoded_token = vec![];
@@ -416,6 +418,8 @@ fn dloas_test() {
         sw_version: None,
         ueid: None,
         uptime: None,
+        manifests: None,
+        measurements: None,
         other: None,
     };
     let mut encoded_token = vec![];
@@ -737,6 +741,8 @@ fn ueid_test() {
         sw_version: None,
         ueid: Some(UeidType::Ueid(hex!("02deadbeefdead").to_vec())),
         uptime: None,
+        manifests: None,
+        measurements: None,
         other: None,
     };
     let mut encoded_token = vec![];
@@ -836,6 +842,8 @@ fn location_type_test() {
         sw_version: None,
         ueid: None,
         uptime: None,
+        manifests: None,
+        measurements: None,
         other: None,
     };
     let mut encoded_token = vec![];

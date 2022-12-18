@@ -21,59 +21,88 @@ use corim::choices::ProfileTypeChoice;
 use serde::de::Error;
 use serde::ser::Error as OtherError;
 
-// $$Claims-Set-Claims //= (boot-count-label => uint)
-// $$Claims-Set-Claims //=  (boot-seed-label => binary-data)
-// $$Claims-Set-Claims //= ( debug-status-label => debug-status-type )
-// $$Claims-Set-Claims //= (
-//     dloas-label => [ + dloa-type ]
-// )
-// $$Claims-Set-Claims //= (
-//     hardware-model-label => hardware-model-type
-// )
-// $$Claims-Set-Claims //=  (
-//     hardware-version-label => hardware-version-type
-// )
-// $$Claims-Set-Claims //= ( intended-use-label => intended-use-type )
-// $$Claims-Set-Claims //= (location-label => location-type)
-// $$Claims-Set-Claims //=
-//     (nonce-label => nonce-type / [ 2* nonce-type ])
-
-// begin todo
-// $$Claims-Set-Claims //= (
-//     manifests-label => manifests-type
-// )
-// $$Claims-Set-Claims //= (
-//     measurement-results-label =>
-//         [ + measurement-results-group ] )
-//
-// $$Claims-Set-Claims //= (
-//     measurements-label => measurements-type
-// )
-// $$Claims-Set-Claims //= (
-//     oemid-label => oemid-pen / oemid-ieee / oemid-random
-// )
-// $$Claims-Set-Claims //= (submods-label => { + text => Submodule })
-// $$Claims-Set-Claims //= (sueids-label => sueids-type)
-// end todo
-
-// $$Claims-Set-Claims //= (profile-label => general-uri / general-oid)
-// $$Claims-Set-Claims //= (secure-boot-label => bool)
-// $$Claims-Set-Claims //= (sw-name-label => tstr )
-// $$Claims-Set-Claims //= (sw-version-label => sw-version-type)
-// $$Claims-Set-Claims //= (ueid-label => ueid-type)
-// $$Claims-Set-Claims //= (uptime-label => uint)
-
-// $$Claims-Set-Claims //= ( iss-claim-label => string-or-uri  )
-// $$Claims-Set-Claims //= ( sub-claim-label => string-or-uri  )
-// $$Claims-Set-Claims //= ( aud-claim-label => string-or-uri  )
-// $$Claims-Set-Claims //= ( exp-claim-label => ~time )
-// $$Claims-Set-Claims //= ( nbf-claim-label => ~time )
-// $$Claims-Set-Claims //= ( iat-claim-label => ~time )
-// $$Claims-Set-Claims //= ( cti-claim-label => bytes )
-//    Claims-Set = {
-//        * $$Claims-Set-Claims
-//        * Claim-Label .feature "extended-claims-label" => any
-//    }
+/// nonce-label            = 10
+/// ueid-label             = 256
+/// sueids-label           = 257
+/// oemid-label            = 258
+/// hardware-model-label   = 259
+/// hardware-version-label = 260
+/// secure-boot-label      = 262
+/// debug-status-label     = 263
+/// location-label         = 264
+/// profile-label          = 265
+/// submods-label          = 266
+/// uptime-label           =    267
+/// boot-seed-label        =    268
+/// intended-use-label     =    269
+/// dloas-label            =    270
+/// sw-name-label          =    271
+/// sw-version-label       =    272
+/// manifests-label        =    273
+/// measurements-label     =    274
+/// measurement-results-label = 275
+/// boot-count-label       =    276
+///
+/// iss-claim-label = 1
+/// sub-claim-label = 2
+/// aud-claim-label = 3
+/// exp-claim-label = 4
+/// nbf-claim-label = 5
+/// iat-claim-label = 6
+/// cti-claim-label = 7  ; jti in JWT: different name and text
+/// $$Claims-Set-Claims //= (boot-count-label => uint)
+/// $$Claims-Set-Claims //=  (boot-seed-label => binary-data)
+/// $$Claims-Set-Claims //= ( debug-status-label => debug-status-type )
+/// $$Claims-Set-Claims //= (
+///     dloas-label => [ + dloa-type ]
+/// )
+/// $$Claims-Set-Claims //= (
+///     hardware-model-label => hardware-model-type
+/// )
+/// $$Claims-Set-Claims //=  (
+///     hardware-version-label => hardware-version-type
+/// )
+/// $$Claims-Set-Claims //= ( intended-use-label => intended-use-type )
+/// $$Claims-Set-Claims //= (location-label => location-type)
+/// $$Claims-Set-Claims //=
+///     (nonce-label => nonce-type / [ 2* nonce-type ])
+/// $$Claims-Set-Claims //= (
+///     manifests-label => manifests-type
+/// )
+/// $$Claims-Set-Claims //= (
+///     measurements-label => measurements-type
+/// )
+///
+/// begin todo
+/// $$Claims-Set-Claims //= (
+///     measurement-results-label =>
+///         [ + measurement-results-group ] )
+///
+/// $$Claims-Set-Claims //= (
+///     oemid-label => oemid-pen / oemid-ieee / oemid-random
+/// )
+/// $$Claims-Set-Claims //= (submods-label => { + text => Submodule })
+/// $$Claims-Set-Claims //= (sueids-label => sueids-type)
+/// end todo
+///
+/// $$Claims-Set-Claims //= (profile-label => general-uri / general-oid)
+/// $$Claims-Set-Claims //= (secure-boot-label => bool)
+/// $$Claims-Set-Claims //= (sw-name-label => tstr )
+/// $$Claims-Set-Claims //= (sw-version-label => sw-version-type)
+/// $$Claims-Set-Claims //= (ueid-label => ueid-type)
+/// $$Claims-Set-Claims //= (uptime-label => uint)
+///
+/// $$Claims-Set-Claims //= ( iss-claim-label => string-or-uri  )
+/// $$Claims-Set-Claims //= ( sub-claim-label => string-or-uri  )
+/// $$Claims-Set-Claims //= ( aud-claim-label => string-or-uri  )
+/// $$Claims-Set-Claims //= ( exp-claim-label => ~time )
+/// $$Claims-Set-Claims //= ( nbf-claim-label => ~time )
+/// $$Claims-Set-Claims //= ( iat-claim-label => ~time )
+/// $$Claims-Set-Claims //= ( cti-claim-label => bytes )
+///    Claims-Set = {
+///        * $$Claims-Set-Claims
+///        * Claim-Label .feature "extended-claims-label" => any
+///    }
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ClaimsSetClaims {
@@ -121,6 +150,10 @@ pub struct ClaimsSetClaims {
     pub ueid: Option<UeidType>,
     #[cbor(tag = "267", value = "Integer")]
     pub uptime: Option<u64>,
+    #[cbor(tag = "273", cbor = "true")]
+    pub manifests: Option<ManifestsType>,
+    #[cbor(tag = "274", cbor = "true")]
+    pub measurements: Option<MeasurementsType>,
     #[cbor(value = "Array", cbor = "true")]
     pub other: Option<Vec<Tuple>>,
 }
