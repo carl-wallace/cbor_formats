@@ -40,15 +40,16 @@
 //! To adhere to the naming conventions in this library, JSON-Selector is represented by the Selector enum
 //! and CBOR-Selector is represented by the SelectorCbor enum.
 //!
-use crate::arrays::DetachedSubmoduleDigestCbor;
-use crate::json_specific::{JsonSelectorValue, Submodule};
-use crate::maps::ClaimsSetClaimsCbor;
 use alloc::boxed::Box;
 use alloc::string::String;
 use alloc::{vec, vec::Vec};
-use ciborium::ser::into_writer;
-use ciborium::value::Value;
+
+use ciborium::{ser::into_writer, value::Value};
 use serde::{Deserialize, Serialize};
+
+use crate::arrays::DetachedSubmoduleDigestCbor;
+use crate::json_specific::{JsonSelectorValue, Submodule};
+use crate::maps::ClaimsSetClaimsCbor;
 
 // EAT-CBOR-Token = $EAT-CBOR-Tagged-Token / $EAT-CBOR-Untagged-Token
 // $EAT-CBOR-Untagged-Token /= CWT-Untagged-Message

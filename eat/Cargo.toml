@@ -25,6 +25,7 @@ subtle-encoding = {version = "0.5.1", default-features = false, features = ["hex
 hex-literal = "0.3.4"
 num_enum = "0.5.7"
 base64 = "0.20.0"
+serde-enum-str = "0.3.2"
 
 [package.metadata.docs.rs]
 all-features = true

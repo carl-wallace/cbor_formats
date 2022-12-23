@@ -56,6 +56,83 @@ fn claims_set_claims_test() {
 }
 
 #[test]
+fn claims_set_claims_with_dup_test() {
+    // this example from veraison uses different keys for some fields than the current EAT spec. let them
+    // be as-is and accumulate in the other bucket to test extensibility support.
+    let expected = hex!("b1016C466F6F2042617220496E632E016941636d6520496e632e026772722d74726170036941636d6520496e632e04c10005c10006c1000746ffffffffffff0a4800000000000000000b5101deadbeefdeadbeefdeadbeefdeadbeef0c6941636d6520496e632e0d46ffffffffffff0e030ff5100111a201fb4028ae147ae147ae02fb404c63d70a3d70a413183c");
+    println!(
+        "Encoded ClaimsSetClaims from veraison: {:?}",
+        buffer_to_hex(expected.as_slice())
+    );
+    let v: Value = from_reader(expected.clone().as_slice()).unwrap();
+    let count = match v {
+        Value::Map(m) => {
+            println!("COUNT: {}", m.len());
+            m.len()
+        }
+        _ => {
+            panic!()
+        }
+    };
+
+    let csc_d: ClaimsSetClaimsCbor = from_reader(expected.clone().as_slice()).unwrap();
+    //println!("Decoded ConciseMidTag: {:?}", comid_d);
+    let mut encoded_token = vec![];
+    let _ = into_writer(&csc_d, &mut encoded_token);
+    println!(
+        "Encoded ClaimsSetClaims: {:?}",
+        buffer_to_hex(encoded_token.as_slice())
+    );
+    let v: Value = from_reader(encoded_token.clone().as_slice()).unwrap();
+    let count_from_enc = match v {
+        Value::Map(m) => {
+            println!("COUNT: {}", m.len());
+            m.len()
+        }
+        _ => {
+            panic!()
+        }
+    };
+    assert_eq!(count, count_from_enc);
+
+    // Where duplicates are present, the claims ought be present but may not be encoded in the same
+    // order (and probably will not be).
+    //assert_eq!(expected.to_vec(), encoded_token);
+
+    let csc_json: ClaimsSetClaims = csc_d.try_into().unwrap();
+    println!("{}", serde_json::to_string(&csc_json).unwrap());
+
+    let mut encoded_token2 = vec![];
+    let _ = into_writer(&csc_json, &mut encoded_token2);
+    println!(
+        "Encoded ClaimsSetClaims with string keys: {:?}",
+        buffer_to_hex(encoded_token2.as_slice())
+    );
+
+    let csc_cbor: ClaimsSetClaimsCbor = csc_json.try_into().unwrap();
+    let mut encoded_token3 = vec![];
+    let _ = into_writer(&csc_cbor, &mut encoded_token3);
+    // Where duplicates are present, the claims ought be present but may not be encoded in the same
+    // order (and probably will not be).
+    //assert_eq!(expected.to_vec(), encoded_token3);
+    let v: Value = from_reader(encoded_token3.clone().as_slice()).unwrap();
+    let count_from_enc3 = match v {
+        Value::Map(m) => {
+            println!("COUNT: {}", m.len());
+            m.len()
+        }
+        _ => {
+            panic!()
+        }
+    };
+    assert_eq!(count, count_from_enc3);
+    println!(
+        "Re-encoded ClaimsSetClaims with integer keys: {:?}",
+        buffer_to_hex(encoded_token3.as_slice())
+    );
+}
+
+#[test]
 fn iss_test() {
     let valid = vec![hex!("A10166497373756572").to_vec()];
     for v in valid {

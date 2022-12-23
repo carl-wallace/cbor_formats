@@ -18,23 +18,16 @@
 //! This module provides support for JSON-encoded Submodule claims. See [cbor_specific](../cbor_specific/index.html) module for
 //! details regarding support for CBOR-encoded Submodule claims.
 
-use crate::alloc::string::ToString;
-use crate::arrays::{DetachedEatBundle, DetachedSubmoduleDigest};
-use crate::maps::ClaimsSetClaims;
-use alloc::format;
-use alloc::string::String;
-use cbor_derive::StructToArray;
-use ciborium::{cbor, value::Value};
-use core::{fmt, marker::PhantomData};
-use serde::ser::Error as OtherError;
-use serde::{Deserialize, Serialize};
-use serde::{__private::size_hint, de::Error, de::Visitor};
-
-use crate::cbor_specific::{SelectorCbor, SubmoduleCbor};
-use crate::maps::ClaimsSetClaimsCbor;
 use alloc::boxed::Box;
-use alloc::{vec, vec::Vec};
+use alloc::string::String;
 use core::ops::Deref;
+
+use serde::__private::de::Content;
+use serde::{Deserialize, Serialize};
+
+use crate::arrays::{DetachedEatBundle, DetachedSubmoduleDigest};
+use crate::cbor_specific::{SelectorCbor, SubmoduleCbor};
+use crate::maps::{ClaimsSetClaims, ClaimsSetClaimsCbor};
 
 // EAT-JSON-Token = $EAT-JSON-Token-Formats
 //
@@ -44,9 +37,22 @@ use core::ops::Deref;
 //
 // Nested-Token = JSON-Selector
 
-// $JSON-Selector-Type /= "JWT" / "CBOR" / "BUNDLE" / "DIGEST"
-
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+/// Represents values used to indicate type of nested token in JSON-Selector as defined in [EAT Section 4.2.18].
+/// Note, while this enum is extensible the related [JsonSelectorValue](JsonSelectorValue) type is not, at present.
+///
+/// ```text
+/// $JSON-Selector-Type /= "JWT" / "CBOR" / "BUNDLE" / "DIGEST"
+/// ```
+///
+/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    PartialEq,
+    serde_enum_str::Deserialize_enum_str,
+    serde_enum_str::Serialize_enum_str,
+)]
 #[allow(missing_docs)]
 pub enum JsonSelectorType {
     #[serde(rename = "JWT")]
@@ -57,36 +63,22 @@ pub enum JsonSelectorType {
     Bundle,
     #[serde(rename = "DIGEST")]
     Digest,
+    #[serde(other)]
     Other(String),
 }
-impl TryFrom<Value> for JsonSelectorType {
-    type Error = String;
-    fn try_from(_value: Value) -> Result<Self, Self::Error> {
-        todo!()
-    }
-}
-impl TryFrom<&Value> for JsonSelectorType {
-    type Error = String;
-    fn try_from(_value: &Value) -> Result<Self, Self::Error> {
-        todo!()
-    }
-}
 
-// ;JWT-Message =
-// ;   text .regexp "[A-Za-z0-9_=-]+\.[A-Za-z0-9_=-]+\.[A-Za-z0-9_=-]+"
-//
-// CBOR-Token-Inside-JSON-Token = base64-url-text
-//
-// $JSON-Selector-Value /= JWT-Message /
-//                   CBOR-Token-Inside-JSON-Token /
-//                   Detached-EAT-Bundle /
-//                   Detached-Submodule-Digest
-//
-// JSON-Selector = [
-//    type : $JSON-Selector-Type,
-//    nested-token : $JSON-Selector-Value
-// ]
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+// todo make JsonSelectorValue and JsonSelector extensible
+/// Represents values used to indicate type of nested token in JSON-Selector as defined in [EAT Section 4.2.18]
+///
+/// ```text
+/// $JSON-Selector-Value /= JWT-Message /
+///                   CBOR-Token-Inside-JSON-Token /
+///                   Detached-EAT-Bundle /
+///                   Detached-Submodule-Digest
+/// ```
+///
+/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
+#[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum JsonSelectorValue {
@@ -95,26 +87,92 @@ pub enum JsonSelectorValue {
     DetachedEatBundle(DetachedEatBundle),
     DetachedSubmoduleDigest(DetachedSubmoduleDigest),
 }
-impl TryFrom<Value> for JsonSelectorValue {
-    type Error = String;
-    fn try_from(_value: Value) -> Result<Self, Self::Error> {
-        todo!()
+impl<'de> serde::Deserialize<'de> for JsonSelectorValue {
+    fn deserialize<__D>(__deserializer: __D) -> serde::__private::Result<Self, __D::Error>
+    where
+        __D: serde::Deserializer<'de>,
+    {
+        let __content = match <serde::__private::de::Content<'_> as serde::Deserialize>::deserialize(
+            __deserializer,
+        ) {
+            serde::__private::Ok(__val) => __val,
+            serde::__private::Err(__err) => {
+                return serde::__private::Err(__err);
+            }
+        };
+        match &__content {
+            Content::Str(s) => {
+                // could use regex crate, but that requires std
+                let num = s.matches('.').count();
+                if 2 == num || 4 == num {
+                    if let serde::__private::Ok(__ok) = serde::__private::Result::map(
+                        <String as serde::Deserialize>::deserialize(
+                            serde::__private::de::ContentRefDeserializer::<__D::Error>::new(
+                                &__content,
+                            ),
+                        ),
+                        JsonSelectorValue::JwtMessage,
+                    ) {
+                        return serde::__private::Ok(__ok);
+                    }
+                }
+                if let serde::__private::Ok(__ok) = serde::__private::Result::map(
+                    <String as serde::Deserialize>::deserialize(
+                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
+                    ),
+                    JsonSelectorValue::CborTokenInsideJsonToken,
+                ) {
+                    return serde::__private::Ok(__ok);
+                }
+            }
+            Content::Map(_) => {
+                if let serde::__private::Ok(__ok) = serde::__private::Result::map(
+                    <DetachedEatBundle as serde::Deserialize>::deserialize(
+                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
+                    ),
+                    JsonSelectorValue::DetachedEatBundle,
+                ) {
+                    return serde::__private::Ok(__ok);
+                }
+                if let serde::__private::Ok(__ok) = serde::__private::Result::map(
+                    <DetachedSubmoduleDigest as serde::Deserialize>::deserialize(
+                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
+                    ),
+                    JsonSelectorValue::DetachedSubmoduleDigest,
+                ) {
+                    return serde::__private::Ok(__ok);
+                }
+            }
+            _ => {}
+        }
+        serde::__private::Err(serde::de::Error::custom(
+            "data did not match any variant of untagged enum JsonSelectorValue",
+        ))
     }
 }
-impl TryFrom<&Value> for JsonSelectorValue {
-    type Error = String;
-    fn try_from(_value: &Value) -> Result<Self, Self::Error> {
-        todo!()
-    }
-}
-#[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
+
+/// Provides token_type and nested_token for JSON-encoded submodules
+///
+/// The `JSON-Selector` array is defined in [EAT Section 4.2.18] and represents a token type and a
+/// nested taken values suitable for use in representing a JSON-encoded submodule claim.
+///
+/// ```text
+/// JSON-Selector = [
+///    type : $JSON-Selector-Type,
+///    nested-token : $JSON-Selector-Value
+/// ]
+/// ```
+/// [SelectorForDeb](SelectorForDeb) is used for DetachedEATBundles.
+///
+/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct JsonSelector {
     pub token_type: JsonSelectorType,
     pub nested_token: JsonSelectorValue,
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum JsonSelectorForDebValue {
@@ -122,19 +180,62 @@ pub enum JsonSelectorForDebValue {
     CborTokenInsideJsonToken(String),
     DetachedSubmoduleDigest(DetachedSubmoduleDigest),
 }
-impl TryFrom<Value> for JsonSelectorForDebValue {
-    type Error = String;
-    fn try_from(_value: Value) -> Result<Self, Self::Error> {
-        todo!()
+impl<'de> serde::Deserialize<'de> for JsonSelectorForDebValue {
+    fn deserialize<__D>(__deserializer: __D) -> serde::__private::Result<Self, __D::Error>
+    where
+        __D: serde::Deserializer<'de>,
+    {
+        let __content = match <serde::__private::de::Content<'_> as serde::Deserialize>::deserialize(
+            __deserializer,
+        ) {
+            serde::__private::Ok(__val) => __val,
+            serde::__private::Err(__err) => {
+                return serde::__private::Err(__err);
+            }
+        };
+        match &__content {
+            Content::Str(s) => {
+                // could use regex crate, but that requires std
+                let num = s.matches('.').count();
+                if 2 == num || 4 == num {
+                    if let serde::__private::Ok(__ok) = serde::__private::Result::map(
+                        <String as serde::Deserialize>::deserialize(
+                            serde::__private::de::ContentRefDeserializer::<__D::Error>::new(
+                                &__content,
+                            ),
+                        ),
+                        JsonSelectorForDebValue::JwtMessage,
+                    ) {
+                        return serde::__private::Ok(__ok);
+                    }
+                }
+                if let serde::__private::Ok(__ok) = serde::__private::Result::map(
+                    <String as serde::Deserialize>::deserialize(
+                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
+                    ),
+                    JsonSelectorForDebValue::CborTokenInsideJsonToken,
+                ) {
+                    return serde::__private::Ok(__ok);
+                }
+            }
+            Content::Map(_) => {
+                if let serde::__private::Ok(__ok) = serde::__private::Result::map(
+                    <DetachedSubmoduleDigest as serde::Deserialize>::deserialize(
+                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
+                    ),
+                    JsonSelectorForDebValue::DetachedSubmoduleDigest,
+                ) {
+                    return serde::__private::Ok(__ok);
+                }
+            }
+            _ => {}
+        }
+        serde::__private::Err(serde::de::Error::custom(
+            "data did not match any variant of untagged enum JsonSelectorValue",
+        ))
     }
 }
-impl TryFrom<&Value> for JsonSelectorForDebValue {
-    type Error = String;
-    fn try_from(_value: &Value) -> Result<Self, Self::Error> {
-        todo!()
-    }
-}
-#[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct SelectorForDeb {
     pub token_type: JsonSelectorType,

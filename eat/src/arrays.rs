@@ -1,28 +1,31 @@
 //! Array-based structs
 
-use ciborium::{cbor, value::Value};
-use core::{fmt, marker::PhantomData};
-use serde::{Deserialize, Serialize};
-use serde::{__private::size_hint, de::Error, de::Visitor};
-
 use alloc::boxed::Box;
 use alloc::format;
 use alloc::string::{String, ToString};
 use alloc::{vec, vec::Vec};
-use core::ops::Deref;
+use core::{fmt, marker::PhantomData, ops::Deref};
+
+use ciborium::{cbor, value::Value};
 use serde::ser::Error as OtherError;
+use serde::{Deserialize, Serialize};
+use serde::{__private::size_hint, de::Error, de::Visitor};
 
 use crate::cbor_specific::SelectorCbor;
 use crate::choices::*;
-use crate::json_specific::{JsonSelectorForDebValue, JsonSelectorType, SelectorForDeb};
+use crate::json_specific::*;
 use cbor_derive::StructToArray;
-use common::choices::*;
-use common::TextOrInt;
-use common::Uri;
-use common::{CoapContentFormat, TextOrBinary};
+use common::{choices::*, *};
 
+/// Provides access to JSON-Selector options suitable for inclusion in a Detached EAT Bundle
+///
+/// The EAT specification uses the `JSON-Selector` choice in two places: in the definition of
+/// Submodule, in the definition of Detached-EAT-Bundle (as part of NestedToken). Where used within
+/// a DEB, the  Detached-EAT-Bundle option MUST NOT be used.
+///
 /// Nested-Token = JSON-Selector
 /// Nested-Token = CBOR-Nested-Token
+///
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct NestedToken(pub Box<SelectorForDeb>);
 impl TryFrom<NestedTokenCbor> for NestedToken {
@@ -240,7 +243,7 @@ pub struct DetachedEatBundle {
 pub struct DetachedSubmoduleDigest {
     pub hash_algorithm: TextOrInt,
     #[cbor(value = "Bytes")]
-    pub dloa_platform_label: Vec<u8>,
+    pub digest: Vec<u8>,
 }
 
 /// dloa-type = [

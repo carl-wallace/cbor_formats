@@ -1,13 +1,12 @@
 //! Choice-based structs
 
-use ciborium::value::Value;
-use serde::{Deserialize, Serialize};
-
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
+
+use ciborium::value::Value;
 use num_enum::TryFromPrimitive;
-use serde_repr::Deserialize_repr;
-use serde_repr::Serialize_repr;
+use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 // BUNDLE-Tagged-Message   = #6.602(BUNDLE-Untagged-Message)
 // BUNDLE-Untagged-Message = Detached-EAT-Bundle

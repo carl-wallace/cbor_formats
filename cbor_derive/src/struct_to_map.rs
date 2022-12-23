@@ -262,7 +262,8 @@ impl DeriveStructToMap {
                             }
                             None => return Err("".to_string())
                         };
-                        if indices.contains(&index) {
+                        // accumulate duplicates as TupleCbor items
+                        if indices.contains(&index) && !m.contains_key(&index) {
                             m.insert(index, v.1.clone());
                         }
                         else {
@@ -294,7 +295,8 @@ impl DeriveStructToMap {
                             }
                             None => return Err("".to_string())
                         };
-                        if indices.contains(&index) {
+                        // accumulate duplicates as TupleCbor items
+                        if indices.contains(&index) && !m.contains_key(&index) {
                             m.insert(index, v.1.clone());
                         }
                         else {
