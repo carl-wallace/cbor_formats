@@ -1,8 +1,12 @@
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
 use ciborium::tag::Required;
-use common::{TimeCbor, UeidType};
-use eat::choices::{DebugStatusType, DebugStatusTypeKwown};
+use ciborium::value::Value;
+use common::tuple::*;
+use common::tuple_map::*;
+use common::{TextOrBinary, TimeCbor, UeidType};
+use eat::cbor_specific::SubmoduleCbor;
+use eat::choices::{DebugStatusType, DebugStatusTypeKwown, Oemid, ResultType, ResultTypeKnown};
 use hex_literal::hex;
 
 use eat::arrays::*;
@@ -348,6 +352,10 @@ fn debug_status_test() {
         uptime: None,
         manifests: None,
         measurements: None,
+        measurement_results: None,
+        oemid: None,
+        sueids: None,
+        submods: None,
         other: None,
     };
     let mut encoded_token = vec![];
@@ -420,6 +428,10 @@ fn dloas_test() {
         uptime: None,
         manifests: None,
         measurements: None,
+        measurement_results: None,
+        oemid: None,
+        sueids: None,
+        submods: None,
         other: None,
     };
     let mut encoded_token = vec![];
@@ -743,6 +755,10 @@ fn ueid_test() {
         uptime: None,
         manifests: None,
         measurements: None,
+        measurement_results: None,
+        oemid: None,
+        sueids: None,
+        submods: None,
         other: None,
     };
     let mut encoded_token = vec![];
@@ -844,6 +860,10 @@ fn location_type_test() {
         uptime: None,
         manifests: None,
         measurements: None,
+        measurement_results: None,
+        oemid: None,
+        sueids: None,
+        submods: None,
         other: None,
     };
     let mut encoded_token = vec![];
@@ -859,6 +879,249 @@ fn location_type_test() {
 }
 
 #[test]
+fn measurement_results_test() {
+    let tob = TextOrBinary::Text("Results ID".to_string());
+    let ir = IndividualResultCbor {
+        results_id: tob,
+        result: ResultType::Known(ResultTypeKnown::Absent),
+    };
+    let mr = MeasurementResultsGroupCbor {
+        measurement_system: "Some Measurement System".to_string(),
+        measurement_results: vec![ir],
+    };
+
+    let csc = ClaimsSetClaimsCbor {
+        iss: None,
+        sub: None,
+        aud: None,
+        exp: None,
+        nbf: None,
+        iat: None,
+        cti: None,
+        nonce: None,
+        boot_count: None,
+        boot_seed: None,
+        debug_status: None,
+        dloas: None,
+        hardware_model: None,
+        hardware_version: None,
+        intended_use: None,
+        location: None,
+        profile: None,
+        secure_boot: None,
+        sw_name: None,
+        sw_version: None,
+        ueid: None,
+        uptime: None,
+        manifests: None,
+        measurements: None,
+        measurement_results: Some(MeasurementResultsGroupArrayCbor::new([mr].to_vec())),
+        oemid: None,
+        sueids: None,
+        submods: None,
+        other: None,
+    };
+    let mut encoded_token = vec![];
+    let _ = into_writer(&csc, &mut encoded_token);
+    println!(
+        "Encoded ClaimsSetClaims: {:?}",
+        buffer_to_hex(encoded_token.as_slice())
+    );
+}
+
+#[test]
+fn oemid_test() {
+    let pen = Oemid::Pen(37623);
+    let ieee = Oemid::Ieee([0x01, 0x02, 0x03].to_vec());
+    let random = Oemid::Random(
+        [
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+            0x07, 0x08,
+        ]
+        .to_vec(),
+    );
+    let vals = [pen, ieee, random];
+    for v in vals {
+        let csc = ClaimsSetClaimsCbor {
+            iss: None,
+            sub: None,
+            aud: None,
+            exp: None,
+            nbf: None,
+            iat: None,
+            cti: None,
+            nonce: None,
+            boot_count: None,
+            boot_seed: None,
+            debug_status: None,
+            dloas: None,
+            hardware_model: None,
+            hardware_version: None,
+            intended_use: None,
+            location: None,
+            profile: None,
+            secure_boot: None,
+            sw_name: None,
+            sw_version: None,
+            ueid: None,
+            uptime: None,
+            manifests: None,
+            measurements: None,
+            measurement_results: None,
+            oemid: Some(v),
+            sueids: None,
+            submods: None,
+            other: None,
+        };
+        let mut encoded_token = vec![];
+        let _ = into_writer(&csc, &mut encoded_token);
+        println!(
+            "Encoded ClaimsSetClaims: {:?}",
+            buffer_to_hex(encoded_token.as_slice())
+        );
+    }
+}
+
+#[test]
 fn sueids_type_test() {
-    // todo!("sueids_type_test")
+    let u1 = hex!("02deadbeefdead").to_vec();
+    let u2 = hex!("02feedfacefeed").to_vec();
+    let t1 = TupleCbor {
+        key: Value::Text("SUEID 1".to_string()),
+        value: Value::Bytes(u1),
+    };
+    let t2 = TupleCbor {
+        key: Value::Text("SUEID 2".to_string()),
+        value: Value::Bytes(u2),
+    };
+    let tm = TupleMapCbor {
+        tuples: vec![t1, t2],
+    };
+
+    let csc = ClaimsSetClaimsCbor {
+        iss: None,
+        sub: None,
+        aud: None,
+        exp: None,
+        nbf: None,
+        iat: None,
+        cti: None,
+        nonce: None,
+        boot_count: None,
+        boot_seed: None,
+        debug_status: None,
+        dloas: None,
+        hardware_model: None,
+        hardware_version: None,
+        intended_use: None,
+        location: None,
+        profile: None,
+        secure_boot: None,
+        sw_name: None,
+        sw_version: None,
+        ueid: None,
+        uptime: None,
+        manifests: None,
+        measurements: None,
+        measurement_results: None,
+        oemid: None,
+        sueids: Some(tm),
+        submods: None,
+        other: None,
+    };
+    let mut encoded_token = vec![];
+    let _ = into_writer(&csc, &mut encoded_token);
+    println!(
+        "Encoded ClaimsSetClaims: {:?}",
+        buffer_to_hex(encoded_token.as_slice())
+    );
+}
+
+#[test]
+fn submods_type_test() {
+    let sm_csc = ClaimsSetClaimsCbor {
+        iss: None,
+        sub: None,
+        aud: None,
+        exp: None,
+        nbf: None,
+        iat: None,
+        cti: None,
+        nonce: None,
+        boot_count: None,
+        boot_seed: None,
+        debug_status: None,
+        dloas: None,
+        hardware_model: None,
+        hardware_version: None,
+        intended_use: None,
+        location: Some(LocationTypeCbor {
+            latitude: 0,
+            longitude: 1,
+            altitude: Some(2),
+            accuracy: Some(3),
+            altitude_accuracy: Some(4),
+            heading: Some(5),
+            speed: Some(6),
+            timestamp: Some(TimeCbor::T(Required(1670527898))),
+            age: Some(7),
+        }),
+        profile: None,
+        secure_boot: None,
+        sw_name: None,
+        sw_version: None,
+        ueid: None,
+        uptime: None,
+        manifests: None,
+        measurements: None,
+        measurement_results: None,
+        oemid: None,
+        sueids: None,
+        submods: None,
+        other: None,
+    };
+    let sm = SubmoduleCbor::ClaimsSet(Box::new(sm_csc));
+
+    let csc = ClaimsSetClaimsCbor {
+        iss: None,
+        sub: None,
+        aud: None,
+        exp: None,
+        nbf: None,
+        iat: None,
+        cti: None,
+        nonce: None,
+        boot_count: None,
+        boot_seed: None,
+        debug_status: None,
+        dloas: None,
+        hardware_model: None,
+        hardware_version: None,
+        intended_use: None,
+        location: None,
+        profile: None,
+        secure_boot: None,
+        sw_name: None,
+        sw_version: None,
+        ueid: None,
+        uptime: None,
+        manifests: None,
+        measurements: None,
+        measurement_results: None,
+        oemid: None,
+        sueids: None,
+        submods: Some(sm),
+        other: None,
+    };
+    let mut encoded_token = vec![];
+    let _ = into_writer(&csc, &mut encoded_token);
+    println!(
+        "Encoded ClaimsSetClaims: {:?}",
+        buffer_to_hex(encoded_token.as_slice())
+    );
+    let csc_json: ClaimsSetClaims = csc.try_into().unwrap();
+    let csc_cbor: ClaimsSetClaimsCbor = csc_json.try_into().unwrap();
+    let mut encoded_token2 = vec![];
+    let _ = into_writer(&csc_cbor, &mut encoded_token2);
+    assert_eq!(encoded_token2, encoded_token);
 }

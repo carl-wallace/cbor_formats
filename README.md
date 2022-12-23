@@ -268,7 +268,7 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (badges)
 
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.56+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.63+-blue.svg
 
 [//]: # (links)
 

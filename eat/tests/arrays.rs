@@ -259,7 +259,7 @@ fn manifest_spdx_as_binary_test() {
 }
 
 #[test]
-fn mearurements_test() {
+fn measurements_test() {
     let coswid_bytes = get_file_as_byte_vec(Path::new(&"tests/examples/coswid_1.cbor".to_string()));
     let scratch = MeasurementsFormatCbor {
         content_type: 258,

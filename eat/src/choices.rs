@@ -1,13 +1,16 @@
-//! Choice-based structs from the Entity Attestation Token (EAT) spec
+//! Choice-based structs
 
 use ciborium::value::Value;
 use serde::{Deserialize, Serialize};
 
 use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 use num_enum::TryFromPrimitive;
 use serde_repr::Deserialize_repr;
 use serde_repr::Serialize_repr;
 
+// BUNDLE-Tagged-Message   = #6.602(BUNDLE-Untagged-Message)
+// BUNDLE-Untagged-Message = Detached-EAT-Bundle
 // BUNDLE-Messages = BUNDLE-Tagged-Message / BUNDLE-Untagged-Message
 
 // Claim-Label = int / text
@@ -141,6 +144,10 @@ impl TryFrom<&Value> for IntendedUseType {
 // The EAT specification provides CBOR-specific and JSON-specific definitions for the type
 // referenced by the manifest-format::content-format definition. The definitions are as follows:
 //
+//     spdx-json = text
+//     cyclone-dx-json = text
+//     cyclone-dx-xml  = text
+//
 //     $manifest-body-cbor /= cyclone-dx-json
 //     $manifest-body-cbor /= cyclone-dx-xml
 //     $manifest-body-cbor /= spdx-json
@@ -166,6 +173,61 @@ impl TryFrom<&Value> for IntendedUseType {
 // $measurements-body-cbor /= bytes .cbor untagged-coswid
 // $measurements-body-json /= base64-url-text
 // Punting on the socket for now and just using TextOrBinary in measurements-format
+
+///     oemid-label => oemid-pen / oemid-ieee / oemid-random
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+#[allow(missing_docs)]
+pub enum Oemid {
+    Pen(i64),
+    #[serde(with = "serde_bytes")]
+    Ieee(Vec<u8>),
+    #[serde(with = "serde_bytes")]
+    Random(Vec<u8>),
+}
+
+impl TryFrom<Value> for Oemid {
+    type Error = String;
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Integer(i) => match <ciborium::value::Integer as TryInto<i64>>::try_into(i) {
+                Ok(val) => Ok(Oemid::Pen(val)),
+                Err(_) => Err("".to_string()),
+            },
+            Value::Bytes(v) => {
+                if 3 == v.len() {
+                    Ok(Oemid::Ieee(v))
+                } else if 16 == v.len() {
+                    Ok(Oemid::Random(v))
+                } else {
+                    Err("".to_string())
+                }
+            }
+            _ => Err("".to_string()),
+        }
+    }
+}
+impl TryFrom<&Value> for Oemid {
+    type Error = String;
+    fn try_from(value: &Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Integer(i) => match <ciborium::value::Integer as TryInto<i64>>::try_into(*i) {
+                Ok(val) => Ok(Oemid::Pen(val)),
+                Err(_) => Err("".to_string()),
+            },
+            Value::Bytes(v) => {
+                if 3 == v.len() {
+                    Ok(Oemid::Ieee(v.clone()))
+                } else if 16 == v.len() {
+                    Ok(Oemid::Random(v.clone()))
+                } else {
+                    Err("".to_string())
+                }
+            }
+            _ => Err("".to_string()),
+        }
+    }
+}
 
 /// result-type = comparison-successful /
 ///               comparison-fail /

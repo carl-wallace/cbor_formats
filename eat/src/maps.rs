@@ -1,4 +1,4 @@
-//! Map-based structs from the Entity Attestation Token (EAT) spec
+//! Map-based structs
 
 use ciborium::{cbor, value::Value};
 use core::{fmt, marker::PhantomData};
@@ -9,7 +9,9 @@ use serde::{
 };
 
 use crate::arrays::*;
+use crate::cbor_specific::SubmoduleCbor;
 use crate::choices::*;
+use crate::json_specific::Submodule;
 use alloc::collections::BTreeMap;
 use alloc::format;
 use alloc::string::{String, ToString};
@@ -21,6 +23,22 @@ use corim::choices::ProfileTypeChoice;
 use serde::de::Error;
 use serde::ser::Error as OtherError;
 
+/// string-or-uri = text
+/// nonce-type = bstr .size (8..64)
+/// oemid-pen = int
+///
+/// oemid-ieee = oemid-ieee-cbor
+/// oemid-ieee-cbor = bstr .size 3
+/// oemid-ieee-json = base64-url-text .size 4
+///
+/// oemid-random = oemid-random-cbor
+/// oemid-random-cbor = bstr .size 16
+/// oemid-random-json = base64-url-text .size 24
+///
+/// hardware-model-type = bytes .size (1..32)
+///
+/// ueid-type = bstr .size (7..33)
+///
 /// nonce-label            = 10
 /// ueid-label             = 256
 /// sueids-label           = 257
@@ -72,8 +90,6 @@ use serde::ser::Error as OtherError;
 /// $$Claims-Set-Claims //= (
 ///     measurements-label => measurements-type
 /// )
-///
-/// begin todo
 /// $$Claims-Set-Claims //= (
 ///     measurement-results-label =>
 ///         [ + measurement-results-group ] )
@@ -81,9 +97,8 @@ use serde::ser::Error as OtherError;
 /// $$Claims-Set-Claims //= (
 ///     oemid-label => oemid-pen / oemid-ieee / oemid-random
 /// )
-/// $$Claims-Set-Claims //= (submods-label => { + text => Submodule })
 /// $$Claims-Set-Claims //= (sueids-label => sueids-type)
-/// end todo
+/// $$Claims-Set-Claims //= (submods-label => { + text => Submodule })
 ///
 /// $$Claims-Set-Claims //= (profile-label => general-uri / general-oid)
 /// $$Claims-Set-Claims //= (secure-boot-label => bool)
@@ -154,6 +169,14 @@ pub struct ClaimsSetClaims {
     pub manifests: Option<ManifestsType>,
     #[cbor(tag = "274", cbor = "true")]
     pub measurements: Option<MeasurementsType>,
+    #[cbor(tag = "275", cbor = "true")]
+    pub measurement_results: Option<MeasurementResultsGroupArray>,
+    #[cbor(tag = "258")]
+    pub oemid: Option<Oemid>,
+    #[cbor(tag = "257", cbor = "true")]
+    pub sueids: Option<TupleMap>,
+    #[cbor(tag = "266", cbor = "true")]
+    pub submods: Option<Submodule>,
     #[cbor(value = "Array", cbor = "true")]
     pub other: Option<Vec<Tuple>>,
 }

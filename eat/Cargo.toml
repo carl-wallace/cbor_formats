@@ -24,6 +24,7 @@ serde_repr = "0.1.9"
 subtle-encoding = {version = "0.5.1", default-features = false, features = ["hex", "alloc"]}
 hex-literal = "0.3.4"
 num_enum = "0.5.7"
+base64 = "0.20.0"
 
 [package.metadata.docs.rs]
 all-features = true

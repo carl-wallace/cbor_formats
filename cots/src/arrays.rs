@@ -88,11 +88,11 @@ impl TryFrom<&ConciseTaStores> for ConciseTaStoresCbor {
 // environment-group-list = [* environment-group-list-map]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
-pub struct EnvironmentGroupList(Vec<EnvironmentGroupListMap>);
+pub struct EnvironmentGroupList(pub Vec<EnvironmentGroupListMap>);
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
-pub struct EnvironmentGroupListCbor(Vec<EnvironmentGroupListMapCbor>);
+pub struct EnvironmentGroupListCbor(pub Vec<EnvironmentGroupListMapCbor>);
 
 // todo closure error handling
 impl TryFrom<&Value> for EnvironmentGroupListCbor {
