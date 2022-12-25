@@ -18,6 +18,9 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 // CWT-Messages = CWT-Tagged-Message / CWT-Untagged-Message
 // CWT-Untagged-Message = COSE_Messages
 
+/// CBOR and JSON encoding/decoding of `debug-status-type`, see [EAT Section 4.2.9].
+///
+/// ```text
 /// debug-status-type = ds-enabled /
 ///                     disabled /
 ///                     disabled-since-boot /
@@ -29,47 +32,32 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 /// disabled-since-boot            = 2
 /// disabled-permanently           = 3
 /// disabled-fully-and-permanently = 4
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-#[allow(missing_docs)]
-pub enum DebugStatusType {
-    Known(DebugStatusTypeKwown),
-}
-
+/// ```
+/// [EAT Section 4.2.9]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.9
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[serde(untagged)]
 #[allow(missing_docs)]
-#[repr(i64)]
-pub enum DebugStatusTypeKwown {
+#[repr(i8)]
+pub enum DebugStatusType {
     Enabled = 0,
     Disabled = 1,
     DisabledSinceBoot = 2,
     DisabledPermanently = 3,
     DisabledFullyAndPermanently = 4,
 }
-
 impl TryFrom<Value> for DebugStatusType {
     type Error = String;
     fn try_from(value: Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Integer(i) => match <ciborium::value::Integer as TryInto<i64>>::try_into(i) {
-                Ok(vs) => match DebugStatusTypeKwown::try_from(vs) {
-                    Ok(val) => Ok(DebugStatusType::Known(val)),
-                    Err(_) => Err("".to_string()),
-                },
-                Err(_) => Err("".to_string()),
-            },
-            _ => Err("".to_string()),
-        }
+        DebugStatusType::try_from(&value)
     }
 }
 impl TryFrom<&Value> for DebugStatusType {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Integer(i) => match <ciborium::value::Integer as TryInto<i64>>::try_into(*i) {
-                Ok(vs) => match DebugStatusTypeKwown::try_from(vs) {
-                    Ok(val) => Ok(DebugStatusType::Known(val)),
+            Value::Integer(i) => match <ciborium::value::Integer as TryInto<i8>>::try_into(*i) {
+                Ok(vs) => match DebugStatusType::try_from(vs) {
+                    Ok(val) => Ok(val),
                     Err(_) => Err("".to_string()),
                 },
                 Err(_) => Err("".to_string()),
@@ -79,6 +67,9 @@ impl TryFrom<&Value> for DebugStatusType {
     }
 }
 
+/// CBOR and JSON encoding/decoding of `intended-use-type`, see [EAT Section 4.3.3].
+///
+/// ```text
 /// intended-use-type = generic /
 ///                     registration /
 ///                     provisioning /
@@ -90,18 +81,13 @@ impl TryFrom<&Value> for DebugStatusType {
 /// provisioning = 3
 /// csr          = 4
 /// pop          = 5
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-#[allow(missing_docs)]
-pub enum IntendedUseType {
-    Known(IntendedUseTypeKnown),
-}
-
+/// ```
+/// [EAT Section 4.3.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.3.3
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[serde(untagged)]
 #[allow(missing_docs)]
-#[repr(i64)]
-pub enum IntendedUseTypeKnown {
+#[repr(i8)]
+pub enum IntendedUseType {
     Generic = 1,
     Registration = 2,
     Provisioning = 3,
@@ -112,25 +98,16 @@ pub enum IntendedUseTypeKnown {
 impl TryFrom<Value> for IntendedUseType {
     type Error = String;
     fn try_from(value: Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Integer(i) => match <ciborium::value::Integer as TryInto<i64>>::try_into(i) {
-                Ok(vs) => match IntendedUseTypeKnown::try_from(vs) {
-                    Ok(val) => Ok(IntendedUseType::Known(val)),
-                    Err(_) => Err("".to_string()),
-                },
-                Err(_) => Err("".to_string()),
-            },
-            _ => Err("".to_string()),
-        }
+        IntendedUseType::try_from(&value)
     }
 }
 impl TryFrom<&Value> for IntendedUseType {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Integer(i) => match <ciborium::value::Integer as TryInto<i64>>::try_into(*i) {
-                Ok(vs) => match IntendedUseTypeKnown::try_from(vs) {
-                    Ok(val) => Ok(IntendedUseType::Known(val)),
+            Value::Integer(i) => match <ciborium::value::Integer as TryInto<i8>>::try_into(*i) {
+                Ok(vs) => match IntendedUseType::try_from(vs) {
+                    Ok(val) => Ok(val),
                     Err(_) => Err("".to_string()),
                 },
                 Err(_) => Err("".to_string()),
@@ -173,7 +150,12 @@ impl TryFrom<&Value> for IntendedUseType {
 // $measurements-body-json /= base64-url-text
 // Punting on the socket for now and just using TextOrBinary in measurements-format
 
-///     oemid-label => oemid-pen / oemid-ieee / oemid-random
+/// CBOR and JSON encoding/decoding of types used by the `oemid` claim, see [EAT Section 4.2.3].
+///
+/// ```text
+/// oemid-label => oemid-pen / oemid-ieee / oemid-random
+/// ```
+/// [EAT Section 4.2.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.3
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -228,6 +210,9 @@ impl TryFrom<&Value> for Oemid {
     }
 }
 
+/// CBOR and JSON encoding/decoding of `result-type`, see [EAT Section 4.2.17].
+///
+/// ```text
 /// result-type = comparison-successful /
 ///               comparison-fail /
 ///               comparison-not-run /
@@ -237,18 +222,13 @@ impl TryFrom<&Value> for Oemid {
 /// comparison-fail          = 2
 /// comparison-not-run       = 3
 /// measurement-absent       = 4
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-#[allow(missing_docs)]
-pub enum ResultType {
-    Known(ResultTypeKnown),
-}
-
+/// ```
+/// [EAT Section 4.2.17]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.17
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[serde(untagged)]
 #[allow(missing_docs)]
-#[repr(i64)]
-pub enum ResultTypeKnown {
+#[repr(i8)]
+pub enum ResultType {
     Successful = 1,
     Fail = 2,
     NotRun = 3,
@@ -258,25 +238,16 @@ pub enum ResultTypeKnown {
 impl TryFrom<Value> for ResultType {
     type Error = String;
     fn try_from(value: Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Integer(i) => match <ciborium::value::Integer as TryInto<i64>>::try_into(i) {
-                Ok(vs) => match ResultTypeKnown::try_from(vs) {
-                    Ok(val) => Ok(ResultType::Known(val)),
-                    Err(_) => Err("".to_string()),
-                },
-                Err(_) => Err("".to_string()),
-            },
-            _ => Err("".to_string()),
-        }
+        ResultType::try_from(&value)
     }
 }
 impl TryFrom<&Value> for ResultType {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Integer(i) => match <ciborium::value::Integer as TryInto<i64>>::try_into(*i) {
-                Ok(vs) => match ResultTypeKnown::try_from(vs) {
-                    Ok(val) => Ok(ResultType::Known(val)),
+            Value::Integer(i) => match <ciborium::value::Integer as TryInto<i8>>::try_into(*i) {
+                Ok(vs) => match ResultType::try_from(vs) {
+                    Ok(val) => Ok(val),
                     Err(_) => Err("".to_string()),
                 },
                 Err(_) => Err("".to_string()),

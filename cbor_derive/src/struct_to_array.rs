@@ -63,7 +63,7 @@ impl DeriveStructToArray {
 
         let mut fields = TokenStream::new();
 
-        let comment = format!("Supports CBOR encoding/decoding of the corresponding array type, which is described in [{}]", self.ident);
+        let comment = format!("CBOR encoding/decoding of [{}]", self.ident);
 
         for (_field_count, field) in (self.fields).iter().enumerate() {
             let name = &field.ident;

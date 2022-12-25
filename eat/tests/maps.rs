@@ -6,7 +6,7 @@ use common::tuple::*;
 use common::tuple_map::*;
 use common::{TextOrBinary, TimeCbor, UeidType};
 use eat::cbor_specific::SubmoduleCbor;
-use eat::choices::{DebugStatusType, DebugStatusTypeKwown, Oemid, ResultType, ResultTypeKnown};
+use eat::choices::{DebugStatusType, Oemid, ResultType};
 use hex_literal::hex;
 
 use eat::arrays::*;
@@ -415,7 +415,7 @@ fn debug_status_test() {
         nonce: None,
         boot_count: None,
         boot_seed: None,
-        debug_status: Some(DebugStatusType::Known(DebugStatusTypeKwown::Enabled)),
+        debug_status: Some(DebugStatusType::Enabled),
         dloas: None,
         hardware_model: None,
         hardware_version: None,
@@ -960,7 +960,7 @@ fn measurement_results_test() {
     let tob = TextOrBinary::Text("Results ID".to_string());
     let ir = IndividualResultCbor {
         results_id: tob,
-        result: ResultType::Known(ResultTypeKnown::Absent),
+        result: ResultType::Absent,
     };
     let mr = MeasurementResultsGroupCbor {
         measurement_system: "Some Measurement System".to_string(),

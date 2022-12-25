@@ -24,6 +24,11 @@ use crate::cbor_specific::SubmoduleCbor;
 use crate::choices::*;
 use crate::json_specific::Submodule;
 
+/// JSON encoding/decoding of `Claims-Set-Claims`, see [EAT Section 4.2].
+///
+/// Use [ClaimsSetClaimsCbor](ClaimsSetClaimsCbor) for CBOR-encoded EATs.
+///
+/// ```text
 /// string-or-uri = text
 /// nonce-type = bstr .size (8..64)
 /// oemid-pen = int
@@ -119,6 +124,8 @@ use crate::json_specific::Submodule;
 ///        * $$Claims-Set-Claims
 ///        * Claim-Label .feature "extended-claims-label" => any
 ///    }
+/// ```
+/// [EAT Section 4.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ClaimsSetClaims {
@@ -182,6 +189,11 @@ pub struct ClaimsSetClaims {
     pub other: Option<Vec<Tuple>>,
 }
 
+/// JSON encoding/decoding of `location-type`, see [EAT Section 4.2.10].
+///
+/// Use [LocationTypeCbor](LocationTypeCbor) for CBOR-encoded EATs.
+///
+/// ```text
 /// location-type = {
 ///     latitude => number,
 ///     longitude => number,
@@ -203,6 +215,8 @@ pub struct ClaimsSetClaims {
 /// speed             = 7
 /// timestamp         = 8
 /// age               = 9
+/// ```
+/// [EAT Section 4.2.10]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.10
 #[derive(Clone, Debug, Eq, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct LocationType {
@@ -226,12 +240,26 @@ pub struct LocationType {
     pub age: Option<u64>,
 }
 
+/// JSON encoding/decoding of `sueids-type`, see [EAT Section 4.2.2].
+///
+/// Use [SwVersionTypeCbor](SwVersionTypeCbor) for CBOR-encoded EATs.
+///
+/// ```text
 /// sueids-type = {
 ///     + tstr => ueid-type
 /// }
+/// ```
+/// [EAT Section 4.2.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.2
 pub struct SueidsType(TupleMap);
 
+/// CBOR encoding/decoding of `sueids-type`, see [EAT Section 4.2.2].
+///
+/// Use [SueidsType](SueidsType) for JSON-encoded EATs.
+///
+/// ```text
 /// sueids-type = {
 ///     + tstr => ueid-type
 /// }
+/// ```
+/// [EAT Section 4.2.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.2
 pub struct SueidsTypeCbor(TupleMapCbor);
