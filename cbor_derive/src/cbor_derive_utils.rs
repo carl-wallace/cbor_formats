@@ -1,3 +1,5 @@
+//! Utility functions used by derive macros
+
 use syn::Path;
 
 pub(crate) fn extract_type(ty: &syn::Type) -> Option<String> {

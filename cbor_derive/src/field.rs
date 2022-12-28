@@ -1,11 +1,12 @@
 //! Structure field processing code adapted from the RustCrypto formats library.
 
-use crate::attributes::FieldAttrs;
-use crate::cbor_derive_utils::*;
 use proc_macro2::TokenStream;
 use proc_macro_error::abort;
 use quote::quote;
 use syn::{Field, Ident, Type};
+
+use crate::attributes::FieldAttrs;
+use crate::cbor_derive_utils::*;
 
 pub type TagNumber = u32;
 

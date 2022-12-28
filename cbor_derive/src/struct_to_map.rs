@@ -1,10 +1,13 @@
-use crate::cbor_derive_utils::{extract_type, is_option, is_option_vec, is_vec};
-use crate::default_lifetime;
-use crate::field::StructField;
+//! Code supporting StructToArray procedural macro
+
 use proc_macro2::TokenStream;
 use proc_macro_error::abort;
 use quote::{quote, ToTokens};
 use syn::{DeriveInput, Ident, Lifetime};
+
+use crate::cbor_derive_utils::{extract_type, is_option, is_option_vec, is_vec};
+use crate::default_lifetime;
+use crate::field::StructField;
 
 /// Derive the `StructToMap` trait for a struct
 pub(crate) struct DeriveStructToMap {

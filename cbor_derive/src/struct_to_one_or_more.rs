@@ -1,9 +1,12 @@
-use crate::default_lifetime;
-use crate::field::StructField;
+//! Code supporting StructToArray procedural macro
+
 use proc_macro2::TokenStream;
 use proc_macro_error::abort;
 use quote::{quote, ToTokens};
 use syn::{DeriveInput, Ident, Lifetime};
+
+use crate::default_lifetime;
+use crate::field::StructField;
 
 /// Derive the `StructToMap` trait for a struct
 pub(crate) struct DeriveStructToOneOrMore {

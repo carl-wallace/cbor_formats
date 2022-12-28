@@ -1,14 +1,12 @@
 //! Attribute processing code adapted from the RustCrypto formats library.
 
-use crate::field::TagNumber;
 use core::fmt::Debug;
 use core::str::FromStr;
+
 use proc_macro_error::abort;
-use syn::LitStr;
-use syn::MetaList;
-use syn::MetaNameValue;
-use syn::Path;
-use syn::{self, Attribute, Lit, Meta, NestedMeta};
+use syn::{self, Attribute, Lit, LitStr, Meta, MetaList, MetaNameValue, NestedMeta, Path};
+
+use crate::field::TagNumber;
 
 /// Attribute name.
 pub(crate) const ATTR_NAME: &str = "cbor";
