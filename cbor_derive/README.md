@@ -25,12 +25,12 @@ corim-meta-map = {
 }
 ```
 
-The [corim](./corim/index.html) library defines support for this structure as shown below. The `StructToMap`
-derive macro is from the [cbor_derive](./cbor_derive/index.html) library and causes generation of a structure named `CorimMetaMapCbor`.
+The [corim](../corim/index.html) library defines support for this structure as shown below. The `StructToMap`
+derive macro is from the [cbor_derive](../cbor_derive/index.html) library and causes generation of a structure named `CorimMetaMapCbor`.
 The Serialize and Deserialize macros are from [serde](https://crates.io/crates/serde) and are used with [serde-json](https://crates.io/crates/serde_json)
 to provide JSON support. These macros also enable CBOR encodings that feature maps with text keys using [ciborium](https://crates.io/crates/ciborium).
 
-The `cbor` derive helper attribute is used by the derive macros defined in [cbor_derive](./cbor_derive/index.html).
+The `cbor` derive helper attribute is used by the derive macros defined in [cbor_derive](../cbor_derive/index.html).
 The `tag` attribute indicates the integer key used to represent the associated field in the map production.
 The `value` attribute indicates the type of `Value` used to represent the data. The `cbor` attribute indicates that a CBOR-specific type should be used for the field (i.e., the type name
 features a `Cbor` suffix when generating or decoding a CBOR-encoding).
