@@ -32,7 +32,7 @@ fn individual_result_test() {
 #[test]
 fn manifest_spdx_test() {
     // CoAP Content-Formats for SPDX and CycloneDX have not been assigned yet. The values
-    // 2112 and 2113 are assigned.
+    // 2112 and 2113 are used here temporarily.
 
     // example1.spdx is from https://github.com/spdx/spdx-examples
     let spdx_bytes = get_file_as_byte_vec(Path::new(&"tests/examples/example1.spdx".to_string()));

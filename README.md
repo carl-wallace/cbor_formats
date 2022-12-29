@@ -9,6 +9,7 @@ along with a command line utility to generate and parse artifacts from these spe
 - [cfcli](./cfcli/index.html) provides a command line utility to exercise the other repositories
 - [common](./common/index.html) provides a set of definitions that are shared by various specifications
 - [corim](./corim/index.html) provides support for the [Concise Reference Integrity Manifest](https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03) specification
+- [cose](./cose/index.html) provides support for the [CBOR Object Signing and Encryption (COSE)](https://datatracker.ietf.org/doc/html/rfc9052) specification
 - [coswid](./coswid/index.html) provides support for the [Concise Software Identification Tags](https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22) specification
 - [cots](./cots/index.html) provides support for the [Concise TA Stores](https://datatracker.ietf.org/doc/html/draft-wallace-rats-concise-ta-stores-01) specification
 - [eat](./eat/index.html) provides support for the [Entity Attestation Token](https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat-17) specification

@@ -6,6 +6,7 @@ members = [
     "cfcli",
     "common",
     "corim",
+    "cose",
     "coswid",
     "cots",
     "eat",

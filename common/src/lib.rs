@@ -384,6 +384,36 @@ impl TryFrom<Value> for TextOrBinary {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
+pub enum BinaryOrNil {
+    #[serde(with = "serde_bytes")]
+    Binary(Vec<u8>),
+    Nil,
+}
+
+impl TryFrom<&Value> for BinaryOrNil {
+    type Error = String;
+    fn try_from(value: &Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Null => Ok(Self::Nil),
+            Value::Bytes(k) => Ok(Self::Binary(k.clone())),
+            _ => Err("Failed to parse value as a TextOrBinary".to_string()),
+        }
+    }
+}
+impl TryFrom<Value> for BinaryOrNil {
+    type Error = String;
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Null => Ok(Self::Nil),
+            Value::Bytes(k) => Ok(Self::Binary(k)),
+            _ => Err("Failed to parse value as a TextOrBinary".to_string()),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+#[allow(missing_docs)]
 pub enum PkixCa {
     #[serde(with = "serde_bytes")]
     Binary(Vec<u8>),
