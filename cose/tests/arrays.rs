@@ -1,9 +1,11 @@
+use std::path::Path;
+
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
+use hex_literal::hex;
+
 use cose::arrays::*;
 use cose::maps::*;
-use hex_literal::hex;
-use std::path::Path;
 
 mod utils;
 use utils::*;
@@ -124,7 +126,7 @@ fn cose_signature_test() {
 
 #[test]
 fn encrypt_test() {
-    // sample from ecdsa-01 test in corim project from https://github.com/cose-wg/Examples
+    // sample from aes-ccm-01 test in cose-wg/Examples project from https://github.com/cose-wg/Examples
     let expected = get_file_as_byte_vec(Path::new(&"tests/examples/aes-ccm-01.cbor".to_string()));
     println!(
         "Encoded TaggedCoseEncrypt from cose-wg/Examples: {:?}",
@@ -143,7 +145,7 @@ fn encrypt_test() {
 
 #[test]
 fn encrypt0_test() {
-    // sample from ecdsa-01 test in corim project from https://github.com/cose-wg/Examples
+    // sample from aes-ccm-enc-01 test in cose-wg/Examples project from https://github.com/cose-wg/Examples
     let expected =
         get_file_as_byte_vec(Path::new(&"tests/examples/aes-ccm-enc-01.cbor".to_string()));
     println!(
@@ -163,7 +165,7 @@ fn encrypt0_test() {
 
 #[test]
 fn cosemac_test() {
-    // sample from ecdsa-01 test in corim project from https://github.com/cose-wg/Examples
+    // sample from cbc-mac-01 test in cose-wg/Examples project from https://github.com/cose-wg/Examples
     let expected = get_file_as_byte_vec(Path::new(&"tests/examples/cbc-mac-01.cbor".to_string()));
     println!(
         "Encoded TaggedCoseMac from cose-wg/Examples: {:?}",
@@ -182,7 +184,7 @@ fn cosemac_test() {
 
 #[test]
 fn cosemac0_test() {
-    // sample from ecdsa-01 test in corim project from https://github.com/cose-wg/Examples
+    // sample from cbc-mac-enc-01 test in cose-wg/Examples project from https://github.com/cose-wg/Examples
     let expected =
         get_file_as_byte_vec(Path::new(&"tests/examples/cbc-mac-enc-01.cbor".to_string()));
     println!(
@@ -199,3 +201,11 @@ fn cosemac0_test() {
 
     assert_eq!(expected.to_vec(), encoded_token);
 }
+
+// uncomment and point at directory with clone of https://github.com/cose-wg/Examples
+// mod cose_wg_examples;
+// use cose_wg_examples::walk_cose_wg_dir;
+// #[test]
+// fn decode_cose_wg_artifacts() {
+//     let _ = walk_cose_wg_dir("../../../third-party/COSE_Examples");
+// }

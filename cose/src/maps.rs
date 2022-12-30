@@ -16,7 +16,7 @@ use serde::{
 
 use cbor_derive::StructToMap;
 
-use common::{TextOrInt, Tuple, TupleCbor};
+use common::{TextOrBinary, TextOrInt, Tuple, TupleCbor};
 
 // todo enforce presence of IV or Partial IV (but not both)
 /// CBOR and JSON encoding/decoding of `Generic_Headers`, see [COSE Section 3].
@@ -35,6 +35,8 @@ use common::{TextOrInt, Tuple, TupleCbor};
 ///     * label => values
 /// }
 /// ```
+/// Used TextOrBinary instead of Vec<u8> owing to some text key IDs in the cose-wg/Examples data set
+///
 /// [COSE Section 3]: https://datatracker.ietf.org/doc/html/rfc9052#section-3
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
@@ -45,8 +47,8 @@ pub struct HeaderMap {
     pub criticality: Option<Vec<TextOrInt>>,
     #[cbor(tag = "3")]
     pub content_type: Option<TextOrInt>,
-    #[cbor(tag = "4", value = "Bytes")]
-    pub key_id: Option<Vec<u8>>,
+    #[cbor(tag = "4")]
+    pub key_id: Option<TextOrBinary>,
     #[cbor(tag = "5", value = "Bytes")]
     pub iv: Option<Vec<u8>>,
     #[cbor(tag = "6", value = "Bytes")]

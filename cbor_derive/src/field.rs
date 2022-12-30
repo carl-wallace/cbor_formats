@@ -8,7 +8,7 @@ use syn::{Field, Ident, Type};
 use crate::attributes::FieldAttrs;
 use crate::cbor_derive_utils::*;
 
-pub type TagNumber = u32;
+pub type TagNumber = i32;
 
 /// "IR" for a field of a derived `StructToMap` or `StructToArray`.
 pub(super) struct StructField {

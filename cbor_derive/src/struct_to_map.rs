@@ -252,11 +252,11 @@ impl DeriveStructToMap {
 
                 fn try_from(value: Vec<(Value, Value)>) -> Result<Self, Self::Error> {
                     //let m = value.iter().map(|v|(v.0.as_integer().unwrap().try_into().unwrap(), v.1.clone())).collect::<BTreeMap<u32, Value>>();
-                    let mut m : BTreeMap<u32, Value> = BTreeMap::new();
+                    let mut m : BTreeMap<i32, Value> = BTreeMap::new();
                     let mut vt : Vec<TupleCbor> = vec![];
                     #tsindices
                     for v in value {
-                        let index : u32 = match v.0.as_integer() {
+                        let index : i32 = match v.0.as_integer() {
                             Some(i) => {
                                 match i.try_into() {
                                     Ok(ival) => ival,
@@ -285,11 +285,11 @@ impl DeriveStructToMap {
 
                 fn try_from(value: &Vec<(Value, Value)>) -> Result<Self, Self::Error> {
                     //let m = value.iter().map(|v|(v.0.as_integer().unwrap().try_into().unwrap(), v.1.clone())).collect::<BTreeMap<u32, Value>>();
-                    let mut m : BTreeMap<u32, Value> = BTreeMap::new();
+                    let mut m : BTreeMap<i32, Value> = BTreeMap::new();
                     let mut vt : Vec<TupleCbor> = vec![];
                     #tsindices
                     for v in value {
-                        let index : u32 = match v.0.as_integer() {
+                        let index : i32 = match v.0.as_integer() {
                             Some(i) => {
                                 match i.try_into() {
                                     Ok(ival) => ival,
