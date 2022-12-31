@@ -138,7 +138,7 @@ pub fn derive_struct_to_array(input: TokenStream) -> TokenStream {
 }
 
 /// The `StructToOneOrMore` macro marshals data to/from an enum that implements the one-or-more CDDL
-/// mechanism. An enum named OneOrMore<name>Cbor is emitted for associated structures along with a
+/// mechanism. An enum named `OneOrMore<name>Cbor` is emitted for associated structures along with a
 /// set of `TryFrom` implementations.
 #[proc_macro_derive(StructToOneOrMore, attributes(cbor))]
 #[proc_macro_error]

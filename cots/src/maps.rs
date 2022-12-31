@@ -25,6 +25,7 @@ use eat::maps::ClaimsSetClaims;
 use eat::maps::*;
 use serde::ser::Error as OtherError;
 
+/// ```text
 /// abbreviated-swid-tag = {
 ///   ? tag-version => integer,
 ///   ? corpus => bool,
@@ -41,6 +42,7 @@ use serde::ser::Error as OtherError;
 ///   * $$coswid-extension,
 ///   global-attributes,
 /// }
+/// ```
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct AbbreviatedSwidTag {

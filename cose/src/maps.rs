@@ -35,7 +35,7 @@ use common::{TextOrBinary, TextOrInt, Tuple, TupleCbor};
 ///     * label => values
 /// }
 /// ```
-/// Used TextOrBinary instead of Vec<u8> owing to some text key IDs in the cose-wg/Examples data set
+/// Used TextOrBinary instead of `Vec<u8>` owing to some text key IDs in the cose-wg/Examples data set
 ///
 /// [COSE Section 3]: https://datatracker.ietf.org/doc/html/rfc9052#section-3
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
