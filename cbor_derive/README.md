@@ -40,7 +40,7 @@ use core::fmt;
 use std::collections::BTreeMap;
 
 use ciborium::{cbor, value::Value};
-use serde::{Deserialize, Deserializer, Serialize, __private::size_hint};
+use serde::{Deserialize, Deserializer, Serialize};
 use serde::__private::PhantomData;
 use serde::de::{Visitor, MapAccess, Error as OtherError};
 use serde::ser::Error;
@@ -71,7 +71,6 @@ use common::TimeCbor;
 use common::TaggedUriTypeCbor;
 use corim::choices::EntityNameTypeChoice;
 use corim::maps::*;
-
 
 // {0: {0: "ACME Ltd.", 1: 32("https://acme.example")}, 1: {0: 1(1601424000), 1: 1(1632960000)}}
 let enc_meta = hex!("a200a2006941434d45204c74642e01d8207468747470733a2f2f61636d652e6578616d706c6501a200c11a5f73ca8001c11a6154fe00");

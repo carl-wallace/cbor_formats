@@ -68,7 +68,7 @@ impl DeriveStructToArray {
 
         let comment = format!("CBOR encoding/decoding of [{}]", self.ident);
 
-        for (_field_count, field) in (self.fields).iter().enumerate() {
+        for field in (self.fields).iter() {
             let name = &field.ident;
 
             let ty = field.field_type.clone();
@@ -283,8 +283,8 @@ impl DeriveStructToArray {
                         where
                             __A: serde::de::SeqAccess<'de>,
                         {
-                            let i = __seq.size_hint().unwrap_or_else(|| 0);
-                            let mut values = Vec::with_capacity(size_hint::cautious(__seq.size_hint()));
+                            //let i = __seq.size_hint().unwrap_or_else(|| 0);
+                            let mut values = Vec::with_capacity(0);
                             while let Some(value) = __seq.next_element()? {
                                 values.push(value);
                             }

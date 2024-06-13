@@ -8,8 +8,8 @@ use core::{fmt, marker::PhantomData};
 use serde::de::MapAccess;
 use serde::ser::Error as OtherError;
 use serde::ser::SerializeMap;
+use serde::{de::Error, de::Visitor};
 use serde::{Deserialize, Serialize};
-use serde::{__private::size_hint, de::Error, de::Visitor};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
@@ -97,6 +97,7 @@ impl TryFrom<&Value> for TupleMapCbor {
 }
 impl TryFrom<&TupleMapCbor> for Vec<(Value, Value)> {
     type Error = String;
+    #[allow(clippy::blocks_in_conditions)]
     fn try_from(value: &TupleMapCbor) -> Result<Self, Self::Error> {
         let mut v = ::alloc::vec::Vec::new();
         for i in &value.tuples {
@@ -173,7 +174,7 @@ impl<'de> Deserialize<'de> for TupleMapCbor {
             where
                 A: MapAccess<'de>,
             {
-                let mut values = Vec::with_capacity(size_hint::cautious(map.size_hint()));
+                let mut values = Vec::with_capacity(map.size_hint().unwrap_or(0));
                 while let Some(value) = map.next_entry()? {
                     values.push(value);
                 }

@@ -342,7 +342,7 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                         }
                     }
                 } else {
-                    let file_exts = vec!["json"];
+                    let file_exts = ["json"];
                     if let Some(ext) = e.path().extension().and_then(OsStr::to_str) {
                         if !file_exts.contains(&ext) {
                             continue;

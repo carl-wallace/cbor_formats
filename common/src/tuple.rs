@@ -99,6 +99,7 @@ impl TryFrom<&Value> for TupleCbor {
 }
 impl TryFrom<&TupleCbor> for Vec<Value> {
     type Error = String;
+    #[allow(clippy::blocks_in_conditions)]
     fn try_from(value: &TupleCbor) -> Result<Self, Self::Error> {
         let mut v = ::alloc::vec::Vec::new();
         v.push(
@@ -220,15 +221,10 @@ impl<'de> Deserialize<'de> for TupleCbor {
                     Some(t) => t,
                     None => return Err(__D::Error::custom("Failed to parse tag value")),
                 };
-                match Integer::try_from(t.0) {
-                    Ok(i) => {
-                        let v0 = Value::Integer(i);
-                        let vals = vec![v0, t.1.clone()];
-                        match TupleCbor::try_from(vals) {
-                            Ok(r) => Ok(r),
-                            Err(e) => Err(__D::Error::custom(e)),
-                        }
-                    }
+                let v0 = Value::Integer(Integer::from(t.0));
+                let vals = vec![v0, t.1.clone()];
+                match TupleCbor::try_from(vals) {
+                    Ok(r) => Ok(r),
                     Err(e) => Err(__D::Error::custom(e)),
                 }
             }

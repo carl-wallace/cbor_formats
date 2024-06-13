@@ -80,10 +80,9 @@ pub fn derive_struct_to_map(input: TokenStream) -> TokenStream {
 ///
 /// use ciborium::{cbor, value::Value};
 /// use serde::{Serialize, Deserialize};
-/// use serde::__private::{PhantomData, size_hint};
 /// use serde::de::{Visitor, Error as OtherError};
 /// use serde::ser::Error;
-///
+/// use core::marker::PhantomData;
 /// use cbor_derive::StructToArray;
 ///
 /// #[derive(Clone, Debug, PartialEq, Eq, StructToArray, Serialize, Deserialize)]
