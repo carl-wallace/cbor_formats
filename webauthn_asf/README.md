@@ -1,9 +1,9 @@
-# cots
+# webauthn_asf
 
 ![Apache2/MIT licensed][license-image]
 ![Rust Version][rustc-image]
 
-Encoders and decoders for structures defined in the CoTS specification.
+Encoders and decoders for WebAuthn Attestation Statement Format structures.
 
 ## Status
 
