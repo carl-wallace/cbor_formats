@@ -463,22 +463,112 @@ fn flags_map_test() {
 
 #[test]
 fn linked_tag_map_test() {
-    //todo
+    let ltm = LinkedTagMapCbor {
+        linked_tag_id: TagIdTypeChoiceCbor::Str("test-tag-id".to_string()),
+        tag_rel: TagRelTypeChoice::Known(TagRelTypeChoiceKnown::Supplements),
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&ltm, &mut buf);
+    let decoded: LinkedTagMapCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(ltm, decoded);
+
+    let json: LinkedTagMap = decoded.try_into().unwrap();
+    let cbor_roundtrip: LinkedTagMapCbor = json.try_into().unwrap();
+    let mut buf2 = vec![];
+    let _ = into_writer(&cbor_roundtrip, &mut buf2);
+    assert_eq!(buf, buf2);
 }
 
 #[test]
 fn measurement_map_test() {
-    //todo
+    let mm = MeasurementMapCbor {
+        mkey: None,
+        value: MeasurementValuesMapCbor {
+            version: None,
+            svn: None,
+            digests: None,
+            flags: None,
+            raw_value: None,
+            raw_value_mask: None,
+            mac_addr: None,
+            ip_addr: None,
+            serial_number: Some("SN-12345".to_string()),
+            ueid: None,
+            uuid: None,
+            name: Some("test-measurement".to_string()),
+            cryptokeys: None,
+            int_range: None,
+            other: None,
+        },
+        authorized_by: None,
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&mm, &mut buf);
+    let decoded: MeasurementMapCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(mm, decoded);
+
+    let json: MeasurementMap = decoded.try_into().unwrap();
+    let cbor_roundtrip: MeasurementMapCbor = json.try_into().unwrap();
+    let mut buf2 = vec![];
+    let _ = into_writer(&cbor_roundtrip, &mut buf2);
+    assert_eq!(buf, buf2);
 }
 
 #[test]
 fn measurement_values_map_test() {
-    //todo
+    let mvm = MeasurementValuesMapCbor {
+        version: Some(VersionMapCbor {
+            version: "1.0.0".to_string(),
+            version_scheme: None,
+        }),
+        svn: None,
+        digests: Some(vec![common::arrays::HashEntryCbor {
+            hash_alg_id: 1,
+            hash_value: vec![0xBB; 32],
+        }]),
+        flags: None,
+        raw_value: None,
+        raw_value_mask: None,
+        mac_addr: Some(vec![0x00, 0x11, 0x22, 0x33, 0x44, 0x55]),
+        ip_addr: None,
+        serial_number: None,
+        ueid: None,
+        uuid: None,
+        name: None,
+        cryptokeys: None,
+        int_range: None,
+        other: None,
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&mvm, &mut buf);
+    let decoded: MeasurementValuesMapCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(mvm, decoded);
+
+    let json: MeasurementValuesMap = decoded.try_into().unwrap();
+    let cbor_roundtrip: MeasurementValuesMapCbor = json.try_into().unwrap();
+    let mut buf2 = vec![];
+    let _ = into_writer(&cbor_roundtrip, &mut buf2);
+    assert_eq!(buf, buf2);
 }
 
 #[test]
 fn protected_corim_header_map_test() {
-    //todo
+    let pchm = ProtectedCorimHeaderMapCbor {
+        alg_id: 1,
+        content_type: "application/corim".to_string(),
+        meta: CorimMetaMapCbor {
+            signer: CorimSignerMapCbor {
+                entity_name: EntityNameTypeChoice::Text("Test Signer".to_string()),
+                reg_id: None,
+            },
+            validity: None,
+        },
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&pchm, &mut buf);
+    let decoded: ProtectedCorimHeaderMapCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(pchm, decoded);
+    assert_eq!(decoded.alg_id, 1);
 }
 
 #[test]
@@ -504,7 +594,64 @@ fn tag_identity_map_test() {
 
 #[test]
 fn triples_map_test() {
-    //todo
+    let env = EnvironmentMapCbor {
+        class: Some(ClassMapCbor {
+            id: Some(ClassIdTypeChoiceCbor::Uuid(Required(UuidType::Uuid(
+                TEST_UUID.as_bytes().to_vec(),
+            )))),
+            vendor: None,
+            model: None,
+            layer: None,
+            index: None,
+        }),
+        instance: None,
+        group: None,
+    };
+    let mvm = MeasurementValuesMapCbor {
+        version: None,
+        svn: None,
+        digests: None,
+        flags: None,
+        raw_value: None,
+        raw_value_mask: None,
+        mac_addr: None,
+        ip_addr: None,
+        serial_number: None,
+        ueid: None,
+        uuid: None,
+        name: Some("test".to_string()),
+        cryptokeys: None,
+        int_range: None,
+        other: None,
+    };
+    let mm = MeasurementMapCbor {
+        mkey: None,
+        value: mvm,
+        authorized_by: None,
+    };
+    use corim::arrays::ReferenceTripleRecordCbor;
+    let triple = ReferenceTripleRecordCbor {
+        environment_map: env,
+        measurement_map: vec![mm],
+    };
+    let tm = TriplesMapCbor {
+        reference_triples: Some(vec![triple]),
+        endorsed_triples: None,
+        identity_triples: None,
+        attest_key_triples: None,
+        dependency_triples: None,
+        membership_triples: None,
+        coswid_triples: None,
+        conditional_endorsement_series_triples: None,
+        conditional_endorsement_triples: None,
+        other: None,
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&tm, &mut buf);
+    let decoded: TriplesMapCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(tm, decoded);
+    assert!(decoded.reference_triples.is_some());
+    assert_eq!(decoded.reference_triples.as_ref().unwrap().len(), 1);
 }
 
 #[test]
@@ -525,5 +672,19 @@ fn validity_map_test() {
 
 #[test]
 fn version_map_test() {
-    //todo
+    let vm = VersionMapCbor {
+        version: "2.1.0".to_string(),
+        version_scheme: None,
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&vm, &mut buf);
+    let decoded: VersionMapCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(vm, decoded);
+    assert_eq!(decoded.version, "2.1.0");
+
+    let json: VersionMap = decoded.try_into().unwrap();
+    let cbor_roundtrip: VersionMapCbor = json.try_into().unwrap();
+    let mut buf2 = vec![];
+    let _ = into_writer(&cbor_roundtrip, &mut buf2);
+    assert_eq!(buf, buf2);
 }

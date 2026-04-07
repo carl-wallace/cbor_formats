@@ -49,6 +49,18 @@ pub struct AppleAttestationObject {
     pub receipt: Vec<u8>,
 }
 
+/// Represents an Apple App Attest assertion object.
+///
+/// Contains a signature and authenticator data for assertion verification.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[allow(missing_docs, non_snake_case)]
+pub struct AppleAssertionObject {
+    #[serde(with = "serde_bytes")]
+    pub signature: Vec<u8>,
+    #[serde(with = "serde_bytes")]
+    pub authenticatorData: Vec<u8>,
+}
+
 /// Represents supported attestation statement formats for Web Authentication.
 ///
 /// Currently supports Apple App Attest and a generic fallback for other formats.

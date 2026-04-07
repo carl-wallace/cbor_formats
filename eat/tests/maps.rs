@@ -901,7 +901,46 @@ fn uptime_test() {
 
 #[test]
 fn other_test() {
-    // todo!("other_test")
+    let csc = ClaimsSetClaimsCbor {
+        iss: None,
+        sub: None,
+        aud: None,
+        exp: None,
+        nbf: None,
+        iat: None,
+        cti: None,
+        nonce: None,
+        boot_count: None,
+        boot_seed: None,
+        debug_status: None,
+        dloas: None,
+        hardware_model: None,
+        hardware_version: None,
+        intended_use: None,
+        location: None,
+        profile: None,
+        oem_boot: None,
+        sw_name: None,
+        sw_version: None,
+        ueid: None,
+        uptime: None,
+        manifests: None,
+        measurements: None,
+        measurement_results: None,
+        oemid: None,
+        sueids: None,
+        submods: None,
+        other: Some(vec![TupleCbor {
+            key: Value::Integer((-70000).into()),
+            value: Value::Text("custom-claim".to_string()),
+        }]),
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&csc, &mut buf);
+    let decoded: ClaimsSetClaimsCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(csc, decoded);
+    assert!(decoded.other.is_some());
+    assert_eq!(decoded.other.as_ref().unwrap().len(), 1);
 }
 
 #[test]
