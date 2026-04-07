@@ -57,7 +57,7 @@ use serde::ser::Error as OtherError;
 /// }
 /// ```
 ///
-/// [CoSWID Section 2.3]: https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22#section-2.3
+/// [CoSWID Section 2.3]: https://datatracker.ietf.org/doc/html/rfc9393#section-2.3
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ConciseSwidTag {
@@ -119,7 +119,7 @@ pub struct ConciseSwidTag {
 /// }
 /// ```
 ///
-/// [CoSWID Section 2.9.2]: https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22#section-2.9.2
+/// [CoSWID Section 2.9.2]: https://datatracker.ietf.org/doc/html/rfc9393#section-2.9.2
 #[derive(Clone, Debug, PartialEq, StructToMap, StructToOneOrMore, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct DirectoryEntry {
@@ -155,7 +155,7 @@ pub struct DirectoryEntry {
 /// }
 /// ```
 ///
-/// [CoSWID Section 2.6]: https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22#section-2.6
+/// [CoSWID Section 2.6]: https://datatracker.ietf.org/doc/html/rfc9393#section-2.6
 #[derive(Clone, Debug, PartialEq, StructToMap, StructToOneOrMore, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct EntityEntry {
@@ -182,12 +182,13 @@ pub struct EntityEntry {
 ///   resource-collection,
 ///   ? date => integer-time,
 ///   ? device-id => text,
+///   ? location => text,
 ///   * $$evidence-extension,
 ///   global-attributes,
 /// }
 /// ```
 ///
-/// [CoSWID Section 2.9.4]: https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22#section-2.9.4
+/// [CoSWID Section 2.9.4]: https://datatracker.ietf.org/doc/html/rfc9393#section-2.9.4
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct EvidenceEntry {
@@ -203,6 +204,8 @@ pub struct EvidenceEntry {
     pub date: Option<Time>,
     #[cbor(tag = "36", value = "Text")]
     pub device_id: Option<String>,
+    #[cbor(tag = "23", value = "Text")]
+    pub location: Option<String>,
     //   * $$evidence-extension,
     #[cbor(tag = "15", value = "Text")]
     pub lang: Option<String>,
@@ -224,17 +227,24 @@ pub struct EvidenceEntry {
 /// }
 /// ```
 ///
-/// [CoSWID Section 2.9.2]: https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22#section-2.9.2
+/// [CoSWID Section 2.9.2]: https://datatracker.ietf.org/doc/html/rfc9393#section-2.9.2
 #[derive(Clone, Debug, PartialEq, StructToMap, StructToOneOrMore, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct FileEntry {
-    //todo filesystem-item
+    #[cbor(tag = "22", value = "Bool")]
+    pub key: Option<bool>,
+    #[cbor(tag = "23", value = "Text")]
+    pub location: Option<String>,
+    #[cbor(tag = "24", value = "Text")]
+    pub fs_name: String,
+    #[cbor(tag = "25", value = "Text")]
+    pub root: Option<String>,
     #[cbor(tag = "20", value = "Integer")]
     pub size: Option<i64>,
     #[cbor(tag = "21", value = "Text")]
     pub file_version: Option<String>,
     #[cbor(tag = "7", cbor = "true")]
-    pub hash: HashEntry,
+    pub hash: Option<HashEntry>,
     //   * $$file-extension,
     #[cbor(tag = "15", value = "Text")]
     pub lang: Option<String>,
@@ -259,7 +269,7 @@ pub struct FileEntry {
 /// }
 /// ```
 ///
-/// [CoSWID Section 2.7]: https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22#section-2.7
+/// [CoSWID Section 2.7]: https://datatracker.ietf.org/doc/html/rfc9393#section-2.7
 #[derive(Clone, Debug, PartialEq, StructToMap, StructToOneOrMore, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct LinkEntry {
@@ -294,7 +304,7 @@ pub struct LinkEntry {
 ///                       )
 /// ```
 ///
-/// [CoSWID Section 2.9.2]: https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22#section-2.9.2
+/// [CoSWID Section 2.9.2]: https://datatracker.ietf.org/doc/html/rfc9393#section-2.9.2
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct PathElementsGroup {
@@ -314,7 +324,7 @@ pub struct PathElementsGroup {
 /// }
 /// ```
 ///
-/// [CoSWID Section 2.9.3]: https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22#section-2.9.3
+/// [CoSWID Section 2.9.3]: https://datatracker.ietf.org/doc/html/rfc9393#section-2.9.3
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct PayloadEntry {
@@ -343,15 +353,16 @@ pub struct PayloadEntry {
 ///   * $$process-extension,
 ///   global-attributes,
 /// }
+/// ```
 ///
-/// [CoSWID Section 2.9.2]: https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22#section-2.9.2
+/// [CoSWID Section 2.9.2]: https://datatracker.ietf.org/doc/html/rfc9393#section-2.9.2
 #[derive(Clone, Debug, PartialEq, StructToMap, StructToOneOrMore, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ProcessEntry {
     #[cbor(tag = "27", value = "Text")]
     pub process_name: String,
     #[cbor(tag = "28", value = "Integer")]
-    pub pin: i64,
+    pub pid: Option<i64>,
     //   * process-extension,
     #[cbor(tag = "15", value = "Text")]
     pub lang: Option<String>,
@@ -370,7 +381,7 @@ pub struct ProcessEntry {
 /// }
 /// ```
 ///
-/// [CoSWID Section 2.9.2]: https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22#section-2.9.2
+/// [CoSWID Section 2.9.2]: https://datatracker.ietf.org/doc/html/rfc9393#section-2.9.2
 #[derive(Clone, Debug, PartialEq, StructToMap, StructToOneOrMore, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ResourceEntry {
@@ -408,7 +419,7 @@ pub struct ResourceEntry {
 /// }
 /// ```
 ///
-/// [CoSWID Section 2.8]: https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22#section-2.8
+/// [CoSWID Section 2.8]: https://datatracker.ietf.org/doc/html/rfc9393#section-2.8
 #[derive(Clone, Debug, PartialEq, StructToMap, StructToOneOrMore, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct SoftwareMetaEntry {
@@ -419,7 +430,7 @@ pub struct SoftwareMetaEntry {
     #[cbor(tag = "45", value = "Text")]
     pub colloquial_version: Option<String>,
     #[cbor(tag = "46", value = "Text")]
-    pub decription: Option<String>,
+    pub description: Option<String>,
     #[cbor(tag = "47", value = "Text")]
     pub edition: Option<String>,
     #[cbor(tag = "48", value = "Bool")]

@@ -148,13 +148,13 @@ impl TryFrom<&Value> for OneOrMoreRole {
 }
 
 // ; ownership indices
-// shared=1
+// abandon=1
 // private=2
-// abandon=3
+// shared=3
 //
-// $ownership /= shared
-// $ownership /= private
 // $ownership /= abandon
+// $ownership /= private
+// $ownership /= shared
 // $ownership /= int / text
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -170,9 +170,9 @@ pub enum Ownership {
 #[allow(missing_docs)]
 #[repr(i64)]
 pub enum OwnershipKnown {
-    Shared = 1,
+    Abandon = 1,
     Private = 2,
-    Abandon = 3,
+    Shared = 3,
 }
 
 impl TryFrom<Value> for Ownership {
