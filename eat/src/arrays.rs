@@ -388,11 +388,10 @@ impl TryFrom<&Value> for ManifestsTypeCbor {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Array(v) => Ok(ManifestsTypeCbor(
-                v.iter()
-                    .map(|m| ManifestFormatCbor::try_from(m).unwrap())
-                    .collect(),
-            )),
+            Value::Array(v) => {
+                let items: Result<Vec<_>, _> = v.iter().map(ManifestFormatCbor::try_from).collect();
+                Ok(ManifestsTypeCbor(items?))
+            }
             _ => Err("Failed to parse value as an array for EnvironmentGroupListCbor".to_string()),
         }
     }
@@ -485,11 +484,11 @@ impl TryFrom<&Value> for MeasurementsTypeCbor {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Array(v) => Ok(MeasurementsTypeCbor(
-                v.iter()
-                    .map(|m| MeasurementsFormatCbor::try_from(m).unwrap())
-                    .collect(),
-            )),
+            Value::Array(v) => {
+                let items: Result<Vec<_>, _> =
+                    v.iter().map(MeasurementsFormatCbor::try_from).collect();
+                Ok(MeasurementsTypeCbor(items?))
+            }
             _ => Err("Failed to parse value as an array for EnvironmentGroupListCbor".to_string()),
         }
     }
@@ -585,11 +584,13 @@ impl TryFrom<&Value> for MeasurementResultsGroupArrayCbor {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Array(v) => Ok(MeasurementResultsGroupArrayCbor(
-                v.iter()
-                    .map(|m| MeasurementResultsGroupCbor::try_from(m).unwrap())
-                    .collect(),
-            )),
+            Value::Array(v) => {
+                let items: Result<Vec<_>, _> = v
+                    .iter()
+                    .map(MeasurementResultsGroupCbor::try_from)
+                    .collect();
+                Ok(MeasurementResultsGroupArrayCbor(items?))
+            }
             _ => Err("Failed to parse value as an array for EnvironmentGroupListCbor".to_string()),
         }
     }

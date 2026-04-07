@@ -41,6 +41,7 @@
 //! and CBOR-Selector is represented by the SelectorCbor enum.
 //!
 use alloc::boxed::Box;
+use alloc::format;
 use alloc::string::String;
 use alloc::{vec, vec::Vec};
 
@@ -106,14 +107,52 @@ pub enum SubmoduleCbor {
 }
 impl TryFrom<Value> for SubmoduleCbor {
     type Error = String;
-    fn try_from(_value: Value) -> Result<Self, Self::Error> {
-        todo!()
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match &value {
+            Value::Map(_) => {
+                // Claims-Set is a CBOR map; serialize the Value then deserialize as ClaimsSetClaimsCbor
+                let mut buf = vec![];
+                into_writer(&value, &mut buf)
+                    .map_err(|e| format!("Failed to serialize Value for ClaimsSet: {e}"))?;
+                let cs: ClaimsSetClaimsCbor = ciborium::de::from_reader(buf.as_slice())
+                    .map_err(|e| format!("Failed to deserialize ClaimsSet: {e}"))?;
+                Ok(SubmoduleCbor::ClaimsSet(Box::new(cs)))
+            }
+            Value::Text(s) => {
+                // JSON-Token-Inside-CBOR-Token = tstr
+                Ok(SubmoduleCbor::SelectorCbor(
+                    SelectorCbor::JsonTokenInsideCborToken(s.clone()),
+                ))
+            }
+            Value::Bytes(b) => {
+                // CBOR-Token-Inside-CBOR-Token = bstr .cbor $EAT-CBOR-Tagged-Token
+                Ok(SubmoduleCbor::SelectorCbor(
+                    SelectorCbor::CborTokenInsideCborToken(b.clone()),
+                ))
+            }
+            Value::Array(_) => {
+                // Detached-Submodule-Digest is an array
+                let mut buf = vec![];
+                into_writer(&value, &mut buf).map_err(|e| {
+                    format!("Failed to serialize Value for DetachedSubmoduleDigest: {e}")
+                })?;
+                let dsd: DetachedSubmoduleDigestCbor = ciborium::de::from_reader(buf.as_slice())
+                    .map_err(|e| format!("Failed to deserialize DetachedSubmoduleDigest: {e}"))?;
+                Ok(SubmoduleCbor::SelectorCbor(
+                    SelectorCbor::DetachedSubmoduleDigest(dsd),
+                ))
+            }
+            _ => Err(format!(
+                "Unexpected CBOR type for SubmoduleCbor: {:?}",
+                value
+            )),
+        }
     }
 }
 impl TryFrom<&Value> for SubmoduleCbor {
     type Error = String;
-    fn try_from(_value: &Value) -> Result<Self, Self::Error> {
-        todo!()
+    fn try_from(value: &Value) -> Result<Self, Self::Error> {
+        value.clone().try_into()
     }
 }
 impl TryFrom<Submodule> for SubmoduleCbor {
@@ -121,40 +160,33 @@ impl TryFrom<Submodule> for SubmoduleCbor {
     fn try_from(value: Submodule) -> Result<Self, Self::Error> {
         match value {
             Submodule::ClaimsSet(b) => {
-                let cs = *b;
-                //todo unwrap
-                let cs_cbor: ClaimsSetClaimsCbor = cs.try_into().unwrap();
+                let cs_cbor: ClaimsSetClaimsCbor = (*b).try_into()?;
                 Ok(SubmoduleCbor::ClaimsSet(Box::new(cs_cbor)))
             }
-            Submodule::JsonSelector(js) => {
-                //todo key off type field instead?
-                match &js.nested_token {
-                    JsonSelectorValue::JwtMessage(v) => Ok(SubmoduleCbor::SelectorCbor(
-                        SelectorCbor::JsonTokenInsideCborToken(v.clone()),
-                    )),
-                    JsonSelectorValue::CborTokenInsideJsonToken(v) => {
-                        //todo unwrap
-                        let b = STANDARD.decode(v).unwrap();
-                        Ok(SubmoduleCbor::SelectorCbor(
-                            SelectorCbor::CborTokenInsideCborToken(b),
-                        ))
-                    }
-                    JsonSelectorValue::DetachedEatBundle(deb) => {
-                        let mut encoded_token = vec![];
-                        // todo error handling
-                        let _ = into_writer(&deb, &mut encoded_token);
-                        Ok(SubmoduleCbor::SelectorCbor(
-                            SelectorCbor::CborTokenInsideCborToken(encoded_token),
-                        ))
-                    }
-                    JsonSelectorValue::DetachedSubmoduleDigest(v) => {
-                        //todo unwrap
-                        Ok(SubmoduleCbor::SelectorCbor(
-                            SelectorCbor::DetachedSubmoduleDigest(v.try_into().unwrap()),
-                        ))
-                    }
+            Submodule::JsonSelector(js) => match &js.nested_token {
+                JsonSelectorValue::JwtMessage(v) => Ok(SubmoduleCbor::SelectorCbor(
+                    SelectorCbor::JsonTokenInsideCborToken(v.clone()),
+                )),
+                JsonSelectorValue::CborTokenInsideJsonToken(v) => {
+                    let b = STANDARD
+                        .decode(v)
+                        .map_err(|e| format!("Failed to decode base64: {e}"))?;
+                    Ok(SubmoduleCbor::SelectorCbor(
+                        SelectorCbor::CborTokenInsideCborToken(b),
+                    ))
                 }
-            }
+                JsonSelectorValue::DetachedEatBundle(deb) => {
+                    let mut encoded_token = vec![];
+                    into_writer(&deb, &mut encoded_token)
+                        .map_err(|e| format!("Failed to serialize DetachedEatBundle: {e}"))?;
+                    Ok(SubmoduleCbor::SelectorCbor(
+                        SelectorCbor::CborTokenInsideCborToken(encoded_token),
+                    ))
+                }
+                JsonSelectorValue::DetachedSubmoduleDigest(v) => Ok(SubmoduleCbor::SelectorCbor(
+                    SelectorCbor::DetachedSubmoduleDigest(v.try_into()?),
+                )),
+            },
         }
     }
 }
@@ -163,40 +195,33 @@ impl TryFrom<&Submodule> for SubmoduleCbor {
     fn try_from(value: &Submodule) -> Result<Self, Self::Error> {
         match value {
             Submodule::ClaimsSet(b) => {
-                let cs = &**b;
-                //todo unwrap
-                let cs_cbor: ClaimsSetClaimsCbor = cs.try_into().unwrap();
+                let cs_cbor: ClaimsSetClaimsCbor = (&**b).try_into()?;
                 Ok(SubmoduleCbor::ClaimsSet(Box::new(cs_cbor)))
             }
-            Submodule::JsonSelector(js) => {
-                //todo key off type field instead?
-                match &js.nested_token {
-                    JsonSelectorValue::JwtMessage(v) => Ok(SubmoduleCbor::SelectorCbor(
-                        SelectorCbor::JsonTokenInsideCborToken(v.clone()),
-                    )),
-                    JsonSelectorValue::CborTokenInsideJsonToken(v) => {
-                        //todo unwrap
-                        let b = STANDARD.decode(v).unwrap();
-                        Ok(SubmoduleCbor::SelectorCbor(
-                            SelectorCbor::CborTokenInsideCborToken(b),
-                        ))
-                    }
-                    JsonSelectorValue::DetachedEatBundle(deb) => {
-                        let mut encoded_token = vec![];
-                        // todo error handling
-                        let _ = into_writer(&deb, &mut encoded_token);
-                        Ok(SubmoduleCbor::SelectorCbor(
-                            SelectorCbor::CborTokenInsideCborToken(encoded_token),
-                        ))
-                    }
-                    JsonSelectorValue::DetachedSubmoduleDigest(v) => {
-                        //todo unwrap
-                        Ok(SubmoduleCbor::SelectorCbor(
-                            SelectorCbor::DetachedSubmoduleDigest(v.try_into().unwrap()),
-                        ))
-                    }
+            Submodule::JsonSelector(js) => match &js.nested_token {
+                JsonSelectorValue::JwtMessage(v) => Ok(SubmoduleCbor::SelectorCbor(
+                    SelectorCbor::JsonTokenInsideCborToken(v.clone()),
+                )),
+                JsonSelectorValue::CborTokenInsideJsonToken(v) => {
+                    let b = STANDARD
+                        .decode(v)
+                        .map_err(|e| format!("Failed to decode base64: {e}"))?;
+                    Ok(SubmoduleCbor::SelectorCbor(
+                        SelectorCbor::CborTokenInsideCborToken(b),
+                    ))
                 }
-            }
+                JsonSelectorValue::DetachedEatBundle(deb) => {
+                    let mut encoded_token = vec![];
+                    into_writer(&deb, &mut encoded_token)
+                        .map_err(|e| format!("Failed to serialize DetachedEatBundle: {e}"))?;
+                    Ok(SubmoduleCbor::SelectorCbor(
+                        SelectorCbor::CborTokenInsideCborToken(encoded_token),
+                    ))
+                }
+                JsonSelectorValue::DetachedSubmoduleDigest(v) => Ok(SubmoduleCbor::SelectorCbor(
+                    SelectorCbor::DetachedSubmoduleDigest(v.try_into()?),
+                )),
+            },
         }
     }
 }

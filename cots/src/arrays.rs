@@ -15,6 +15,10 @@ use crate::maps::*;
 use cbor_derive::StructToArray;
 
 // concise-ta-stores = [+ concise-ta-store-map]
+
+/// JSON encoding/decoding of `concise-ta-stores`, a list of Concise TA Store maps.
+///
+/// Use [ConciseTaStoresCbor] for CBOR-encoded Concise TA Stores.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ConciseTaStores(pub Vec<ConciseTaStoreMap>);
@@ -50,6 +54,9 @@ impl TryFrom<&ConciseTaStoresCbor> for ConciseTaStores {
     }
 }
 
+/// CBOR encoding/decoding of `concise-ta-stores`, a list of Concise TA Store maps.
+///
+/// Use [ConciseTaStores] for JSON-encoded Concise TA Stores.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ConciseTaStoresCbor(pub Vec<ConciseTaStoreMapCbor>);
@@ -86,24 +93,32 @@ impl TryFrom<&ConciseTaStores> for ConciseTaStoresCbor {
 }
 
 // environment-group-list = [* environment-group-list-map]
+
+/// JSON encoding/decoding of `environment-group-list` from the CoTS specification.
+///
+/// Use [EnvironmentGroupListCbor] for CBOR-encoded Concise TA Stores.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct EnvironmentGroupList(pub Vec<EnvironmentGroupListMap>);
 
+/// CBOR encoding/decoding of `environment-group-list` from the CoTS specification.
+///
+/// Use [EnvironmentGroupList] for JSON-encoded Concise TA Stores.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct EnvironmentGroupListCbor(pub Vec<EnvironmentGroupListMapCbor>);
 
-// todo closure error handling
 impl TryFrom<&Value> for EnvironmentGroupListCbor {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Array(v) => Ok(EnvironmentGroupListCbor(
-                v.iter()
-                    .map(|m| EnvironmentGroupListMapCbor::try_from(m).unwrap())
-                    .collect(),
-            )),
+            Value::Array(v) => {
+                let items: Result<Vec<_>, _> = v
+                    .iter()
+                    .map(EnvironmentGroupListMapCbor::try_from)
+                    .collect();
+                Ok(EnvironmentGroupListCbor(items?))
+            }
             _ => Err("Failed to parse value as an array for EnvironmentGroupListCbor".to_string()),
         }
     }
@@ -146,6 +161,10 @@ impl TryFrom<&EnvironmentGroupListCbor> for EnvironmentGroupList {
 //   format => $pkix-ta-type
 //   data => bstr
 // ]
+
+/// Represents a `trust-anchor` array from the CoTS specification.
+///
+/// Contains a PKIX trust anchor format indicator and the raw trust anchor data.
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct TrustAnchor {

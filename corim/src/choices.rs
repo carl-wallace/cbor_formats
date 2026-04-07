@@ -23,13 +23,13 @@ pub struct TaggedCoswid(pub Required<ConciseSwidTag, 505>);
 impl TryFrom<TaggedCoswidCbor> for TaggedCoswid {
     type Error = String;
     fn try_from(value: TaggedCoswidCbor) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.0.0.try_into().unwrap())))
+        Ok(Self(Required(value.0.0.try_into()?)))
     }
 }
 impl TryFrom<&TaggedCoswidCbor> for TaggedCoswid {
     type Error = String;
     fn try_from(value: &TaggedCoswidCbor) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.clone().0.0.try_into().unwrap())))
+        Ok(Self(Required(value.clone().0.0.try_into()?)))
     }
 }
 
@@ -40,13 +40,13 @@ pub struct TaggedComid(pub Required<ConciseMidTag, 506>);
 impl TryFrom<TaggedComidCbor> for TaggedComid {
     type Error = String;
     fn try_from(value: TaggedComidCbor) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.0.0.try_into().unwrap())))
+        Ok(Self(Required(value.0.0.try_into()?)))
     }
 }
 impl TryFrom<&TaggedComidCbor> for TaggedComid {
     type Error = String;
     fn try_from(value: &TaggedComidCbor) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.0.0.clone().try_into().unwrap())))
+        Ok(Self(Required(value.0.0.clone().try_into()?)))
     }
 }
 
@@ -57,13 +57,13 @@ pub struct TaggedCoswidCbor(pub Required<ConciseSwidTagCbor, 505>);
 impl TryFrom<TaggedCoswid> for TaggedCoswidCbor {
     type Error = String;
     fn try_from(value: TaggedCoswid) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.0.0.try_into().unwrap())))
+        Ok(Self(Required(value.0.0.try_into()?)))
     }
 }
 impl TryFrom<&TaggedCoswid> for TaggedCoswidCbor {
     type Error = String;
     fn try_from(value: &TaggedCoswid) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.0.0.clone().try_into().unwrap())))
+        Ok(Self(Required(value.0.0.clone().try_into()?)))
     }
 }
 
@@ -71,8 +71,13 @@ impl TryFrom<Value> for TaggedCoswidCbor {
     type Error = String;
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Tag(505, b) => Ok(Self(Required((*b).as_map().unwrap().try_into().unwrap()))),
-            _ => Err("Failed to parse value as TaggedComidCbor".to_string()),
+            Value::Tag(505, b) => {
+                let m = (*b).as_map().ok_or_else(|| {
+                    "Expected map inside tag 505 for TaggedCoswidCbor".to_string()
+                })?;
+                Ok(Self(Required(m.try_into()?)))
+            }
+            _ => Err("Failed to parse value as TaggedCoswidCbor".to_string()),
         }
     }
 }
@@ -80,8 +85,13 @@ impl TryFrom<&Value> for TaggedCoswidCbor {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Tag(505, b) => Ok(Self(Required((*b).as_map().unwrap().try_into().unwrap()))),
-            _ => Err("Failed to parse value as TaggedComidCbor".to_string()),
+            Value::Tag(505, b) => {
+                let m = (*b).as_map().ok_or_else(|| {
+                    "Expected map inside tag 505 for TaggedCoswidCbor".to_string()
+                })?;
+                Ok(Self(Required(m.try_into()?)))
+            }
+            _ => Err("Failed to parse value as TaggedCoswidCbor".to_string()),
         }
     }
 }
@@ -93,13 +103,13 @@ pub struct TaggedComidCbor(pub Required<ConciseMidTagCbor, 506>);
 impl TryFrom<TaggedComid> for TaggedComidCbor {
     type Error = String;
     fn try_from(value: TaggedComid) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.0.0.try_into().unwrap())))
+        Ok(Self(Required(value.0.0.try_into()?)))
     }
 }
 impl TryFrom<&TaggedComid> for TaggedComidCbor {
     type Error = String;
     fn try_from(value: &TaggedComid) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.0.0.clone().try_into().unwrap())))
+        Ok(Self(Required(value.0.0.clone().try_into()?)))
     }
 }
 
@@ -107,7 +117,12 @@ impl TryFrom<Value> for TaggedComidCbor {
     type Error = String;
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Tag(506, b) => Ok(Self(Required((*b).as_map().unwrap().try_into().unwrap()))),
+            Value::Tag(506, b) => {
+                let m = (*b)
+                    .as_map()
+                    .ok_or_else(|| "Expected map inside tag 506 for TaggedComidCbor".to_string())?;
+                Ok(Self(Required(m.try_into()?)))
+            }
             _ => Err("Failed to parse value as TaggedComidCbor".to_string()),
         }
     }
@@ -116,7 +131,12 @@ impl TryFrom<&Value> for TaggedComidCbor {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Tag(506, b) => Ok(Self(Required((*b).as_map().unwrap().try_into().unwrap()))),
+            Value::Tag(506, b) => {
+                let m = (*b)
+                    .as_map()
+                    .ok_or_else(|| "Expected map inside tag 506 for TaggedComidCbor".to_string())?;
+                Ok(Self(Required(m.try_into()?)))
+            }
             _ => Err("Failed to parse value as TaggedComidCbor".to_string()),
         }
     }
@@ -259,6 +279,7 @@ impl TryFrom<&ClassIdTypeChoiceCbor> for ClassIdTypeChoice {
     }
 }
 
+/// CBOR-encodable counterpart of [`ClassIdTypeChoice`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -513,6 +534,7 @@ impl TryFrom<CorimRoleTypeChoiceCbor> for CorimRoleTypeChoice {
     }
 }
 
+/// CBOR-encodable counterpart of [`CorimRoleTypeChoice`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -593,6 +615,7 @@ impl TryFrom<&Value> for CorimRoleTypeChoiceCbor {
     }
 }
 
+/// CBOR-encodable enumeration of known `corim-role-type-choice` values.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr)]
 #[allow(missing_docs)]
 #[repr(i8)]
@@ -1010,6 +1033,7 @@ impl TryFrom<&Value> for MeasuredElementTypeChoice {
     }
 }
 
+/// CBOR-encodable counterpart of [`MeasuredElementTypeChoice`].
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -1175,6 +1199,7 @@ impl TryFrom<&Value> for ProfileTypeChoice {
     }
 }
 
+/// CBOR-encodable counterpart of [`ProfileTypeChoice`].
 //todo the untagged OID field was added to interop with corim repo artifacts (and it raises questions re: use of Tuple for extensibility)
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -1388,6 +1413,7 @@ impl TryFrom<&TagIdTypeChoiceCbor> for TagIdTypeChoice {
     }
 }
 
+/// CBOR-encodable counterpart of [`TagIdTypeChoice`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -1468,6 +1494,7 @@ pub enum TagRelTypeChoice {
     Extensions(i8),
 }
 
+/// Enumeration of known `tag-rel-type-choice` values (supplements, replaces).
 #[derive(Clone, Debug, Eq, PartialEq, Deserialize)]
 #[allow(missing_docs)]
 pub enum TagRelTypeChoiceKnown {

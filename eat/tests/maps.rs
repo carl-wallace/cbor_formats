@@ -1206,3 +1206,103 @@ fn submods_type_test() {
     let _ = into_writer(&csc_cbor, &mut encoded_token2);
     assert_eq!(encoded_token2, encoded_token);
 }
+
+#[test]
+fn submodule_cbor_try_from_value_test() {
+    use eat::cbor_specific::SelectorCbor;
+
+    // Test 1: Map Value → ClaimsSet
+    // Encode a simple ClaimsSetClaimsCbor with just iss set, then parse as Value, then try_from
+    let csc = ClaimsSetClaimsCbor {
+        iss: Some("test-issuer".to_string()),
+        sub: None,
+        aud: None,
+        exp: None,
+        nbf: None,
+        iat: None,
+        cti: None,
+        nonce: None,
+        boot_count: None,
+        boot_seed: None,
+        debug_status: None,
+        dloas: None,
+        hardware_model: None,
+        hardware_version: None,
+        intended_use: None,
+        location: None,
+        profile: None,
+        oem_boot: None,
+        sw_name: None,
+        sw_version: None,
+        ueid: None,
+        uptime: None,
+        manifests: None,
+        measurements: None,
+        measurement_results: None,
+        oemid: None,
+        sueids: None,
+        submods: None,
+        other: None,
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&csc, &mut buf);
+    let value: Value = from_reader(buf.as_slice()).unwrap();
+    assert!(matches!(&value, Value::Map(_)));
+    let sm: SubmoduleCbor = value.try_into().unwrap();
+    match &sm {
+        SubmoduleCbor::ClaimsSet(cs) => assert_eq!(cs.iss, Some("test-issuer".to_string())),
+        _ => panic!("Expected ClaimsSet variant"),
+    }
+
+    // Test 2: Text Value → JsonTokenInsideCborToken
+    let text_value = Value::Text("eyJhbGciOiJub25lIn0".to_string());
+    let sm: SubmoduleCbor = text_value.try_into().unwrap();
+    match &sm {
+        SubmoduleCbor::SelectorCbor(SelectorCbor::JsonTokenInsideCborToken(s)) => {
+            assert_eq!(s, "eyJhbGciOiJub25lIn0");
+        }
+        _ => panic!("Expected JsonTokenInsideCborToken variant"),
+    }
+
+    // Test 3: Bytes Value → CborTokenInsideCborToken
+    let bytes_value = Value::Bytes(vec![0xA1, 0x01, 0x02]);
+    let sm: SubmoduleCbor = bytes_value.try_into().unwrap();
+    match &sm {
+        SubmoduleCbor::SelectorCbor(SelectorCbor::CborTokenInsideCborToken(b)) => {
+            assert_eq!(b, &vec![0xA1, 0x01, 0x02]);
+        }
+        _ => panic!("Expected CborTokenInsideCborToken variant"),
+    }
+
+    // Test 4: Array Value → DetachedSubmoduleDigest
+    let dsd = DetachedSubmoduleDigestCbor {
+        hash_algorithm: common::TextOrInt::Int(1),
+        digest: vec![0xDE, 0xAD, 0xBE, 0xEF],
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&dsd, &mut buf);
+    let value: Value = from_reader(buf.as_slice()).unwrap();
+    assert!(matches!(&value, Value::Array(_)));
+    let sm: SubmoduleCbor = value.try_into().unwrap();
+    match &sm {
+        SubmoduleCbor::SelectorCbor(SelectorCbor::DetachedSubmoduleDigest(d)) => {
+            assert_eq!(d.digest, vec![0xDE, 0xAD, 0xBE, 0xEF]);
+        }
+        _ => panic!("Expected DetachedSubmoduleDigest variant"),
+    }
+
+    // Test 5: &Value variant
+    let text_value = Value::Text("test-jwt-token".to_string());
+    let sm: SubmoduleCbor = (&text_value).try_into().unwrap();
+    match &sm {
+        SubmoduleCbor::SelectorCbor(SelectorCbor::JsonTokenInsideCborToken(s)) => {
+            assert_eq!(s, "test-jwt-token");
+        }
+        _ => panic!("Expected JsonTokenInsideCborToken variant"),
+    }
+
+    // Test 6: Unsupported type returns error
+    let bad_value = Value::Bool(true);
+    let result: Result<SubmoduleCbor, String> = bad_value.try_into();
+    assert!(result.is_err());
+}

@@ -142,6 +142,10 @@ pub struct JsonSelector {
     pub nested_token: JsonSelectorValue,
 }
 
+/// Represents JSON-Selector values for use within a Detached-EAT-Bundle per RFC 9711.
+///
+/// Unlike [JsonSelectorValue], this excludes the `DetachedEatBundle` variant since a DEB
+/// cannot contain another DEB.
 #[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -180,6 +184,10 @@ impl<'de> serde::Deserialize<'de> for JsonSelectorForDebValue {
         }
     }
 }
+/// JSON-Selector variant for use within a Detached-EAT-Bundle per RFC 9711.
+///
+/// Similar to [JsonSelector] but uses [JsonSelectorForDebValue] to exclude the
+/// `DetachedEatBundle` option.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct SelectorForDeb {
@@ -190,6 +198,11 @@ pub struct SelectorForDeb {
 // $$Claims-Set-Claims //= (submods-label => { + text => Submodule })
 //
 // Submodule = Claims-Set / JSON-Selector
+
+/// Represents a JSON-encoded EAT Submodule as defined in RFC 9711 Section 4.2.18.
+///
+/// A Submodule is either a nested Claims-Set or a JSON-Selector. Use [SubmoduleCbor]
+/// for CBOR-encoded EATs.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -200,8 +213,8 @@ pub enum Submodule {
 }
 impl TryFrom<SubmoduleCbor> for Submodule {
     type Error = String;
-    fn try_from(_value: SubmoduleCbor) -> Result<Self, Self::Error> {
-        todo!()
+    fn try_from(value: SubmoduleCbor) -> Result<Self, Self::Error> {
+        (&value).try_into()
     }
 }
 impl TryFrom<&SubmoduleCbor> for Submodule {
@@ -210,8 +223,7 @@ impl TryFrom<&SubmoduleCbor> for Submodule {
         match value {
             SubmoduleCbor::ClaimsSet(b) => {
                 let cs: &ClaimsSetClaimsCbor = b.deref();
-                //todo unwrap
-                let cs_json: ClaimsSetClaims = cs.try_into().unwrap();
+                let cs_json: ClaimsSetClaims = cs.try_into()?;
                 Ok(Submodule::ClaimsSet(Box::new(cs_json)))
             }
             SubmoduleCbor::SelectorCbor(SelectorCbor::CborTokenInsideCborToken(b)) => {
@@ -229,12 +241,9 @@ impl TryFrom<&SubmoduleCbor> for Submodule {
                 Ok(Submodule::JsonSelector(js))
             }
             SubmoduleCbor::SelectorCbor(SelectorCbor::DetachedSubmoduleDigest(dsm)) => {
-                //todo unwrap
                 let js = JsonSelector {
                     token_type: JsonSelectorType::Bundle,
-                    nested_token: JsonSelectorValue::DetachedSubmoduleDigest(
-                        dsm.try_into().unwrap(),
-                    ),
+                    nested_token: JsonSelectorValue::DetachedSubmoduleDigest(dsm.try_into()?),
                 };
                 Ok(Submodule::JsonSelector(js))
             }

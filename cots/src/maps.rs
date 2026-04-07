@@ -55,7 +55,7 @@ pub struct AbbreviatedSwidTag {
     pub software_name: Option<String>,
     #[cbor(tag = "13", value = "Text")]
     pub software_version: Option<String>,
-    #[cbor(tag = "13")]
+    #[cbor(tag = "14")]
     pub version_scheme: Option<VersionScheme>,
     #[cbor(tag = "10", value = "Text")]
     pub media: Option<String>,
@@ -83,6 +83,9 @@ pub struct AbbreviatedSwidTag {
 //  tastore.tas => [ + trust-anchor ]
 //  ? tastore.cas => [ + tastore.pkix-cert-type ]
 // }
+/// Represents the `cas-and-tas-map` from the CoTS specification.
+///
+/// Contains required trust anchors and optional CA certificates for a Concise TA Store entry.
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct CasAndTasMap {
@@ -109,6 +112,9 @@ pub struct CasAndTasMap {
 //  ? tastore.excl_claims => [+ $$claims-set-claims]
 //  tastore.keys => cas-and-tas-map
 // }
+/// Represents the `concise-ta-store-map` from the CoTS specification.
+///
+/// Defines a trust anchor store entry with environments, purposes, permitted/excluded claims, and keys.
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ConciseTaStoreMap {
@@ -128,11 +134,15 @@ pub struct ConciseTaStoreMap {
     pub keys: CasAndTasMap,
 }
 
+/// Represents the `environment-group-list-map` from the CoTS specification.
+///
+/// ```text
 /// environment-group-list-map = {
 ///   ? environment-map => environment-map,
 ///   ? concise-swid-tag => abbreviated-swid-tag,
 ///   ? named-ta-store => named-ta-store,
 /// }
+/// ```
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct EnvironmentGroupListMap {

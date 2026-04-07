@@ -129,18 +129,29 @@ impl StructField {
         }
 
         if self.attrs.cbor.is_some() {
-            //todo error handling in closures
             if is_option_vec(&self.field_type) {
                 quote! {
-                    #field_ident: value.#field_ident.as_ref().map_or_else(|| None, |o| o.iter().map(|oo| Some(#try_from_type::try_from(oo).unwrap().clone())).collect()),
+                    #field_ident: match &value.#field_ident {
+                        Some(o) => {
+                            let items: Result<Vec<_>, String> = o.iter().map(|oo| #try_from_type::try_from(oo).map(|v| v.clone())).collect();
+                            Some(items?)
+                        }
+                        None => None,
+                    },
                 }
             } else if is_option(&self.field_type) {
                 quote! {
-                    #field_ident: value.#field_ident.as_ref().map_or_else(|| None, |o| Some(#try_from_type::try_from(o).unwrap().clone())),
+                    #field_ident: match &value.#field_ident {
+                        Some(o) => Some(#try_from_type::try_from(o)?.clone()),
+                        None => None,
+                    },
                 }
             } else if is_vec(&self.field_type) {
                 quote! {
-                    #field_ident: value.#field_ident.iter().map(|oo| #try_from_type::try_from(oo).unwrap().clone()).collect(),
+                    #field_ident: {
+                        let items: Result<Vec<_>, String> = value.#field_ident.iter().map(|oo| #try_from_type::try_from(oo).map(|v| v.clone())).collect();
+                        items?
+                    },
                 }
             } else {
                 quote! {
@@ -232,19 +243,24 @@ impl StructField {
                 },
             }
         } else if "Bytes" == self.attrs.value {
-            //todo error handling in closures
             if is_option {
                 quote! {
                     #field_ident: match m.get(&#t) {
-                        Some(v) => m.get(&#t).map(|m| m.as_bytes().unwrap().clone()),
+                        Some(v) => match v.as_bytes() {
+                            Some(b) => Some(b.clone()),
+                            None => return Err(format!("Failed to process {} as bytes", #field_ident_str))
+                        },
                         None => None
                     },
                 }
             } else {
                 quote! {
-                    #field_ident: match m.get(&#t).map(|m| m.as_bytes().unwrap().clone()) {
-                        Some(val) => val,
-                        None => return Err(format!("Failed to to process {}", #field_ident_str))
+                    #field_ident: match m.get(&#t) {
+                        Some(v) => match v.as_bytes() {
+                            Some(b) => b.clone(),
+                            None => return Err(format!("Failed to process {} as bytes", #field_ident_str))
+                        },
+                        None => return Err(format!("Failed to process {}", #field_ident_str))
                     },
                 }
             }
@@ -278,13 +294,15 @@ impl StructField {
                 }
             }
         } else if "Array" == self.attrs.value {
-            //todo error handling in closures
             if is_option {
                 quote! {
                     #field_ident: match m.get(&#t) {
-                        Some(v) => match m[&#t].as_array() {
-                            Some(a) => Some(a.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone()).unwrap()).collect()),
-                            None => return Err(format!("Failed to to process {} as an array: {:?}", #field_ident_str, m[&#t]))
+                        Some(v) => match v.as_array() {
+                            Some(a) => {
+                                let items: Result<Vec<_>, String> = a.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone())).collect();
+                                Some(items?)
+                            },
+                            None => return Err(format!("Failed to process {} as an array: {:?}", #field_ident_str, v))
                         },
                         None => None
                     },
@@ -292,8 +310,11 @@ impl StructField {
             } else {
                 quote! {
                     #field_ident: match m[&#t].as_array() {
-                        Some(a) => a.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone()).unwrap()).collect(),
-                        None => return Err(format!("Failed to to process {} as an array: {:?}", #field_ident_str, m[&#t]))
+                        Some(a) => {
+                            let items: Result<Vec<_>, String> = a.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone())).collect();
+                            items?
+                        },
+                        None => return Err(format!("Failed to process {} as an array: {:?}", #field_ident_str, m[&#t]))
                     },
                 }
             }
@@ -504,13 +525,15 @@ impl StructField {
                 }
             }
         } else if "Array" == self.attrs.value {
-            //todo error handling in closures
             if is_option {
                 quote! {
                     #field_ident: match v.get(#index){
                         Some(val) => {
                             match val.as_array(){
-                                Some(val) => Some(val.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone()).unwrap()).collect()),
+                                Some(val) => {
+                                    let items: Result<Vec<_>, String> = val.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone())).collect();
+                                    Some(items?)
+                                },
                                 None => return Err("".to_string())
                             }
                         },
@@ -520,7 +543,10 @@ impl StructField {
             } else {
                 quote! {
                     #field_ident: match v[#index].as_array(){
-                        Some(val) => val.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone()).unwrap()).collect(),
+                        Some(val) => {
+                            let items: Result<Vec<_>, String> = val.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone())).collect();
+                            items?
+                        },
                         None => return Err("".to_string())
                     },
                 }

@@ -10,12 +10,14 @@
 //     COSE_Encrypt_Tagged / COSE_Encrypt0_Tagged /
 //     COSE_Mac_Tagged / COSE_Mac0_Tagged
 
+use alloc::format;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
 use ciborium::value::Value;
 use serde::{Deserialize, Serialize};
 
-//todo enforce header_map or zero size
+use crate::maps::HeaderMapCbor;
+
 /// CBOR and JSON encoding/decoding of `empty_or_serialized_map`, see [COSE Section 3].
 ///
 /// ```text
@@ -45,14 +47,20 @@ impl TryFrom<&Value> for EmptyOrSerializedMap {
                 if v.is_empty() {
                     Ok(EmptyOrSerializedMap::Empty(v.clone()))
                 } else {
+                    // Validate that the bytes decode as a valid header_map
+                    let _: HeaderMapCbor =
+                        ciborium::de::from_reader(v.as_slice()).map_err(|e| {
+                            format!("SerializedMap bytes are not a valid header_map: {e}")
+                        })?;
                     Ok(EmptyOrSerializedMap::SerializedMap(v.clone()))
                 }
             }
-            _ => Err("".to_string()),
+            _ => Err("Expected bytes for empty_or_serialized_map".to_string()),
         }
     }
 }
 
+/// Context string identifying a `Signature` or `Signature1` operation, used in `Sig_structure` per RFC 9052 Section 4.4.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -80,6 +88,7 @@ impl TryFrom<&Value> for SignatureOrSignature1 {
     }
 }
 
+/// Context string for `Enc_structure`, identifying the encryption operation type per RFC 9052 Section 5.3.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -116,6 +125,7 @@ impl TryFrom<&Value> for EncStructureContext {
     }
 }
 
+/// Context string for `MAC_structure`, identifying the MAC operation type per RFC 9052 Section 6.3.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]

@@ -17,7 +17,6 @@ use cbor_derive::StructToMap;
 
 use common::{TextOrBinary, TextOrInt, Tuple, TupleCbor};
 
-// todo enforce presence of IV or Partial IV (but not both)
 /// CBOR and JSON encoding/decoding of `Generic_Headers`, see [COSE Section 3].
 ///
 /// ```text
@@ -54,6 +53,19 @@ pub struct HeaderMap {
     pub partial_iv: Option<Vec<u8>>,
     #[cbor(value = "Array", cbor = "true")]
     pub other: Option<Vec<Tuple>>,
+}
+
+impl HeaderMap {
+    /// Validates that at most one of `iv` (label 5) and `partial_iv` (label 6) is present,
+    /// per [RFC 9052 Section 3.1](https://datatracker.ietf.org/doc/html/rfc9052#section-3.1).
+    pub fn validate(&self) -> Result<(), String> {
+        if self.iv.is_some() && self.partial_iv.is_some() {
+            return Err(
+                "HeaderMap must not contain both IV (label 5) and Partial IV (label 6)".to_string(),
+            );
+        }
+        Ok(())
+    }
 }
 
 /// CBOR and JSON encoding/decoding of `COSE_Key`, see [COSE Section 7].

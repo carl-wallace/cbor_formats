@@ -13,12 +13,14 @@ pub mod tuple_map;
 
 pub use tuple::*;
 
+use alloc::format;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
 use ciborium::tag::Required;
 use ciborium::value::{Integer, Value};
 use serde::{Deserialize, Serialize};
 
+/// Wrapper enum for a CBOR byte string value.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -140,6 +142,7 @@ pub type DigestsType = Vec<arrays::HashEntry>;
 /// [CoRIM Section 5.1.4.7]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.7
 pub type IntegrityRegisters = Vec<(TextOrInt, DigestsType)>;
 
+/// Represents a nonce as either a single byte string or an array of byte strings, each 8 to 64 bytes.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -147,36 +150,39 @@ pub enum NonceType {
     One(BytesType),
     More(Vec<BytesType>),
 }
+fn validate_nonce_size(b: &[u8]) -> Result<(), String> {
+    if b.len() < 8 || b.len() > 64 {
+        return Err(format!("Nonce must be 8..64 bytes, got {}", b.len()));
+    }
+    Ok(())
+}
+
 impl TryFrom<&Value> for NonceType {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Bytes(k) => Ok(Self::One(BytesType::Bytes(k.clone()))),
-            Value::Array(k) => Ok(Self::More(
-                k.iter()
-                    .map(|m| BytesType::Bytes(m.as_bytes().unwrap().clone()))
-                    .collect(),
-            )),
+            Value::Bytes(k) => {
+                validate_nonce_size(k)?;
+                Ok(Self::One(BytesType::Bytes(k.clone())))
+            }
+            Value::Array(k) => {
+                let mut items = Vec::new();
+                for m in k.iter() {
+                    match m.as_bytes() {
+                        Some(b) => {
+                            validate_nonce_size(b)?;
+                            items.push(BytesType::Bytes(b.clone()));
+                        }
+                        None => {
+                            return Err(
+                                "Failed to parse array element as bytes in NonceType".to_string()
+                            );
+                        }
+                    }
+                }
+                Ok(Self::More(items))
+            }
             _ => Err("Failed to parse value as a NonceType".to_string()),
-        }
-    }
-}
-
-//todo the corim code emits bytes, but the spec says int
-/// type to serve as target for TaggedIntType
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-#[allow(missing_docs)]
-pub enum IntType {
-    #[serde(with = "serde_bytes")]
-    Int(Vec<u8>),
-}
-impl TryFrom<&Value> for IntType {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Bytes(k) => Ok(Self::Int(k.clone())),
-            _ => Err("Failed to parse value as an IntType".to_string()),
         }
     }
 }
@@ -208,7 +214,7 @@ pub type TaggedPkixBase64CertType = Required<String, 555>;
 /// [CoRIM Section 5.1.4.6]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.6
 pub type TaggedPkixBase64CertPathType = Required<String, 556>;
 
-/// ueid-type = bytes .size 33
+/// ueid-type = bstr .size (7..33)
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -220,7 +226,15 @@ impl TryFrom<&Value> for UeidType {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Bytes(k) => Ok(Self::Ueid(k.clone())),
+            Value::Bytes(k) => {
+                if k.len() < 7 || k.len() > 33 {
+                    return Err(alloc::format!(
+                        "UeidType must be 7-33 bytes, got {}",
+                        k.len()
+                    ));
+                }
+                Ok(Self::Ueid(k.clone()))
+            }
             _ => Err("Failed to parse value as a UeidType".to_string()),
         }
     }
@@ -252,10 +266,10 @@ pub enum OidType {
 /// [CoRIM Section 7.6]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-7.6
 pub type TaggedOidTypeCbor = Required<OidType, 111>;
 
+/// Alias for [`OidType`] used in non-CBOR (JSON) contexts where the tag is not applied.
 #[allow(missing_docs)]
 pub type TaggedOidType = OidType;
 
-//todo size limit
 /// uuid-type = bytes .size 16
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -268,7 +282,15 @@ impl TryFrom<&Value> for UuidType {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Bytes(k) => Ok(Self::Uuid(k.clone())),
+            Value::Bytes(k) => {
+                if k.len() != 16 {
+                    return Err(alloc::format!(
+                        "UuidType must be exactly 16 bytes, got {}",
+                        k.len()
+                    ));
+                }
+                Ok(Self::Uuid(k.clone()))
+            }
             _ => Err("Failed to parse value as a UuidType".to_string()),
         }
     }
@@ -284,9 +306,11 @@ impl TryFrom<&Value> for UuidType {
 pub type TaggedUuidType = Required<UuidType, 37>;
 
 //pub type TaggedUriType = Required<Uri, 32>;
+/// Alias for [`Uri`] used in non-CBOR (JSON) contexts where the tag is not applied.
 #[allow(missing_docs)]
 pub type TaggedUriType = Uri;
 
+/// CBOR-encoded URI wrapped with tag 32, as defined in RFC 7049.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -297,7 +321,10 @@ impl TryFrom<&Value> for TaggedUriTypeCbor {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Tag(32, k) => Ok(Self::U(Required(k.as_text().unwrap().to_string()))),
+            Value::Tag(32, k) => match k.as_text() {
+                Some(s) => Ok(Self::U(Required(s.to_string()))),
+                None => Err("Expected text value inside tag 32 for TaggedUriTypeCbor".to_string()),
+            },
             _ => Err("Failed to parse value as a TaggedUriTypeCbor".to_string()),
         }
     }
@@ -331,6 +358,7 @@ impl TryFrom<&TaggedUriTypeCbor> for String {
     }
 }
 
+/// A choice between a tagged URI or a tagged OID, used in non-CBOR (JSON) contexts.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -342,13 +370,20 @@ impl TryFrom<&Value> for OidOrUri {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Tag(32, k) => Ok(Self::U(k.as_text().unwrap().to_string())),
-            Value::Tag(111, k) => Ok(Self::O(OidType::Oid(k.as_bytes().unwrap().clone()))),
+            Value::Tag(32, k) => match k.as_text() {
+                Some(s) => Ok(Self::U(s.to_string())),
+                None => Err("Expected text value inside tag 32 for OidOrUri".to_string()),
+            },
+            Value::Tag(111, k) => match k.as_bytes() {
+                Some(b) => Ok(Self::O(OidType::Oid(b.clone()))),
+                None => Err("Expected bytes value inside tag 111 for OidOrUri".to_string()),
+            },
             _ => Err("Failed to parse value as a OidOrUri".to_string()),
         }
     }
 }
 
+/// CBOR-encoded choice between a tagged URI (tag 32) or a tagged OID (tag 111).
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -360,17 +395,22 @@ impl TryFrom<&Value> for OidOrUriCbor {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Tag(32, k) => Ok(Self::U(TaggedUriTypeCbor::U(Required(
-                k.as_text().unwrap().to_string(),
-            )))),
-            Value::Tag(111, k) => Ok(Self::O(TaggedOidTypeCbor {
-                0: OidType::Oid(k.as_bytes().unwrap().clone()),
-            })),
+            Value::Tag(32, k) => match k.as_text() {
+                Some(s) => Ok(Self::U(TaggedUriTypeCbor::U(Required(s.to_string())))),
+                None => Err("Expected text value inside tag 32 for OidOrUriCbor".to_string()),
+            },
+            Value::Tag(111, k) => match k.as_bytes() {
+                Some(b) => Ok(Self::O(TaggedOidTypeCbor {
+                    0: OidType::Oid(b.clone()),
+                })),
+                None => Err("Expected bytes value inside tag 111 for OidOrUriCbor".to_string()),
+            },
             _ => Err("Failed to parse value as a OidOrUriCbor".to_string()),
         }
     }
 }
 
+/// A base64-encoded PKIX value represented as a text string.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -401,9 +441,11 @@ impl TryFrom<Value> for PkixBase64Type {
 // ; is not allowed.
 // time-int = #6.1(int)
 //pub type time = Required<i64, 1>;
+/// Integer time value (`time-int`) used in non-CBOR (JSON) contexts where the tag is not applied.
 #[allow(missing_docs)]
 pub type Time = i64;
 
+/// CBOR-encoded integer time value wrapped with tag 1, as defined in `time-int = #6.1(int)`.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -414,9 +456,15 @@ impl TryFrom<&Value> for TimeCbor {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Tag(_i, k) => Ok(Self::T(Required(
-                k.as_integer().unwrap().try_into().unwrap(),
-            ))),
+            Value::Tag(_i, k) => {
+                let integer = k
+                    .as_integer()
+                    .ok_or_else(|| "Expected integer value inside tag for TimeCbor".to_string())?;
+                let val: i64 = integer
+                    .try_into()
+                    .map_err(|_| "Integer value out of range for TimeCbor".to_string())?;
+                Ok(Self::T(Required(val)))
+            }
             _ => Err("Failed to parse value as a TimeCbor".to_string()),
         }
     }
@@ -483,6 +531,7 @@ pub type TaggedSvn = Required<u64, 552>;
 /// [CoRIM Section 5.1.4.5.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5.4
 pub type TaggedMinSvn = Required<u64, 553>;
 
+/// A choice between a text string and a byte string value.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -513,6 +562,7 @@ impl TryFrom<Value> for TextOrBinary {
     }
 }
 
+/// A choice between a byte string value and CBOR null.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -543,6 +593,7 @@ impl TryFrom<Value> for BinaryOrNil {
     }
 }
 
+/// A PKIX certificate authority value represented as a byte string.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -569,6 +620,7 @@ impl TryFrom<Value> for PkixCa {
     }
 }
 
+/// A choice between a text string and an integer value.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -581,7 +633,11 @@ impl TryFrom<&Value> for TextOrInt {
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
             Value::Text(k) => Ok(Self::Text(k.clone())),
-            Value::Integer(k) => Ok(Self::Int(Integer::try_into(*k).unwrap())),
+            Value::Integer(k) => {
+                let val: i64 = Integer::try_into(*k)
+                    .map_err(|_| "Integer value out of range for TextOrInt".to_string())?;
+                Ok(Self::Int(val))
+            }
             _ => Err("Failed to parse value as a TextOrInt".to_string()),
         }
     }
@@ -591,7 +647,11 @@ impl TryFrom<Value> for TextOrInt {
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
             Value::Text(k) => Ok(Self::Text(k)),
-            Value::Integer(k) => Ok(Self::Int(Integer::try_into(k).unwrap())),
+            Value::Integer(k) => {
+                let val: i64 = Integer::try_into(k)
+                    .map_err(|_| "Integer value out of range for TextOrInt".to_string())?;
+                Ok(Self::Int(val))
+            }
             _ => Err("Failed to parse value as a TextOrInt".to_string()),
         }
     }

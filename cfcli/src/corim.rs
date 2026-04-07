@@ -18,9 +18,7 @@ pub fn corim_main(args: &CorimCommand) {
 }
 
 fn corim_create(args: &CorimCreateSubcommand) {
-    if args.template.is_none()
-        && (args.template_dir.is_none() || args.template_dir.as_ref().unwrap().is_empty())
-    {
+    if args.template.is_none() && args.template_dir.as_ref().is_none_or(|d| d.is_empty()) {
         println!("No templates supplied");
         return;
     }
@@ -141,10 +139,23 @@ fn corim_template_to_cbor(template_file: &String, output_dir: &Path) {
     };
 
     let output_path = Path::new(output_dir);
-    let mut output_pathbuf = output_path.join(template_filename.to_str().unwrap());
+    let filename_str = match template_filename.to_str() {
+        Some(s) => s,
+        None => {
+            println!("Failed to convert filename to string");
+            return;
+        }
+    };
+    let mut output_pathbuf = output_path.join(filename_str);
     output_pathbuf.set_extension("cbor");
 
-    let mut output_file = File::create(output_pathbuf).unwrap();
+    let mut output_file = match File::create(&output_pathbuf) {
+        Ok(f) => f,
+        Err(e) => {
+            println!("Failed to create output file {:?}: {}", output_pathbuf, e);
+            return;
+        }
+    };
     output_file
         .write_all(encoded_token.as_slice())
         .expect("Unable to write manifest file");

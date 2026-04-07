@@ -132,10 +132,11 @@ impl DeriveStructToOneOrMore {
                 fn try_from(value: #sname) -> Result<Self, Self::Error> {
                     match value {
                         #sname::One(v) => {
-                            Ok(Self::One(v.try_into().unwrap()))
+                            Ok(Self::One(v.try_into()?))
                         }
                         #sname::More(v) => {
-                            Ok(Self::More(v.iter().map(|m|m.try_into().unwrap()).collect()))
+                            let items: Result<Vec<_>, String> = v.iter().map(|m|m.try_into()).collect();
+                            Ok(Self::More(items?))
                         }
                     }
                 }
@@ -145,10 +146,11 @@ impl DeriveStructToOneOrMore {
                 fn try_from(value: &#sname) -> Result<Self, Self::Error> {
                     match value {
                         #sname::One(v) => {
-                            Ok(Self::One(v.try_into().unwrap()))
+                            Ok(Self::One(v.try_into()?))
                         }
                         #sname::More(v) => {
-                            Ok(Self::More(v.iter().map(|m|m.try_into().unwrap()).collect()))
+                            let items: Result<Vec<_>, String> = v.iter().map(|m|m.try_into()).collect();
+                            Ok(Self::More(items?))
                         }
                     }
                 }
@@ -158,9 +160,10 @@ impl DeriveStructToOneOrMore {
                 type Error = String;
                 fn try_from(value: Value) -> Result<Self, Self::Error> {
                     match value {
-                        Value::Map(m) => Ok(Self::One(#sname_base::try_from(m.to_vec()).unwrap())),
+                        Value::Map(m) => Ok(Self::One(#sname_base::try_from(m.to_vec())?)),
                         Value::Array(a) => {
-                            Ok(Self::More(a.iter().map(|v|#sname_base::try_from(v).unwrap()).collect()))
+                            let items: Result<Vec<_>, String> = a.iter().map(|v|#sname_base::try_from(v)).collect();
+                            Ok(Self::More(items?))
                         },
                         _ => Err("".to_string()),
                     }
@@ -170,9 +173,10 @@ impl DeriveStructToOneOrMore {
                 type Error = String;
                 fn try_from(value: &Value) -> Result<Self, Self::Error> {
                     match value {
-                        Value::Map(m) => Ok(Self::One(#sname_base::try_from(m.to_vec()).unwrap())),
+                        Value::Map(m) => Ok(Self::One(#sname_base::try_from(m.to_vec())?)),
                         Value::Array(a) => {
-                            Ok(Self::More(a.iter().map(|v|#sname_base::try_from(v).unwrap()).collect()))
+                            let items: Result<Vec<_>, String> = a.iter().map(|v|#sname_base::try_from(v)).collect();
+                            Ok(Self::More(items?))
                         },
                         _ => Err("".to_string()),
                     }
@@ -183,10 +187,11 @@ impl DeriveStructToOneOrMore {
                 fn try_from(value: #name) -> Result<Self, Self::Error> {
                     match value {
                         #name::One(v) => {
-                            Ok(Self::One(v.try_into().unwrap()))
+                            Ok(Self::One(v.try_into()?))
                         }
                         #name::More(v) => {
-                            Ok(Self::More(v.iter().map(|m|m.try_into().unwrap()).collect()))
+                            let items: Result<Vec<_>, String> = v.iter().map(|m|m.try_into()).collect();
+                            Ok(Self::More(items?))
                         }
                     }
                 }
@@ -196,10 +201,11 @@ impl DeriveStructToOneOrMore {
                 fn try_from(value: &#name) -> Result<Self, Self::Error> {
                     match value {
                         #name::One(v) => {
-                            Ok(Self::One(v.try_into().unwrap()))
+                            Ok(Self::One(v.try_into()?))
                         }
                         #name::More(v) => {
-                            Ok(Self::More(v.iter().map(|m|m.try_into().unwrap()).collect()))
+                            let items: Result<Vec<_>, String> = v.iter().map(|m|m.try_into()).collect();
+                            Ok(Self::More(items?))
                         }
                     }
                 }

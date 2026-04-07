@@ -11,6 +11,7 @@ use serde::de::Visitor;
 use serde::ser::Error as OtherError;
 use serde::{Deserialize, Serialize, de};
 
+/// A key-value pair represented as two CBOR `Value` items, used for generic tagged entries.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct Tuple {

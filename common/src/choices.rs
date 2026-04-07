@@ -89,6 +89,7 @@ impl TryFrom<&Value> for VersionScheme {
     }
 }
 
+/// Well-known version scheme identifiers as defined in the CoSWID/CoRIM specifications.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[allow(missing_docs)]
 #[repr(i64)]
@@ -124,6 +125,7 @@ impl TryFrom<&VersionSchemeKnownCbor> for VersionSchemeKnown {
     }
 }
 
+/// CBOR-encoded version scheme, supporting known schemes, text, or integer extensions.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 #[serde(untagged)]
@@ -191,6 +193,7 @@ impl TryFrom<&Value> for VersionSchemeCbor {
     }
 }
 
+/// CBOR-encoded well-known version scheme identifiers, mirroring [`VersionSchemeKnown`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[allow(missing_docs)]
 #[repr(i64)]

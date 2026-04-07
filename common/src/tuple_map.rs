@@ -11,6 +11,7 @@ use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize};
 use serde::{de::Error, de::Visitor};
 
+/// A collection of [`Tuple`] key-value pairs, representing a generic map structure.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct TupleMap {
@@ -26,49 +27,29 @@ pub struct TupleMapCbor {
 impl TryFrom<TupleMapCbor> for TupleMap {
     type Error = String;
     fn try_from(value: TupleMapCbor) -> Result<Self, Self::Error> {
-        Ok(TupleMap {
-            tuples: value
-                .tuples
-                .iter()
-                .map(|m| Tuple::try_from(m).unwrap())
-                .collect(),
-        })
+        let tuples: Result<Vec<_>, _> = value.tuples.iter().map(Tuple::try_from).collect();
+        Ok(TupleMap { tuples: tuples? })
     }
 }
 impl TryFrom<TupleMap> for TupleMapCbor {
     type Error = String;
     fn try_from(value: TupleMap) -> Result<Self, Self::Error> {
-        Ok(TupleMapCbor {
-            tuples: value
-                .tuples
-                .iter()
-                .map(|m| TupleCbor::try_from(m).unwrap())
-                .collect(),
-        })
+        let tuples: Result<Vec<_>, _> = value.tuples.iter().map(TupleCbor::try_from).collect();
+        Ok(TupleMapCbor { tuples: tuples? })
     }
 }
 impl TryFrom<&TupleMapCbor> for TupleMap {
     type Error = String;
     fn try_from(value: &TupleMapCbor) -> Result<Self, Self::Error> {
-        Ok(TupleMap {
-            tuples: value
-                .tuples
-                .iter()
-                .map(|m| Tuple::try_from(m).unwrap())
-                .collect(),
-        })
+        let tuples: Result<Vec<_>, _> = value.tuples.iter().map(Tuple::try_from).collect();
+        Ok(TupleMap { tuples: tuples? })
     }
 }
 impl TryFrom<&TupleMap> for TupleMapCbor {
     type Error = String;
     fn try_from(value: &TupleMap) -> Result<Self, Self::Error> {
-        Ok(TupleMapCbor {
-            tuples: value
-                .tuples
-                .iter()
-                .map(|m| TupleCbor::try_from(m).unwrap())
-                .collect(),
-        })
+        let tuples: Result<Vec<_>, _> = value.tuples.iter().map(TupleCbor::try_from).collect();
+        Ok(TupleMapCbor { tuples: tuples? })
     }
 }
 impl TryFrom<Value> for TupleMapCbor {
@@ -120,9 +101,8 @@ impl TryFrom<&TupleMapCbor> for Vec<(Value, Value)> {
 impl TryFrom<Vec<Value>> for TupleMapCbor {
     type Error = String;
     fn try_from(v: Vec<Value>) -> Result<Self, Self::Error> {
-        Ok(TupleMapCbor {
-            tuples: v.iter().map(|m| TupleCbor::try_from(m).unwrap()).collect(),
-        })
+        let tuples: Result<Vec<_>, _> = v.iter().map(TupleCbor::try_from).collect();
+        Ok(TupleMapCbor { tuples: tuples? })
     }
 }
 impl serde::Serialize for TupleMapCbor {
@@ -136,7 +116,9 @@ impl serde::Serialize for TupleMapCbor {
                 return Err(__S::Error::custom(e));
             }
         };
-        let mut m = __serializer.serialize_map(Some(v.len())).unwrap();
+        let mut m = __serializer.serialize_map(Some(v.len())).map_err(|e| {
+            __S::Error::custom(alloc::format!("Failed to start map serialization: {e}"))
+        })?;
         for i in &v {
             match TupleCbor::try_from(i.clone()) {
                 Ok(tmc) => {

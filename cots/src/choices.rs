@@ -16,6 +16,9 @@ use serde_repr::Serialize_repr;
 // tastore.pkix-cert-type = 0
 // tastore.pkix-tainfo-type = 1
 // tastore.pkix-spki-type = 2
+/// Represents the type of a PKIX trust anchor in a Concise TA Store.
+///
+/// Wraps the known variants defined by `$pkix-ta-type` in the CoTS specification.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -23,6 +26,7 @@ pub enum PkixTaType {
     Known(PkixTaTypeKnown),
 }
 
+/// Known PKIX trust anchor type values: certificate, TrustAnchorInfo, or SubjectPublicKeyInfo.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -70,6 +74,9 @@ impl TryFrom<&Value> for PkixTaType {
 // $tas-list-purpose /= "eat"
 // $tas-list-purpose /= "key-attestation"
 // $tas-list-purpose /= "certificate"
+/// Represents the intended purpose of a trust anchor store list in the CoTS specification.
+///
+/// Defined by `$tas-list-purpose` with values such as "cots", "corim", "eat", etc.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
