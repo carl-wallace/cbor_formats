@@ -3,7 +3,7 @@
 //! In order to support the submodules claim, the Entity Attestation Token (EAT) specification provides
 //! a set of CBOR-specific definitions and a set of JSON-specific definitions.
 //!
-//! The JSON-specific definitions from [Section 7.3.3](https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#name-json-specific-cddl) are below.
+//! The JSON-specific definitions from [Section 7.3.3](https://datatracker.ietf.org/doc/html/rfc9711#name-json-specific-cddl) are below.
 //!
 //! ```text
 //! $JSON-Selector-Value /= JWT-Message / CBOR-Token-Inside-JSON-Token / Detached-EAT-Bundle / Detached-Submodule-Digest
@@ -43,7 +43,7 @@ use crate::maps::{ClaimsSetClaims, ClaimsSetClaimsCbor};
 /// $JSON-Selector-Type /= "JWT" / "CBOR" / "BUNDLE" / "DIGEST"
 /// ```
 ///
-/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
+/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.18
 #[derive(
     Clone,
     Debug,
@@ -76,7 +76,7 @@ pub enum JsonSelectorType {
 ///                   Detached-Submodule-Digest
 /// ```
 ///
-/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
+/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.18
 #[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -133,7 +133,7 @@ impl<'de> serde::Deserialize<'de> for JsonSelectorValue {
 /// ```
 /// [SelectorForDeb] is used for DetachedEATBundles.
 ///
-/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
+/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.18
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct JsonSelector {

@@ -29,7 +29,7 @@ use common::{choices::*, *};
 /// Nested-Token = JSON-Selector
 /// ```
 ///
-/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
+/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.18
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct NestedToken(pub Box<SelectorForDeb>);
 impl TryFrom<NestedTokenCbor> for NestedToken {
@@ -121,7 +121,7 @@ impl TryFrom<&NestedTokenCbor> for NestedToken {
 /// ```text
 /// CBOR-Selector = CBOR-Nested-Token / Detached-Submodule-Digest
 /// ```
-/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
+/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.18
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct NestedTokenCbor(pub SelectorCbor);
 impl TryFrom<Value> for NestedTokenCbor {
@@ -182,7 +182,7 @@ impl TryFrom<&NestedToken> for NestedTokenCbor {
 /// ]
 /// ```
 ///
-/// [EAT Section 5]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-5
+/// [EAT Section 5]: https://datatracker.ietf.org/doc/html/rfc9711#section-5
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct WrappedClaimsSet(pub String);
 impl TryFrom<WrappedClaimsSetCbor> for WrappedClaimsSet {
@@ -215,7 +215,7 @@ impl TryFrom<&WrappedClaimsSetCbor> for WrappedClaimsSet {
 /// ]
 /// ```
 ///
-/// [EAT Section 5]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-5
+/// [EAT Section 5]: https://datatracker.ietf.org/doc/html/rfc9711#section-5
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct WrappedClaimsSetCbor(pub Vec<u8>);
 impl TryFrom<Value> for WrappedClaimsSetCbor {
@@ -268,7 +268,7 @@ impl TryFrom<&WrappedClaimsSet> for WrappedClaimsSetCbor {
 ///     }
 /// ]
 /// ```
-/// [EAT Section 5]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-5
+/// [EAT Section 5]: https://datatracker.ietf.org/doc/html/rfc9711#section-5
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct DetachedEatBundle {
@@ -288,7 +288,7 @@ pub struct DetachedEatBundle {
 ///    digest         : binary-data
 /// ]
 /// ```
-/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
+/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.18
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct DetachedSubmoduleDigest {
@@ -308,7 +308,7 @@ pub struct DetachedSubmoduleDigest {
 ///     ? dloa_application_label: text
 /// ]
 /// ```
-/// [EAT Section 4.2.14]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.14
+/// [EAT Section 4.2.14]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.14
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct DloaType {
@@ -330,7 +330,7 @@ pub struct DloaType {
 ///     ? scheme:  $version-scheme
 /// ]
 /// ```
-/// [EAT Section 4.2.5]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.5
+/// [EAT Section 4.2.5]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.5
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct HardwareVersionType {
@@ -346,11 +346,11 @@ pub struct HardwareVersionType {
 ///
 /// ```text
 /// individual-result = [
-///     results-id: tstr / binary-data,
-///     result:     result-type,
+///     result-id: tstr / binary-data,
+///     result:    result-type,
 /// ]
 /// ```
-/// [EAT Section 4.2.17]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.17
+/// [EAT Section 4.2.17]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.17
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct IndividualResult {
@@ -365,7 +365,7 @@ pub struct IndividualResult {
 /// ```text
 /// manifests-type = [+ manifest-format]
 /// ```
-/// [EAT Section 4.2.15]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.15
+/// [EAT Section 4.2.15]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.15
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ManifestsType(pub Vec<ManifestFormat>);
@@ -377,7 +377,7 @@ pub struct ManifestsType(pub Vec<ManifestFormat>);
 /// ```text
 /// manifests-type = [+ manifest-format]
 /// ```
-/// [EAT Section 4.2.15]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.15
+/// [EAT Section 4.2.15]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.15
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ManifestsTypeCbor(pub Vec<ManifestFormatCbor>);
@@ -446,7 +446,7 @@ impl TryFrom<&ManifestsTypeCbor> for ManifestsType {
 ///                         $manifest-body-cbor >
 /// ]
 /// ```
-/// [EAT Section 4.2.15]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.15
+/// [EAT Section 4.2.15]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.15
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ManifestFormat {
@@ -462,7 +462,7 @@ pub struct ManifestFormat {
 /// ```text
 /// measurements-type = [+ measurements-format]
 /// ```
-/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.16
+/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.16
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct MeasurementsType(pub Vec<MeasurementsFormat>);
@@ -474,7 +474,7 @@ pub struct MeasurementsType(pub Vec<MeasurementsFormat>);
 /// ```text
 /// measurements-type = [+ measurements-format]
 /// ```
-/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.16
+/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.16
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct MeasurementsTypeCbor(pub Vec<MeasurementsFormatCbor>);
@@ -540,7 +540,7 @@ impl TryFrom<&MeasurementsTypeCbor> for MeasurementsType {
 ///     content-format: $measurements-body-cbor
 /// ]
 /// ```
-/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.16
+/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.16
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct MeasurementsFormat {
@@ -556,7 +556,7 @@ pub struct MeasurementsFormat {
 /// ```text
 /// measurements-type = [+ measurements-format]
 /// ```
-/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.16
+/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.16
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct MeasurementResultsGroupArray(pub Vec<MeasurementResultsGroup>);
@@ -568,7 +568,7 @@ pub struct MeasurementResultsGroupArray(pub Vec<MeasurementResultsGroup>);
 /// ```text
 /// measurements-type = [+ measurements-format]
 /// ```
-/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.16
+/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.16
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct MeasurementResultsGroupArrayCbor(pub Vec<MeasurementResultsGroupCbor>);
@@ -637,7 +637,7 @@ impl TryFrom<&MeasurementResultsGroupArrayCbor> for MeasurementResultsGroupArray
 ///     measurement-results: [ + individual-result ]
 /// ]
 /// ```
-/// [EAT Section 4.2.17]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.17
+/// [EAT Section 4.2.17]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.17
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct MeasurementResultsGroup {
@@ -657,7 +657,7 @@ pub struct MeasurementResultsGroup {
 ///     ? scheme:  $version-scheme ; As defined by CoSWID
 /// ]
 /// ```
-/// [EAT Section 4.2.7]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.7
+/// [EAT Section 4.2.7]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.7
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct SwVersionType {

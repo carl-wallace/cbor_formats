@@ -352,7 +352,7 @@ fn nonce_test() {
 
 #[test]
 fn boot_count_test() {
-    let valid = vec![hex!("A119011404").to_vec()];
+    let valid = vec![hex!("A119010B04").to_vec()];
     for v in valid {
         let csc_d: ClaimsSetClaimsCbor = from_reader(v.clone().as_slice()).unwrap();
         let mut encoded_token = vec![];
@@ -367,8 +367,8 @@ fn boot_count_test() {
     }
 
     let invalid = vec![
-        hex!("8119011404").to_vec(), // map not array
-        hex!("A1190114").to_vec(),   // value too short
+        hex!("8119010B04").to_vec(), // map not array
+        hex!("A119010B").to_vec(),   // value too short
     ];
     for v in invalid {
         let csc_d: Result<ClaimsSetClaimsCbor, _> = from_reader(v.clone().as_slice());
@@ -422,7 +422,7 @@ fn debug_status_test() {
         intended_use: None,
         location: None,
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
         ueid: None,
@@ -498,7 +498,7 @@ fn dloas_test() {
         intended_use: None,
         location: None,
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
         ueid: None,
@@ -518,9 +518,9 @@ fn dloas_test() {
         buffer_to_hex(encoded_token.as_slice())
     );
     let valid = vec![
-        hex!("A119010E8183695265676973747261726E506C6174666F726D204C6162656C714170706C69636174696F6E204C6162656C").to_vec(),
-        hex!("A119010E8182695265676973747261726E506C6174666F726D204C6162656C").to_vec(),
-        hex!("A119010E8283695265676973747261726E506C6174666F726D204C6162656C714170706C69636174696F6E204C6162656C826A526567697374726172326F506C6174666F726D204C6162656C32").to_vec(),
+        hex!("A119010D8183695265676973747261726E506C6174666F726D204C6162656C714170706C69636174696F6E204C6162656C").to_vec(),
+        hex!("A119010D8182695265676973747261726E506C6174666F726D204C6162656C").to_vec(),
+        hex!("A119010D8283695265676973747261726E506C6174666F726D204C6162656C714170706C69636174696F6E204C6162656C826A526567697374726172326F506C6174666F726D204C6162656C32").to_vec(),
     ];
     assert_eq!(encoded_token, valid[0]);
     for v in valid {
@@ -537,7 +537,7 @@ fn dloas_test() {
     }
 
     let invalid = vec![
-        hex!("8119010E8183695265676973747261726E506C6174666F726D204C6162656C714170706C69636174696F6E204C6162656C").to_vec(), // map not array
+        hex!("8119010D8183695265676973747261726E506C6174666F726D204C6162656C714170706C69636174696F6E204C6162656C").to_vec(), // map not array
     ];
     for v in invalid {
         let csc_d: Result<ClaimsSetClaimsCbor, _> = from_reader(v.clone().as_slice());
@@ -609,11 +609,11 @@ fn hardware_version_test() {
 #[test]
 fn intended_use_test() {
     let valid = vec![
-        hex!("A119010D01").to_vec(),
-        hex!("A119010D02").to_vec(),
-        hex!("A119010D03").to_vec(),
-        hex!("A119010D04").to_vec(),
-        hex!("A119010D05").to_vec(),
+        hex!("A119011301").to_vec(),
+        hex!("A119011302").to_vec(),
+        hex!("A119011303").to_vec(),
+        hex!("A119011304").to_vec(),
+        hex!("A119011305").to_vec(),
     ];
 
     for v in valid {
@@ -630,9 +630,9 @@ fn intended_use_test() {
     }
 
     let invalid = vec![
-        hex!("8119010D01").to_vec(), // map not array
-        hex!("A119010D").to_vec(),   // value too short
-        hex!("A119010D00").to_vec(), // unknown value
+        hex!("8119011301").to_vec(), // map not array
+        hex!("A1190113").to_vec(),   // value too short
+        hex!("A119011300").to_vec(), // unknown value
     ];
     for v in invalid {
         let csc_d: Result<ClaimsSetClaimsCbor, _> = from_reader(v.clone().as_slice());
@@ -717,7 +717,7 @@ fn profile_test() {
 }
 
 #[test]
-fn secboot_test() {
+fn oem_boot_test() {
     let valid = vec![hex!("A1190106F5").to_vec(), hex!("A1190106F4").to_vec()];
     for v in valid {
         let csc_d: ClaimsSetClaimsCbor = from_reader(v.clone().as_slice()).unwrap();
@@ -746,7 +746,7 @@ fn secboot_test() {
 
 #[test]
 fn sw_name_test() {
-    let valid = vec![hex!("A119010F6C537472696E672056616C7565").to_vec()];
+    let valid = vec![hex!("A119010E6C537472696E672056616C7565").to_vec()];
     for v in valid {
         let csc_d: ClaimsSetClaimsCbor = from_reader(v.clone().as_slice()).unwrap();
         let mut encoded_token = vec![];
@@ -761,8 +761,8 @@ fn sw_name_test() {
     }
 
     let invalid = vec![
-        hex!("8119010F6C537472696E672056616C7565").to_vec(), // map not array
-        hex!("A119010F6C537472696E672056616C75").to_vec(),   // value too short
+        hex!("8119010E6C537472696E672056616C7565").to_vec(), // map not array
+        hex!("A119010E6C537472696E672056616C75").to_vec(),   // value too short
     ];
     for v in invalid {
         let csc_d: Result<ClaimsSetClaimsCbor, _> = from_reader(v.clone().as_slice());
@@ -773,14 +773,14 @@ fn sw_name_test() {
 #[test]
 fn sw_version_test() {
     let valid = vec![
-        hex!("A11901108265312E312E3101").to_vec(),
-        hex!("A11901108165312E312E31").to_vec(),
-        hex!("A11901108266312E312E316102").to_vec(),
-        hex!("A11901108268414243312E312E3103").to_vec(),
-        hex!("A119011082613104").to_vec(),
-        hex!("A11901108265312E322E33194000").to_vec(),
-        hex!("A11901108263466F6F63426172").to_vec(),
-        hex!("A11901108263466F6F1863").to_vec(),
+        hex!("A119010F8265312E312E3101").to_vec(),
+        hex!("A119010F8165312E312E31").to_vec(),
+        hex!("A119010F8266312E312E316102").to_vec(),
+        hex!("A119010F8268414243312E312E3103").to_vec(),
+        hex!("A119010F82613104").to_vec(),
+        hex!("A119010F8265312E322E33194000").to_vec(),
+        hex!("A119010F8263466F6F63426172").to_vec(),
+        hex!("A119010F8263466F6F1863").to_vec(),
     ];
     for v in valid {
         let csc_d: ClaimsSetClaimsCbor = from_reader(v.clone().as_slice()).unwrap();
@@ -796,8 +796,8 @@ fn sw_version_test() {
     }
 
     let invalid = vec![
-        hex!("811901108265312E312E3101").to_vec(), // map not array
-        hex!("A11901108165312E312E").to_vec(),     // value too short
+        hex!("8119010F8265312E312E3101").to_vec(), // map not array
+        hex!("A119010F8165312E312E").to_vec(),     // value too short
     ];
     for v in invalid {
         let csc_d: Result<ClaimsSetClaimsCbor, _> = from_reader(v.clone().as_slice());
@@ -825,7 +825,7 @@ fn ueid_test() {
         intended_use: None,
         location: None,
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
         ueid: Some(UeidType::Ueid(hex!("02deadbeefdead").to_vec())),
@@ -871,7 +871,7 @@ fn ueid_test() {
 
 #[test]
 fn uptime_test() {
-    let valid = vec![hex!("A119010B04").to_vec()];
+    let valid = vec![hex!("A119010504").to_vec()];
     for v in valid {
         let csc_d: ClaimsSetClaimsCbor = from_reader(v.clone().as_slice()).unwrap();
         let mut encoded_token = vec![];
@@ -886,8 +886,8 @@ fn uptime_test() {
     }
 
     let invalid = vec![
-        hex!("8119010B04").to_vec(), // map not array
-        hex!("A119010B").to_vec(),   // value too short
+        hex!("8119010504").to_vec(), // map not array
+        hex!("A1190105").to_vec(),   // value too short
     ];
     for v in invalid {
         let csc_d: Result<ClaimsSetClaimsCbor, _> = from_reader(v.clone().as_slice());
@@ -930,7 +930,7 @@ fn location_type_test() {
             age: Some(7),
         }),
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
         ueid: None,
@@ -985,7 +985,7 @@ fn measurement_results_test() {
         intended_use: None,
         location: None,
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
         ueid: None,
@@ -1037,7 +1037,7 @@ fn oemid_test() {
             intended_use: None,
             location: None,
             profile: None,
-            secure_boot: None,
+            oem_boot: None,
             sw_name: None,
             sw_version: None,
             ueid: None,
@@ -1093,7 +1093,7 @@ fn sueids_type_test() {
         intended_use: None,
         location: None,
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
         ueid: None,
@@ -1144,7 +1144,7 @@ fn submods_type_test() {
             age: Some(7),
         }),
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
         ueid: None,
@@ -1177,7 +1177,7 @@ fn submods_type_test() {
         intended_use: None,
         location: None,
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
         ueid: None,

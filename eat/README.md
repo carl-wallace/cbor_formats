@@ -3,7 +3,7 @@
 ![Apache2/MIT licensed][license-image]
 ![Rust Version][rustc-image]
 
-This crate provides encoders and decoders for structures defined in the [Entity Attestation Token (EAT) specification](https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat).
+This crate provides encoders and decoders for structures defined in the [Entity Attestation Token (EAT) specification](https://datatracker.ietf.org/doc/html/rfc9711).
 
 ## Status
 

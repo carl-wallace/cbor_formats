@@ -50,21 +50,21 @@ use crate::json_specific::Submodule;
 /// oemid-label            = 258
 /// hardware-model-label   = 259
 /// hardware-version-label = 260
-/// secure-boot-label      = 262
+/// uptime-label           = 261
+/// oem-boot-label         = 262
 /// debug-status-label     = 263
 /// location-label         = 264
 /// profile-label          = 265
 /// submods-label          = 266
-/// uptime-label           =    267
-/// boot-seed-label        =    268
-/// intended-use-label     =    269
-/// dloas-label            =    270
-/// sw-name-label          =    271
-/// sw-version-label       =    272
-/// manifests-label        =    273
-/// measurements-label     =    274
-/// measurement-results-label = 275
-/// boot-count-label       =    276
+/// boot-count-label       = 267
+/// boot-seed-label        = 268
+/// dloas-label            = 269
+/// sw-name-label          = 270
+/// sw-version-label       = 271
+/// manifests-label        = 272
+/// measurements-label     = 273
+/// measurement-results-label = 274
+/// intended-use-label     = 275
 ///
 /// iss-claim-label = 1
 /// sub-claim-label = 2
@@ -106,7 +106,7 @@ use crate::json_specific::Submodule;
 /// $$Claims-Set-Claims //= (submods-label => { + text => Submodule })
 ///
 /// $$Claims-Set-Claims //= (profile-label => general-uri / general-oid)
-/// $$Claims-Set-Claims //= (secure-boot-label => bool)
+/// $$Claims-Set-Claims //= (oem-boot-label => bool)
 /// $$Claims-Set-Claims //= (sw-name-label => tstr )
 /// $$Claims-Set-Claims //= (sw-version-label => sw-version-type)
 /// $$Claims-Set-Claims //= (ueid-label => ueid-type)
@@ -124,7 +124,7 @@ use crate::json_specific::Submodule;
 ///        * Claim-Label .feature "extended-claims-label" => any
 ///    }
 /// ```
-/// [EAT Section 4.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2
+/// [EAT Section 4.2]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ClaimsSetClaims {
@@ -144,39 +144,39 @@ pub struct ClaimsSetClaims {
     pub cti: Option<Vec<u8>>,
     #[cbor(tag = "10")]
     pub nonce: Option<NonceType>,
-    #[cbor(tag = "276", value = "Integer")]
+    #[cbor(tag = "267", value = "Integer")]
     pub boot_count: Option<u64>,
     #[cbor(tag = "268", value = "Bytes")]
     pub boot_seed: Option<Vec<u8>>,
     #[cbor(tag = "263")]
     pub debug_status: Option<DebugStatusType>,
-    #[cbor(tag = "270", value = "Array", cbor = "true")]
+    #[cbor(tag = "269", value = "Array", cbor = "true")]
     pub dloas: Option<Vec<DloaType>>,
     #[cbor(tag = "259", value = "Bytes")]
     pub hardware_model: Option<Vec<u8>>,
     #[cbor(tag = "260", cbor = "true")]
     pub hardware_version: Option<HardwareVersionType>,
-    #[cbor(tag = "269")]
+    #[cbor(tag = "275")]
     pub intended_use: Option<IntendedUseType>,
     #[cbor(tag = "264", cbor = "true")]
     pub location: Option<LocationType>,
     #[cbor(tag = "265")]
     pub profile: Option<ProfileTypeChoice>,
     #[cbor(tag = "262", value = "Bool")]
-    pub secure_boot: Option<bool>,
-    #[cbor(tag = "271", value = "Text")]
+    pub oem_boot: Option<bool>,
+    #[cbor(tag = "270", value = "Text")]
     pub sw_name: Option<String>,
-    #[cbor(tag = "272", cbor = "true")]
+    #[cbor(tag = "271", cbor = "true")]
     pub sw_version: Option<SwVersionType>,
     #[cbor(tag = "256")]
     pub ueid: Option<UeidType>,
-    #[cbor(tag = "267", value = "Integer")]
+    #[cbor(tag = "261", value = "Integer")]
     pub uptime: Option<u64>,
-    #[cbor(tag = "273", cbor = "true")]
+    #[cbor(tag = "272", cbor = "true")]
     pub manifests: Option<ManifestsType>,
-    #[cbor(tag = "274", cbor = "true")]
+    #[cbor(tag = "273", cbor = "true")]
     pub measurements: Option<MeasurementsType>,
-    #[cbor(tag = "275", cbor = "true")]
+    #[cbor(tag = "274", cbor = "true")]
     pub measurement_results: Option<MeasurementResultsGroupArray>,
     #[cbor(tag = "258")]
     pub oemid: Option<Oemid>,
@@ -215,7 +215,7 @@ pub struct ClaimsSetClaims {
 /// timestamp         = 8
 /// age               = 9
 /// ```
-/// [EAT Section 4.2.10]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.10
+/// [EAT Section 4.2.10]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.10
 #[derive(Clone, Debug, Eq, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct LocationType {
@@ -248,7 +248,7 @@ pub struct LocationType {
 ///     + tstr => ueid-type
 /// }
 /// ```
-/// [EAT Section 4.2.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.2
+/// [EAT Section 4.2.2]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.2
 #[allow(dead_code)]
 pub struct SueidsType(TupleMap);
 
@@ -261,6 +261,6 @@ pub struct SueidsType(TupleMap);
 ///     + tstr => ueid-type
 /// }
 /// ```
-/// [EAT Section 4.2.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.2
+/// [EAT Section 4.2.2]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.2
 #[allow(dead_code)]
 pub struct SueidsTypeCbor(TupleMapCbor);

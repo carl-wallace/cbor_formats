@@ -3,7 +3,7 @@
 //! In order to support the submodules claim, the Entity Attestation Token (EAT) specification provides
 //! a set of CBOR-specific definitions and a set of JSON-specific definitions.
 //!
-//! The CBOR-specific definitions from [Section 7.3.2](https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#name-cbor-specific-cddl) are below.
+//! The CBOR-specific definitions from [Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc9711#name-cbor-specific-cddl) are below.
 //!
 //! ```text
 //! $EAT-CBOR-Tagged-Token /= CWT-Tagged-Message
@@ -15,7 +15,7 @@
 //! Submodule = Claims-Set / CBOR-Nested-Token /  Detached-Submodule-Digest
 //! ```
 //!
-//! The JSON-specific definitions from [Section 7.3.3](https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#name-json-specific-cddl) are below.
+//! The JSON-specific definitions from [Section 7.3.3](https://datatracker.ietf.org/doc/html/rfc9711#name-json-specific-cddl) are below.
 //!
 //! ```text
 //! $JSON-Selector-Value /= JWT-Message / CBOR-Token-Inside-JSON-Token / Detached-EAT-Bundle / Detached-Submodule-Digest
