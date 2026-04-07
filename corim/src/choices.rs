@@ -2,9 +2,11 @@
 
 use alloc::format;
 use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 use ciborium::value::{Integer, Value};
 use common::*;
-use serde::__private::de::Content;
+use core::fmt;
+use serde::de::Visitor;
 use serde::{Deserialize, Serialize};
 use serde_repr::Deserialize_repr;
 use serde_repr::Serialize_repr;
@@ -438,44 +440,30 @@ impl TryFrom<&Value> for CorimIdTypeChoice {
 // Serde parses untagged enums as the first type that happens to parse. This implementation inspects
 // the content type. Proc macro generated code from serde is in the comment above.
 impl<'de> serde::Deserialize<'de> for CorimIdTypeChoice {
-    fn deserialize<__D>(__deserializer: __D) -> serde::__private::Result<Self, __D::Error>
+    fn deserialize<__D>(__deserializer: __D) -> Result<Self, __D::Error>
     where
         __D: serde::Deserializer<'de>,
     {
-        let __content = match <serde::__private::de::Content<'_> as serde::Deserialize>::deserialize(
-            __deserializer,
-        ) {
-            serde::__private::Ok(__val) => __val,
-            serde::__private::Err(__err) => {
-                return serde::__private::Err(__err);
+        struct CorimIdVisitor;
+        impl<'de> Visitor<'de> for CorimIdVisitor {
+            type Value = CorimIdTypeChoice;
+            fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.write_str("a string or byte array")
             }
-        };
-        match &__content {
-            Content::String(_s) => {
-                if let serde::__private::Ok(__ok) = serde::__private::Result::map(
-                    <String as serde::Deserialize>::deserialize(
-                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
-                    ),
-                    CorimIdTypeChoice::Str,
-                ) {
-                    return serde::__private::Ok(__ok);
-                }
+            fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
+                Ok(CorimIdTypeChoice::Str(v.into()))
             }
-            Content::ByteBuf(_b) => {
-                if let serde::__private::Ok(__ok) = serde::__private::Result::map(
-                    <UuidType as serde::Deserialize>::deserialize(
-                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
-                    ),
-                    CorimIdTypeChoice::Uuid,
-                ) {
-                    return serde::__private::Ok(__ok);
-                }
+            fn visit_string<E: serde::de::Error>(self, v: String) -> Result<Self::Value, E> {
+                Ok(CorimIdTypeChoice::Str(v))
             }
-            _ => {}
-        };
-        serde::__private::Err(serde::de::Error::custom(
-            "data did not match any variant of untagged enum CorimIdTypeChoice",
-        ))
+            fn visit_bytes<E: serde::de::Error>(self, v: &[u8]) -> Result<Self::Value, E> {
+                Ok(CorimIdTypeChoice::Uuid(UuidType::Uuid(v.to_vec())))
+            }
+            fn visit_byte_buf<E: serde::de::Error>(self, v: Vec<u8>) -> Result<Self::Value, E> {
+                Ok(CorimIdTypeChoice::Uuid(UuidType::Uuid(v)))
+            }
+        }
+        __deserializer.deserialize_any(CorimIdVisitor)
     }
 }
 
@@ -1457,44 +1445,30 @@ impl TryFrom<&Value> for TagIdTypeChoiceCbor {
 }
 // Serde does not parse untagged enums properly (it just parses as the first type)
 impl<'de> serde::Deserialize<'de> for TagIdTypeChoiceCbor {
-    fn deserialize<__D>(__deserializer: __D) -> serde::__private::Result<Self, __D::Error>
+    fn deserialize<__D>(__deserializer: __D) -> Result<Self, __D::Error>
     where
         __D: serde::Deserializer<'de>,
     {
-        let __content = match <serde::__private::de::Content<'_> as serde::Deserialize>::deserialize(
-            __deserializer,
-        ) {
-            serde::__private::Ok(__val) => __val,
-            serde::__private::Err(__err) => {
-                return serde::__private::Err(__err);
+        struct TagIdVisitor;
+        impl<'de> Visitor<'de> for TagIdVisitor {
+            type Value = TagIdTypeChoiceCbor;
+            fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.write_str("a string or byte array")
             }
-        };
-        match &__content {
-            Content::String(_s) => {
-                if let serde::__private::Ok(__ok) = serde::__private::Result::map(
-                    <String as serde::Deserialize>::deserialize(
-                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
-                    ),
-                    TagIdTypeChoiceCbor::Str,
-                ) {
-                    return serde::__private::Ok(__ok);
-                }
+            fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
+                Ok(TagIdTypeChoiceCbor::Str(v.into()))
             }
-            Content::ByteBuf(_b) => {
-                if let serde::__private::Ok(__ok) = serde::__private::Result::map(
-                    <UuidType as serde::Deserialize>::deserialize(
-                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
-                    ),
-                    TagIdTypeChoiceCbor::Uuid,
-                ) {
-                    return serde::__private::Ok(__ok);
-                }
+            fn visit_string<E: serde::de::Error>(self, v: String) -> Result<Self::Value, E> {
+                Ok(TagIdTypeChoiceCbor::Str(v))
             }
-            _ => {}
-        };
-        serde::__private::Err(serde::de::Error::custom(
-            "data did not match any variant of untagged enum TagIdTypeChoiceCbor",
-        ))
+            fn visit_bytes<E: serde::de::Error>(self, v: &[u8]) -> Result<Self::Value, E> {
+                Ok(TagIdTypeChoiceCbor::Uuid(UuidType::Uuid(v.to_vec())))
+            }
+            fn visit_byte_buf<E: serde::de::Error>(self, v: Vec<u8>) -> Result<Self::Value, E> {
+                Ok(TagIdTypeChoiceCbor::Uuid(UuidType::Uuid(v)))
+            }
+        }
+        __deserializer.deserialize_any(TagIdVisitor)
     }
 }
 
@@ -1527,10 +1501,7 @@ const _: () = {
     extern crate serde as _serde;
     #[automatically_derived]
     impl _serde::Serialize for TagRelTypeChoiceKnown {
-        fn serialize<__S>(
-            &self,
-            __serializer: __S,
-        ) -> _serde::__private::Result<__S::Ok, __S::Error>
+        fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
         where
             __S: _serde::Serializer,
         {

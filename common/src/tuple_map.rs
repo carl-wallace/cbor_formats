@@ -8,8 +8,8 @@ use core::{fmt, marker::PhantomData};
 use serde::de::MapAccess;
 use serde::ser::Error as OtherError;
 use serde::ser::SerializeMap;
+use serde::{de::Error, de::Visitor};
 use serde::{Deserialize, Serialize};
-use serde::{__private::size_hint, de::Error, de::Visitor};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
@@ -99,20 +99,16 @@ impl TryFrom<&TupleMapCbor> for Vec<(Value, Value)> {
     type Error = String;
     fn try_from(value: &TupleMapCbor) -> Result<Self, Self::Error> {
         let mut v = ::alloc::vec::Vec::new();
+        #[allow(unused_imports)]
+        use ::ciborium::value::Value::Null as null;
         for i in &value.tuples {
-            let v1 = match {
-                #[allow(unused_imports)]
-                use ::ciborium::value::Value::Null as null;
-                ::ciborium::value::Value::serialized(&i.key)
-            } {
+            let key_res = ::ciborium::value::Value::serialized(&i.key);
+            let v1 = match key_res {
                 Ok(v) => v,
                 Err(_) => return Err("Failed to parse TupleCbor".to_string()),
             };
-            let v2 = match {
-                #[allow(unused_imports)]
-                use ::ciborium::value::Value::Null as null;
-                ::ciborium::value::Value::serialized(&i.value)
-            } {
+            let val_res = ::ciborium::value::Value::serialized(&i.value);
+            let v2 = match val_res {
                 Ok(v) => v,
                 Err(_) => return Err("Failed to parse TupleCbor".to_string()),
             };
@@ -130,7 +126,7 @@ impl TryFrom<Vec<Value>> for TupleMapCbor {
     }
 }
 impl serde::Serialize for TupleMapCbor {
-    fn serialize<__S>(&self, __serializer: __S) -> serde::__private::Result<__S::Ok, __S::Error>
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
     {
@@ -157,7 +153,7 @@ impl serde::Serialize for TupleMapCbor {
     }
 }
 impl<'de> Deserialize<'de> for TupleMapCbor {
-    fn deserialize<__D>(deserializer: __D) -> serde::__private::Result<Self, __D::Error>
+    fn deserialize<__D>(deserializer: __D) -> Result<Self, __D::Error>
     where
         __D: serde::Deserializer<'de>,
     {
@@ -173,7 +169,7 @@ impl<'de> Deserialize<'de> for TupleMapCbor {
             where
                 A: MapAccess<'de>,
             {
-                let mut values = Vec::with_capacity(size_hint::cautious(map.size_hint()));
+                let mut values = Vec::with_capacity(map.size_hint().unwrap_or(0).min(4096));
                 while let Some(value) = map.next_entry()? {
                     values.push(value);
                 }

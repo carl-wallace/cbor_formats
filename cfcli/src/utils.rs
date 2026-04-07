@@ -23,7 +23,7 @@ pub(crate) fn find_files(dir: &String, ext: &str, list: &mut Vec<String>) {
                     }
                     continue;
                 } else {
-                    let file_exts = vec![ext];
+                    let file_exts = [ext];
                     if let Some(ext) = path.extension().and_then(OsStr::to_str) {
                         if !file_exts.contains(&ext) {
                             continue;

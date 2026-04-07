@@ -7,12 +7,11 @@ use alloc::{vec, vec::Vec};
 use core::{fmt, marker::PhantomData};
 
 use ciborium::{cbor, value::Value};
-use serde::{Deserialize, Deserializer, Serialize};
 use serde::{
-    __private::size_hint,
     de::{Error, MapAccess, Visitor},
     ser::Error as OtherError,
 };
+use serde::{Deserialize, Deserializer, Serialize};
 
 use cbor_derive::StructToMap;
 

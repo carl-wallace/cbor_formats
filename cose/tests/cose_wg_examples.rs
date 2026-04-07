@@ -342,7 +342,7 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                         }
                     }
                 } else {
-                    let file_exts = vec!["json"];
+                    let file_exts = ["json"];
                     if let Some(ext) = e.path().extension().and_then(OsStr::to_str) {
                         if !file_exts.contains(&ext) {
                             continue;
@@ -367,11 +367,8 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                                     Ok(parsed) => {
                                         if let Some(some) = ex.fail {
                                             if some {
-                                                match &ex.input.failures {
-                                                    Some(failures) => {
-                                                        check_failures(failures);
-                                                    }
-                                                    None => {}
+                                                if let Some(failures) = &ex.input.failures {
+                                                    check_failures(failures);
                                                 }
                                             }
                                         }
@@ -399,11 +396,8 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                                     Ok(parsed) => {
                                         if let Some(some) = ex.fail {
                                             if some {
-                                                match &ex.input.failures {
-                                                    Some(failures) => {
-                                                        check_failures(failures);
-                                                    }
-                                                    None => {}
+                                                if let Some(failures) = &ex.input.failures {
+                                                    check_failures(failures);
                                                 }
                                             }
                                         }
@@ -430,11 +424,8 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                                     Ok(parsed) => {
                                         if let Some(some) = ex.fail {
                                             if some {
-                                                match &ex.input.failures {
-                                                    Some(failures) => {
-                                                        check_failures(failures);
-                                                    }
-                                                    None => {}
+                                                if let Some(failures) = &ex.input.failures {
+                                                    check_failures(failures);
                                                 }
                                             }
                                         }
@@ -461,11 +452,8 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                                     Ok(parsed) => {
                                         if let Some(some) = ex.fail {
                                             if some {
-                                                match &ex.input.failures {
-                                                    Some(failures) => {
-                                                        check_failures(failures);
-                                                    }
-                                                    None => {}
+                                                if let Some(failures) = &ex.input.failures {
+                                                    check_failures(failures);
                                                 }
                                             }
                                         }
@@ -492,11 +480,8 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                                     Ok(parsed) => {
                                         if let Some(some) = ex.fail {
                                             if some {
-                                                match &ex.input.failures {
-                                                    Some(failures) => {
-                                                        check_failures(failures);
-                                                    }
-                                                    None => {}
+                                                if let Some(failures) = &ex.input.failures {
+                                                    check_failures(failures);
                                                 }
                                             }
                                         }

@@ -68,7 +68,7 @@ impl DeriveStructToArray {
 
         let comment = format!("CBOR encoding/decoding of [{}]", self.ident);
 
-        for (_field_count, field) in (self.fields).iter().enumerate() {
+        for field in (self.fields).iter() {
             let name = &field.ident;
 
             let ty = field.field_type.clone();
@@ -245,7 +245,7 @@ impl DeriveStructToArray {
                 fn serialize<__S>(
                     &self,
                     __serializer: __S,
-                ) -> serde::__private::Result<__S::Ok, __S::Error>
+                ) -> Result<__S::Ok, __S::Error>
                     where
                         __S: serde::Serializer,
                 {
@@ -263,7 +263,7 @@ impl DeriveStructToArray {
             impl<'de> Deserialize<'de> for #alt_ident<#lt_params> {
                 fn deserialize<__D>(
                     deserializer: __D,
-                ) -> serde::__private::Result<Self, __D::Error>
+                ) -> Result<Self, __D::Error>
                 where
                     __D: serde::Deserializer<'de>,
                 {
@@ -279,12 +279,11 @@ impl DeriveStructToArray {
                         fn visit_seq<__A>(
                             self,
                             mut __seq: __A,
-                        ) -> serde::__private::Result<Self::Value, __A::Error>
+                        ) -> Result<Self::Value, __A::Error>
                         where
                             __A: serde::de::SeqAccess<'de>,
                         {
-                            let i = __seq.size_hint().unwrap_or_else(|| 0);
-                            let mut values = Vec::with_capacity(size_hint::cautious(__seq.size_hint()));
+                            let mut values = Vec::with_capacity(__seq.size_hint().unwrap_or(0).min(4096));
                             while let Some(value) = __seq.next_element()? {
                                 values.push(value);
                             }

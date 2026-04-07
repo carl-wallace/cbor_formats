@@ -7,12 +7,11 @@ use alloc::{vec, vec::Vec};
 use core::{fmt, marker::PhantomData};
 
 use ciborium::{cbor, value::Value};
-use serde::{Deserialize, Deserializer, Serialize};
 use serde::{
-    __private::size_hint,
     de::{Error, MapAccess, Visitor},
     ser::Error as OtherError,
 };
+use serde::{Deserialize, Deserializer, Serialize};
 
 use cbor_derive::StructToMap;
 use common::tuple_map::{TupleMap, TupleMapCbor};
@@ -250,6 +249,7 @@ pub struct LocationType {
 /// }
 /// ```
 /// [EAT Section 4.2.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.2
+#[allow(dead_code)]
 pub struct SueidsType(TupleMap);
 
 /// CBOR encoding/decoding of `sueids-type`, see [EAT Section 4.2.2].
@@ -262,4 +262,5 @@ pub struct SueidsType(TupleMap);
 /// }
 /// ```
 /// [EAT Section 4.2.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.2
+#[allow(dead_code)]
 pub struct SueidsTypeCbor(TupleMapCbor);

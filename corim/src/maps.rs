@@ -7,11 +7,8 @@ use alloc::{vec, vec::Vec};
 use ciborium::value::Integer;
 use ciborium::{cbor, value::Value};
 use core::{fmt, marker::PhantomData};
+use serde::de::{Error, MapAccess, Visitor};
 use serde::{Deserialize, Deserializer, Serialize};
-use serde::{
-    __private::size_hint,
-    de::{Error, MapAccess, Visitor},
-};
 
 use crate::arrays::*;
 use crate::choices::*;

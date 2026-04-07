@@ -80,7 +80,7 @@ pub fn derive_struct_to_map(input: TokenStream) -> TokenStream {
 ///
 /// use ciborium::{cbor, value::Value};
 /// use serde::{Serialize, Deserialize};
-/// use serde::__private::{PhantomData, size_hint};
+/// use core::marker::PhantomData;
 /// use serde::de::{Visitor, Error as OtherError};
 /// use serde::ser::Error;
 ///
@@ -106,7 +106,6 @@ pub fn derive_struct_to_map(input: TokenStream) -> TokenStream {
 /// use hex_literal::hex;
 ///
 /// use common::arrays::{HashEntry, HashEntryCbor};
-
 ///
 /// let some_bytes = hex!("a200c11a637cffdc01c11a637d0decffa200c11a637cffdc01c11a637d0decff");
 /// let scratch = HashEntryCbor {

@@ -14,7 +14,7 @@ rust-version = "1.63"
 
 [dependencies]
 cbor_derive = { version = "0.1.0", path = "../cbor_derive" }
-ciborium = "0.2.0"
+ciborium = "0.2.2"
 subtle-encoding = {version = "0.5.1", default-features = false, features = ["hex", "alloc"]}
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
 hex-literal = "0.3.4"

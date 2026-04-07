@@ -25,10 +25,9 @@ fn comid_create(args: &ComidCreateSubcommand) {
     }
 
     let mut files = vec![];
-    match &args.template {
-        Some(f) => files.push(f.clone()),
-        None => {}
-    };
+    if let Some(f) = &args.template {
+        files.push(f.clone());
+    }
 
     if let Some(f) = args.template_dir.as_ref() {
         find_files(f, "json", &mut files)

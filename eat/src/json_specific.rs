@@ -22,7 +22,6 @@ use alloc::boxed::Box;
 use alloc::string::String;
 use core::ops::Deref;
 
-use serde::__private::de::Content;
 use serde::{Deserialize, Serialize};
 
 use crate::arrays::{DetachedEatBundle, DetachedSubmoduleDigest};
@@ -92,60 +91,32 @@ impl<'de> serde::Deserialize<'de> for JsonSelectorValue {
     where
         __D: serde::Deserializer<'de>,
     {
-        let __content = match <Content<'_> as serde::Deserialize>::deserialize(__deserializer) {
-            Ok(__val) => __val,
-            Err(__err) => {
-                return Err(__err);
-            }
-        };
-        match &__content {
-            Content::Str(s) => {
+        let value = serde_json::Value::deserialize(__deserializer)?;
+        match &value {
+            serde_json::Value::String(s) => {
                 // could use regex crate, but that requires std
                 let num = s.matches('.').count();
                 if 2 == num || 4 == num {
-                    if let Ok(__ok) = Result::map(
-                        <String as serde::Deserialize>::deserialize(
-                            serde::__private::de::ContentRefDeserializer::<__D::Error>::new(
-                                &__content,
-                            ),
-                        ),
-                        JsonSelectorValue::JwtMessage,
-                    ) {
-                        return Ok(__ok);
-                    }
+                    return Ok(JsonSelectorValue::JwtMessage(s.clone()));
                 }
-                if let Ok(__ok) = Result::map(
-                    <String as serde::Deserialize>::deserialize(
-                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
-                    ),
-                    JsonSelectorValue::CborTokenInsideJsonToken,
-                ) {
-                    return Ok(__ok);
-                }
+                Ok(JsonSelectorValue::CborTokenInsideJsonToken(s.clone()))
             }
-            Content::Map(_) => {
-                if let Ok(__ok) = Result::map(
-                    <DetachedEatBundle as serde::Deserialize>::deserialize(
-                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
-                    ),
-                    JsonSelectorValue::DetachedEatBundle,
-                ) {
-                    return Ok(__ok);
+            serde_json::Value::Object(_) => {
+                if let Ok(bundle) = serde_json::from_value::<DetachedEatBundle>(value.clone()) {
+                    return Ok(JsonSelectorValue::DetachedEatBundle(bundle));
                 }
-                if let Ok(__ok) = Result::map(
-                    <DetachedSubmoduleDigest as serde::Deserialize>::deserialize(
-                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
-                    ),
-                    JsonSelectorValue::DetachedSubmoduleDigest,
-                ) {
-                    return Ok(__ok);
+                if let Ok(digest) = serde_json::from_value::<DetachedSubmoduleDigest>(value.clone())
+                {
+                    return Ok(JsonSelectorValue::DetachedSubmoduleDigest(digest));
                 }
+                Err(serde::de::Error::custom(
+                    "data did not match any variant of untagged enum JsonSelectorValue",
+                ))
             }
-            _ => {}
+            _ => Err(serde::de::Error::custom(
+                "data did not match any variant of untagged enum JsonSelectorValue",
+            )),
         }
-        Err(serde::de::Error::custom(
-            "data did not match any variant of untagged enum JsonSelectorValue",
-        ))
     }
 }
 
@@ -183,52 +154,29 @@ impl<'de> serde::Deserialize<'de> for JsonSelectorForDebValue {
     where
         __D: serde::Deserializer<'de>,
     {
-        let __content = match <Content<'_> as serde::Deserialize>::deserialize(__deserializer) {
-            Ok(__val) => __val,
-            Err(__err) => {
-                return Err(__err);
-            }
-        };
-        match &__content {
-            Content::Str(s) => {
+        let value = serde_json::Value::deserialize(__deserializer)?;
+        match &value {
+            serde_json::Value::String(s) => {
                 // could use regex crate, but that requires std
                 let num = s.matches('.').count();
                 if 2 == num || 4 == num {
-                    if let Ok(__ok) = Result::map(
-                        <String as serde::Deserialize>::deserialize(
-                            serde::__private::de::ContentRefDeserializer::<__D::Error>::new(
-                                &__content,
-                            ),
-                        ),
-                        JsonSelectorForDebValue::JwtMessage,
-                    ) {
-                        return Ok(__ok);
-                    }
+                    return Ok(JsonSelectorForDebValue::JwtMessage(s.clone()));
                 }
-                if let Ok(__ok) = Result::map(
-                    <String as serde::Deserialize>::deserialize(
-                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
-                    ),
-                    JsonSelectorForDebValue::CborTokenInsideJsonToken,
-                ) {
-                    return Ok(__ok);
-                }
+                Ok(JsonSelectorForDebValue::CborTokenInsideJsonToken(s.clone()))
             }
-            Content::Map(_) => {
-                if let Ok(__ok) = Result::map(
-                    <DetachedSubmoduleDigest as serde::Deserialize>::deserialize(
-                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
-                    ),
-                    JsonSelectorForDebValue::DetachedSubmoduleDigest,
-                ) {
-                    return Ok(__ok);
+            serde_json::Value::Object(_) => {
+                if let Ok(digest) = serde_json::from_value::<DetachedSubmoduleDigest>(value.clone())
+                {
+                    return Ok(JsonSelectorForDebValue::DetachedSubmoduleDigest(digest));
                 }
+                Err(serde::de::Error::custom(
+                    "data did not match any variant of untagged enum JsonSelectorValue",
+                ))
             }
-            _ => {}
+            _ => Err(serde::de::Error::custom(
+                "data did not match any variant of untagged enum JsonSelectorValue",
+            )),
         }
-        Err(serde::de::Error::custom(
-            "data did not match any variant of untagged enum JsonSelectorValue",
-        ))
     }
 }
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

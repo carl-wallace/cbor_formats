@@ -68,7 +68,7 @@ impl DeriveStructToMap {
 
         let comment = format!("Supports CBOR encoding/decoding of the corresponding map type, which is described in [{}]", self.ident);
 
-        for (_field_count, field) in (self.fields).iter().enumerate() {
+        for field in (self.fields).iter() {
             let name = &field.ident;
 
             let ty = field.field_type.clone();
@@ -318,7 +318,7 @@ impl DeriveStructToMap {
                 fn serialize<__S>(
                     &self,
                     __serializer: __S,
-                ) -> serde::__private::Result<__S::Ok, __S::Error>
+                ) -> Result<__S::Ok, __S::Error>
                     where
                         __S: serde::Serializer,
                 {
@@ -354,7 +354,7 @@ impl DeriveStructToMap {
                             where
                                 A: MapAccess<'de>,
                         {
-                            let mut values = Vec::with_capacity(size_hint::cautious(map.size_hint()));
+                            let mut values = Vec::with_capacity(map.size_hint().unwrap_or(0).min(4096));
                             while let Some(value) = map.next_entry()? {
                                 values.push(value);
                             }

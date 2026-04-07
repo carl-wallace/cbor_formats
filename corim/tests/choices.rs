@@ -385,8 +385,8 @@ fn version_scheme_test() {
     assert_eq!(vs3, vs_cbor3);
 
     let unknown = 99999;
-    let unknown_as_int: Integer = unknown.try_into().unwrap();
-    let unknown_as_value: Value = unknown_as_int.try_into().unwrap();
+    let unknown_as_int: Integer = unknown.into();
+    let unknown_as_value: Value = unknown_as_int.into();
     let vs4: VersionSchemeCbor = unknown_as_value.try_into().unwrap();
     assert_eq!(vs4, VersionSchemeCbor::IntExtensions(99999));
     let mut encoded_token4 = vec![];

@@ -101,26 +101,18 @@ impl TryFrom<&TupleCbor> for Vec<Value> {
     type Error = String;
     fn try_from(value: &TupleCbor) -> Result<Self, Self::Error> {
         let mut v = ::alloc::vec::Vec::new();
-        v.push(
-            match {
-                #[allow(unused_imports)]
-                use ::ciborium::value::Value::Null as null;
-                ::ciborium::value::Value::serialized(&value.key)
-            } {
-                Ok(v) => v,
-                Err(_) => return Err("Failed to parse TupleCbor".to_string()),
-            },
-        );
-        v.push(
-            match {
-                #[allow(unused_imports)]
-                use ::ciborium::value::Value::Null as null;
-                ::ciborium::value::Value::serialized(&value.value)
-            } {
-                Ok(v) => v,
-                Err(_) => return Err("Failed to parse TupleCbor".to_string()),
-            },
-        );
+        #[allow(unused_imports)]
+        use ::ciborium::value::Value::Null as null;
+        let key_val = ::ciborium::value::Value::serialized(&value.key);
+        match key_val {
+            Ok(val) => v.push(val),
+            Err(_) => return Err("Failed to parse TupleCbor".to_string()),
+        }
+        let value_val = ::ciborium::value::Value::serialized(&value.value);
+        match value_val {
+            Ok(val) => v.push(val),
+            Err(_) => return Err("Failed to parse TupleCbor".to_string()),
+        }
         Ok(v)
     }
 }
@@ -134,7 +126,7 @@ impl TryFrom<Vec<Value>> for TupleCbor {
     }
 }
 impl serde::Serialize for TupleCbor {
-    fn serialize<__S>(&self, __serializer: __S) -> serde::__private::Result<__S::Ok, __S::Error>
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
     {
@@ -166,7 +158,7 @@ impl serde::Serialize for TupleCbor {
     }
 }
 impl<'de> Deserialize<'de> for TupleCbor {
-    fn deserialize<__D>(deserializer: __D) -> serde::__private::Result<Self, __D::Error>
+    fn deserialize<__D>(deserializer: __D) -> Result<Self, __D::Error>
     where
         __D: serde::Deserializer<'de>,
     {
@@ -220,16 +212,14 @@ impl<'de> Deserialize<'de> for TupleCbor {
                     Some(t) => t,
                     None => return Err(__D::Error::custom("Failed to parse tag value")),
                 };
-                match Integer::try_from(t.0) {
-                    Ok(i) => {
-                        let v0 = Value::Integer(i);
-                        let vals = vec![v0, t.1.clone()];
-                        match TupleCbor::try_from(vals) {
-                            Ok(r) => Ok(r),
-                            Err(e) => Err(__D::Error::custom(e)),
-                        }
+                {
+                    let i = Integer::from(t.0);
+                    let v0 = Value::Integer(i);
+                    let vals = vec![v0, t.1.clone()];
+                    match TupleCbor::try_from(vals) {
+                        Ok(r) => Ok(r),
+                        Err(e) => Err(__D::Error::custom(e)),
                     }
-                    Err(e) => Err(__D::Error::custom(e)),
                 }
             }
             Err(e) => Err(__D::Error::custom(e)),

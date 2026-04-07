@@ -40,8 +40,8 @@ use core::fmt;
 use std::collections::BTreeMap;
 
 use ciborium::{cbor, value::Value};
-use serde::{Deserialize, Deserializer, Serialize, __private::size_hint};
-use serde::__private::PhantomData;
+use serde::{Deserialize, Deserializer, Serialize};
+use core::marker::PhantomData;
 use serde::de::{Visitor, MapAccess, Error as OtherError};
 use serde::ser::Error;
 
