@@ -48,7 +48,9 @@ fn json_selector_value_test() {
     let jwt_str = get_file_as_byte_vec(Path::new("tests/examples/a1_jwe.jwt"));
     let jwt = std::str::from_utf8(&jwt_str).unwrap();
     //todo replace with signed EAT example
-    let eatbytes = hex!("b0016941636d6520496e632e026772722d74726170036941636d6520496e632e04c10005c10006c1000746ffffffffffff0a4800000000000000000b5101deadbeefdeadbeefdeadbeefdeadbeef0c6941636d6520496e632e0d46ffffffffffff0e030ff5100111a201fb4028ae147ae147ae02fb404c63d70a3d70a413183c");
+    let eatbytes = hex!(
+        "b0016941636d6520496e632e026772722d74726170036941636d6520496e632e04c10005c10006c1000746ffffffffffff0a4800000000000000000b5101deadbeefdeadbeefdeadbeefdeadbeef0c6941636d6520496e632e0d46ffffffffffff0e030ff5100111a201fb4028ae147ae147ae02fb404c63d70a3d70a413183c"
+    );
     let eatbase64 = base64::encode(eatbytes);
     let digest = &eatbytes.as_slice()[0..32];
 
@@ -92,7 +94,9 @@ fn json_selector_for_deb_value_test() {
     let jwt = std::str::from_utf8(&jwt_str).unwrap();
 
     //todo replace with signed EAT example
-    let eatbytes = hex!("b0016941636d6520496e632e026772722d74726170036941636d6520496e632e04c10005c10006c1000746ffffffffffff0a4800000000000000000b5101deadbeefdeadbeefdeadbeefdeadbeef0c6941636d6520496e632e0d46ffffffffffff0e030ff5100111a201fb4028ae147ae147ae02fb404c63d70a3d70a413183c");
+    let eatbytes = hex!(
+        "b0016941636d6520496e632e026772722d74726170036941636d6520496e632e04c10005c10006c1000746ffffffffffff0a4800000000000000000b5101deadbeefdeadbeefdeadbeefdeadbeef0c6941636d6520496e632e0d46ffffffffffff0e030ff5100111a201fb4028ae147ae147ae02fb404c63d70a3d70a413183c"
+    );
     let eatbase64 = base64::encode(eatbytes);
     let digest = &eatbytes.as_slice()[0..32];
 

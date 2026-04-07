@@ -9,7 +9,7 @@ use serde::de::Error;
 use serde::de::VariantAccess;
 use serde::de::Visitor;
 use serde::ser::Error as OtherError;
-use serde::{de, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
@@ -144,7 +144,7 @@ impl serde::Serialize for TupleCbor {
             None => {
                 return Err(__S::Error::custom(
                     "Failed to parse tag value as an integer",
-                ))
+                ));
             }
         };
 

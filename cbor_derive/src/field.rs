@@ -1,7 +1,7 @@
 //! Structure field processing code adapted from the RustCrypto formats library.
 
-use proc_macro2::TokenStream;
 use proc_macro_error::abort;
+use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Field, Ident, Type};
 
@@ -216,7 +216,9 @@ impl StructField {
             Some(t) => t,
             None => {
                 if !is_tuple_cbor {
-                    panic!("At present, only maps with integer indices are supported by StructToMap (default Ciborium support enables text indices)");
+                    panic!(
+                        "At present, only maps with integer indices are supported by StructToMap (default Ciborium support enables text indices)"
+                    );
                 }
                 66666
             }

@@ -4,16 +4,16 @@ description = "CBOR-focused encoders/decoders for structures common to various s
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/carl-wallace/cbor-formats/tree/main/cbor_derive"
 categories = ["cryptography", "data-structures", "encoding", "no-std", "parser-implementations"]
-keywords = ["cbor", "json", "crypto", "ietf", "corim", "eat"]
+keywords = ["cbor", "json", "corim", "coswid", "eat"]
 readme = "README.md"
-version = "0.1.0"
-edition = "2021"
-rust-version = "1.63"
+version = "0.1.1"
+edition = "2024"
+rust-version = "1.85.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cbor_derive = { version = "0.1.0", path = "../cbor_derive" }
+cbor_derive = { version = "0.1.1", path = "../cbor_derive" }
 ciborium = "0.2.2"
 subtle-encoding = {version = "0.5.1", default-features = false, features = ["hex", "alloc"]}
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }

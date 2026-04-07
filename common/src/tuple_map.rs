@@ -8,8 +8,8 @@ use core::{fmt, marker::PhantomData};
 use serde::de::MapAccess;
 use serde::ser::Error as OtherError;
 use serde::ser::SerializeMap;
-use serde::{de::Error, de::Visitor};
 use serde::{Deserialize, Serialize};
+use serde::{de::Error, de::Visitor};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]

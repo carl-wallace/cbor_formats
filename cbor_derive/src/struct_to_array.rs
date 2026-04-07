@@ -1,8 +1,8 @@
 //! Code supporting StructToArray procedural macro
 
-use proc_macro2::TokenStream;
 use proc_macro_error::abort;
-use quote::{quote, ToTokens};
+use proc_macro2::TokenStream;
+use quote::{ToTokens, quote};
 use syn::{DeriveInput, Ident, Lifetime};
 
 use crate::cbor_derive_utils::{extract_type, is_option, is_option_vec, is_vec};

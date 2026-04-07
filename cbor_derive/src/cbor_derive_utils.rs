@@ -97,11 +97,7 @@ pub(crate) fn is_vec(ty: &syn::Type) -> bool {
         let b = vec!["Vec|", "std|vec|Vec|", "core|vec|Vec|"]
             .into_iter()
             .any(|s| idents_of_path == s);
-        if b {
-            Some(b)
-        } else {
-            None
-        }
+        if b { Some(b) } else { None }
     }
 
     extract_type_path(ty)
@@ -127,11 +123,7 @@ pub(crate) fn is_option(ty: &syn::Type) -> bool {
         let b = vec!["Option|", "std|option|Option|", "core|option|Option|"]
             .into_iter()
             .any(|s| idents_of_path == s);
-        if b {
-            Some(b)
-        } else {
-            None
-        }
+        if b { Some(b) } else { None }
     }
 
     extract_type_path(ty)

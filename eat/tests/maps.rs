@@ -19,7 +19,9 @@ use utils::*;
 fn claims_set_claims_test() {
     // this example from veraison uses different keys for some fields than the current EAT spec. let them
     // be as-is and accumulate in the other bucket to test extensibility support.
-    let expected = hex!("b0016941636d6520496e632e026772722d74726170036941636d6520496e632e04c10005c10006c1000746ffffffffffff0a4800000000000000000b5101deadbeefdeadbeefdeadbeefdeadbeef0c6941636d6520496e632e0d46ffffffffffff0e030ff5100111a201fb4028ae147ae147ae02fb404c63d70a3d70a413183c");
+    let expected = hex!(
+        "b0016941636d6520496e632e026772722d74726170036941636d6520496e632e04c10005c10006c1000746ffffffffffff0a4800000000000000000b5101deadbeefdeadbeefdeadbeefdeadbeef0c6941636d6520496e632e0d46ffffffffffff0e030ff5100111a201fb4028ae147ae147ae02fb404c63d70a3d70a413183c"
+    );
     println!(
         "Encoded ClaimsSetClaims from veraison: {:?}",
         buffer_to_hex(expected.as_slice())
@@ -59,7 +61,9 @@ fn claims_set_claims_test() {
 fn claims_set_claims_with_dup_test() {
     // this example from veraison uses different keys for some fields than the current EAT spec. let them
     // be as-is and accumulate in the other bucket to test extensibility support.
-    let expected = hex!("b1016C466F6F2042617220496E632E016941636d6520496e632e026772722d74726170036941636d6520496e632e04c10005c10006c1000746ffffffffffff0a4800000000000000000b5101deadbeefdeadbeefdeadbeefdeadbeef0c6941636d6520496e632e0d46ffffffffffff0e030ff5100111a201fb4028ae147ae147ae02fb404c63d70a3d70a413183c");
+    let expected = hex!(
+        "b1016C466F6F2042617220496E632E016941636d6520496e632e026772722d74726170036941636d6520496e632e04c10005c10006c1000746ffffffffffff0a4800000000000000000b5101deadbeefdeadbeefdeadbeefdeadbeef0c6941636d6520496e632e0d46ffffffffffff0e030ff5100111a201fb4028ae147ae147ae02fb404c63d70a3d70a413183c"
+    );
     println!(
         "Encoded ClaimsSetClaims from veraison: {:?}",
         buffer_to_hex(expected.as_slice())

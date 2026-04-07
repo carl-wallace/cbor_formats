@@ -3,7 +3,7 @@ use lazy_static::lazy_static;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 lazy_static! {
     pub static ref TEST_UUID: Uuid = uuid!("31fb5abf-023e-4992-aa4e-95f9c1503bfa");

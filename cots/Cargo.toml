@@ -4,20 +4,20 @@ description = "CBOR-focused encoders/decoders for CoTS structures"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/carl-wallace/cbor-formats/tree/main/cbor_derive"
 categories = ["cryptography", "data-structures", "encoding", "no-std", "parser-implementations"]
-keywords = ["cbor", "json", "crypto", "ietf", "corim", "eat"]
+keywords = ["cbor", "json", "corim", "coswid", "eat"]
 readme = "README.md"
-version = "0.1.0"
-edition = "2021"
-rust-version = "1.63"
+version = "0.1.1"
+edition = "2024"
+rust-version = "1.85.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cbor_derive = { version = "0.1.0", path = "../cbor_derive" }
-common = { version = "0.1.0", path = "../common" }
-corim = { version = "0.1.0", path = "../corim" }
-coswid = { version = "0.1.0", path = "../coswid" }
-eat = { version = "0.1.0", path = "../eat" }
+cbor_derive = { version = "0.1.1", path = "../cbor_derive" }
+common = { version = "0.1.1", path = "../common" }
+corim = { version = "0.1.1", path = "../corim" }
+coswid = { version = "0.1.1", path = "../coswid" }
+eat = { version = "0.1.1", path = "../eat" }
 ciborium = "0.2.2"
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
 serde_bytes = "0.11"

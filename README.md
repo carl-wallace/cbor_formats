@@ -246,7 +246,7 @@ in relatively early stages of development (and, correspondingly, so are other im
 
 ## Rust Version
 
-This crate was developed using **Rust 1.63**.
+This crate was developed using **Rust 1.85**.
 
 We may change the MSRV in the future, but it will be accompanied by a minor
 version bump.
@@ -269,7 +269,7 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (badges)
 
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.63+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 
 [//]: # (links)
 

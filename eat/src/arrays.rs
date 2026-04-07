@@ -8,8 +8,8 @@ use core::{fmt, marker::PhantomData, ops::Deref};
 
 use ciborium::{cbor, value::Value};
 use serde::ser::Error as OtherError;
-use serde::{de::Error, de::Visitor};
 use serde::{Deserialize, Serialize};
+use serde::{de::Error, de::Visitor};
 
 use crate::cbor_specific::SelectorCbor;
 use crate::choices::*;

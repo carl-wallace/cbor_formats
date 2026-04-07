@@ -27,7 +27,9 @@ fn class_map_test2() {
 #[test]
 fn class_map_uuid_full_test() {
     // {0: 37(h'31FB5ABF023E4992AA4E95F9C1503BFA'), 1: "ACME Ltd", 2: "Roadrunner", 3: 1, 4: 2}
-    let expected = hex!("a500d8255031fb5abf023e4992aa4e95f9c1503bfa016841434d45204c7464026a526f616472756e6e657203010402");
+    let expected = hex!(
+        "a500d8255031fb5abf023e4992aa4e95f9c1503bfa016841434d45204c7464026a526f616472756e6e657203010402"
+    );
     let e = ClassMapCbor {
         id: Some(ClassIdTypeChoiceCbor::Uuid(Required(UuidType::Uuid(
             TEST_UUID.as_bytes().to_vec(),
@@ -206,7 +208,9 @@ fn corim_map_test() {
 fn corim_meta_map_full_test() {
     let mut encoded_token = vec![];
     // {0: {0: "ACME Ltd.", 1: 32("https://acme.example")}, 1: {0: 1(1601424000), 1: 1(1632960000)}}
-    let enc_meta = hex!("a200a2006941434d45204c74642e01d8207468747470733a2f2f61636d652e6578616d706c6501a200c11a5f73ca8001c11a6154fe00");
+    let enc_meta = hex!(
+        "a200a2006941434d45204c74642e01d8207468747470733a2f2f61636d652e6578616d706c6501a200c11a5f73ca8001c11a6154fe00"
+    );
     let dec: CorimMetaMapCbor = from_reader(enc_meta.to_vec().as_slice()).unwrap();
     let _ = into_writer(&dec, &mut encoded_token);
     assert_eq!(encoded_token, enc_meta);

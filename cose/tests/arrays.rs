@@ -108,7 +108,9 @@ fn header_map_test() {
 #[test]
 fn cose_signature_test() {
     // sample from ecdsa-01 test in corim project from https://github.com/cose-wg/Examples
-    let expected = hex!("8343A10126A1044231315840D71C05DB52C9CE7F1BF5AAC01334BBEACAC1D86A2303E6EEAA89266F45C01ED602CA649EAF790D8BC99D2458457CA6A872061940E7AFBE48E289DFAC146AE258");
+    let expected = hex!(
+        "8343A10126A1044231315840D71C05DB52C9CE7F1BF5AAC01334BBEACAC1D86A2303E6EEAA89266F45C01ED602CA649EAF790D8BC99D2458457CA6A872061940E7AFBE48E289DFAC146AE258"
+    );
     println!(
         "Encoded CoseSignatureCbor from cose-wg/Examples: {:?}",
         buffer_to_hex(expected.as_slice())

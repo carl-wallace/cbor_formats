@@ -23,13 +23,13 @@ pub struct TaggedCoswid(pub Required<ConciseSwidTag, 505>);
 impl TryFrom<TaggedCoswidCbor> for TaggedCoswid {
     type Error = String;
     fn try_from(value: TaggedCoswidCbor) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.0 .0.try_into().unwrap())))
+        Ok(Self(Required(value.0.0.try_into().unwrap())))
     }
 }
 impl TryFrom<&TaggedCoswidCbor> for TaggedCoswid {
     type Error = String;
     fn try_from(value: &TaggedCoswidCbor) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.clone().0 .0.try_into().unwrap())))
+        Ok(Self(Required(value.clone().0.0.try_into().unwrap())))
     }
 }
 
@@ -40,13 +40,13 @@ pub struct TaggedComid(pub Required<ConciseMidTag, 506>);
 impl TryFrom<TaggedComidCbor> for TaggedComid {
     type Error = String;
     fn try_from(value: TaggedComidCbor) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.0 .0.try_into().unwrap())))
+        Ok(Self(Required(value.0.0.try_into().unwrap())))
     }
 }
 impl TryFrom<&TaggedComidCbor> for TaggedComid {
     type Error = String;
     fn try_from(value: &TaggedComidCbor) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.0 .0.clone().try_into().unwrap())))
+        Ok(Self(Required(value.0.0.clone().try_into().unwrap())))
     }
 }
 
@@ -57,13 +57,13 @@ pub struct TaggedCoswidCbor(pub Required<ConciseSwidTagCbor, 505>);
 impl TryFrom<TaggedCoswid> for TaggedCoswidCbor {
     type Error = String;
     fn try_from(value: TaggedCoswid) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.0 .0.try_into().unwrap())))
+        Ok(Self(Required(value.0.0.try_into().unwrap())))
     }
 }
 impl TryFrom<&TaggedCoswid> for TaggedCoswidCbor {
     type Error = String;
     fn try_from(value: &TaggedCoswid) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.0 .0.clone().try_into().unwrap())))
+        Ok(Self(Required(value.0.0.clone().try_into().unwrap())))
     }
 }
 
@@ -93,13 +93,13 @@ pub struct TaggedComidCbor(pub Required<ConciseMidTagCbor, 506>);
 impl TryFrom<TaggedComid> for TaggedComidCbor {
     type Error = String;
     fn try_from(value: TaggedComid) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.0 .0.try_into().unwrap())))
+        Ok(Self(Required(value.0.0.try_into().unwrap())))
     }
 }
 impl TryFrom<&TaggedComid> for TaggedComidCbor {
     type Error = String;
     fn try_from(value: &TaggedComid) -> Result<Self, Self::Error> {
-        Ok(Self(Required(value.0 .0.clone().try_into().unwrap())))
+        Ok(Self(Required(value.0.0.clone().try_into().unwrap())))
     }
 }
 
@@ -677,19 +677,19 @@ impl TryFrom<&Value> for CryptoKeyTypeChoice {
             Value::Tag(554, b) => Ok(Self::Key(Required(match b.as_text() {
                 Some(t) => t.to_string(),
                 None => {
-                    return Err("Failed to parse CryptoKeyTypeChoice tag 554 as text".to_string())
+                    return Err("Failed to parse CryptoKeyTypeChoice tag 554 as text".to_string());
                 }
             }))),
             Value::Tag(555, b) => Ok(Self::Cert(Required(match b.as_text() {
                 Some(t) => t.to_string(),
                 None => {
-                    return Err("Failed to parse CryptoKeyTypeChoice tag 555 as text".to_string())
+                    return Err("Failed to parse CryptoKeyTypeChoice tag 555 as text".to_string());
                 }
             }))),
             Value::Tag(556, b) => Ok(Self::Path(Required(match b.as_text() {
                 Some(t) => t.to_string(),
                 None => {
-                    return Err("Failed to parse CryptoKeyTypeChoice tag 556 as text".to_string())
+                    return Err("Failed to parse CryptoKeyTypeChoice tag 556 as text".to_string());
                 }
             }))),
             Value::Tag(557, b) => Ok(Self::KeyThumbprint(Required(parse_tagged_hash_entry(b)?))),
@@ -699,7 +699,7 @@ impl TryFrom<&Value> for CryptoKeyTypeChoice {
                     None => {
                         return Err(
                             "Failed to parse CryptoKeyTypeChoice tag 558 as bytes".to_string()
-                        )
+                        );
                     }
                 },
             )))),
@@ -710,7 +710,7 @@ impl TryFrom<&Value> for CryptoKeyTypeChoice {
                     None => {
                         return Err(
                             "Failed to parse CryptoKeyTypeChoice tag 560 as bytes".to_string()
-                        )
+                        );
                     }
                 },
             )))),
@@ -723,7 +723,7 @@ impl TryFrom<&Value> for CryptoKeyTypeChoice {
                     None => {
                         return Err(
                             "Failed to parse CryptoKeyTypeChoice tag 562 as bytes".to_string()
-                        )
+                        );
                     }
                 },
             )))),
@@ -762,7 +762,7 @@ impl TryFrom<Value> for DomainTypeChoice {
                 0: UuidType::Uuid(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => {
-                        return Err("Failed to parse UUID value as a DomainTypeChoice".to_string())
+                        return Err("Failed to parse UUID value as a DomainTypeChoice".to_string());
                     }
                 }),
             })),
@@ -843,7 +843,7 @@ impl TryFrom<&Value> for GroupIdTypeChoice {
                 0: UuidType::Uuid(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => {
-                        return Err("Failed to parse UUID value as a GroupIdTypeChoice".to_string())
+                        return Err("Failed to parse UUID value as a GroupIdTypeChoice".to_string());
                     }
                 }),
             })),
@@ -853,7 +853,7 @@ impl TryFrom<&Value> for GroupIdTypeChoice {
                     None => {
                         return Err(
                             "Failed to parse tagged bytes value as a GroupIdTypeChoice".to_string()
-                        )
+                        );
                     }
                 }),
             })),
@@ -891,7 +891,7 @@ impl TryFrom<&Value> for InstanceIdTypeChoice {
                     None => {
                         return Err(
                             "Failed to parse UUID value as a InstanceIdTypeChoice".to_string()
-                        )
+                        );
                     }
                 }),
             })),
@@ -901,7 +901,7 @@ impl TryFrom<&Value> for InstanceIdTypeChoice {
                     None => {
                         return Err(
                             "Failed to parse UEID value as a InstanceIdTypeChoice".to_string()
-                        )
+                        );
                     }
                 }),
             })),
@@ -979,7 +979,7 @@ impl TryFrom<&Value> for MeasuredElementTypeChoice {
                 None => {
                     return Err(
                         "Failed to parse OID value as a MeasuredElementTypeChoice".to_string()
-                    )
+                    );
                 }
             }))),
             Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
@@ -988,7 +988,7 @@ impl TryFrom<&Value> for MeasuredElementTypeChoice {
                     None => {
                         return Err(
                             "Failed to parse UUID value as a MeasuredElementTypeChoice".to_string()
-                        )
+                        );
                     }
                 }),
             })),
@@ -998,7 +998,7 @@ impl TryFrom<&Value> for MeasuredElementTypeChoice {
                     return Err(format!(
                         "Failed to parse uint in MeasuredElementTypeChoice: {}",
                         e
-                    ))
+                    ));
                 }
             })),
             Value::Text(s) => Ok(Self::Text(s.clone())),
@@ -1069,7 +1069,7 @@ impl TryFrom<&Value> for MeasuredElementTypeChoiceCbor {
                     Some(b) => b.clone(),
                     None => {
                         return Err("Failed to parse OID value as MeasuredElementTypeChoiceCbor"
-                            .to_string())
+                            .to_string());
                     }
                 }),
             })),
@@ -1080,7 +1080,7 @@ impl TryFrom<&Value> for MeasuredElementTypeChoiceCbor {
                         return Err(
                             "Failed to parse UUID value as MeasuredElementTypeChoiceCbor"
                                 .to_string(),
-                        )
+                        );
                     }
                 }),
             })),
@@ -1233,7 +1233,7 @@ impl TryFrom<Value> for ProfileTypeChoiceCbor {
                     None => {
                         return Err(
                             "Failed to parse OID value as an ProfileTypeChoiceCbor".to_string()
-                        )
+                        );
                     }
                 }),
             })),
@@ -1257,7 +1257,7 @@ impl TryFrom<&Value> for ProfileTypeChoiceCbor {
                     None => {
                         return Err(
                             "Failed to parse OID value as an ProfileTypeChoiceCbor".to_string()
-                        )
+                        );
                     }
                 }),
             })),
@@ -1297,7 +1297,7 @@ impl TryFrom<Value> for SvnTypeChoice {
                     None => {
                         return Err(
                             "Failed to parse tagged SVN value as an SvnTypeChoice".to_string()
-                        )
+                        );
                     }
                 },
             })),
@@ -1310,7 +1310,7 @@ impl TryFrom<Value> for SvnTypeChoice {
                     None => {
                         return Err(
                             "Failed to parse tagged min SVN value as an SvnTypeChoice".to_string()
-                        )
+                        );
                     }
                 },
             })),
@@ -1331,7 +1331,7 @@ impl TryFrom<&Value> for SvnTypeChoice {
                     None => {
                         return Err(
                             "Failed to parse tagged SVN value as an SvnTypeChoice".to_string()
-                        )
+                        );
                     }
                 },
             })),
@@ -1344,7 +1344,7 @@ impl TryFrom<&Value> for SvnTypeChoice {
                     None => {
                         return Err(
                             "Failed to parse tagged min SVN value as an SvnTypeChoice".to_string()
-                        )
+                        );
                     }
                 },
             })),

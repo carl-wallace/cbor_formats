@@ -3,8 +3,8 @@
 use ciborium::{cbor, value::Value};
 use core::{fmt, marker::PhantomData};
 use serde::ser::Error as OtherError;
-use serde::{de::Error, de::Visitor};
 use serde::{Deserialize, Serialize};
+use serde::{de::Error, de::Visitor};
 
 use alloc::{vec, vec::Vec};
 
