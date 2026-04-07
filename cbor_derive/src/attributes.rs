@@ -3,16 +3,13 @@
 use core::fmt::Debug;
 use core::str::FromStr;
 
-use proc_macro_error::abort;
-use syn::{self, Attribute, Lit, LitStr, Meta, MetaList, MetaNameValue, NestedMeta, Path};
+use proc_macro_error2::abort;
+use syn::{Attribute, LitStr, Path};
 
 use crate::field::TagNumber;
 
 /// Attribute name.
 pub(crate) const ATTR_NAME: &str = "cbor";
-
-/// Parsing error message.
-const PARSE_ERR_MSG: &str = "error parsing `cbor` attribute";
 
 /// Field-level attributes.
 #[derive(Clone, Debug, Default)]
@@ -90,28 +87,19 @@ impl AttrNameValue {
     /// Parse a slice of attributes.
     pub fn from_attributes(attrs: &[Attribute], out: &mut Vec<Self>) {
         for attr in attrs {
-            if !attr.path.is_ident(ATTR_NAME) {
+            if !attr.path().is_ident(ATTR_NAME) {
                 continue;
             }
 
-            let nested = match attr.parse_meta().expect(PARSE_ERR_MSG) {
-                Meta::List(MetaList { nested, .. }) => nested,
-                other => abort!(other, "malformed `cbor` attribute"),
-            };
-
-            for meta in &nested {
-                match meta {
-                    NestedMeta::Meta(Meta::NameValue(MetaNameValue {
-                        path,
-                        lit: Lit::Str(lit_str),
-                        ..
-                    })) => out.push(Self {
-                        name: path.clone(),
-                        value: lit_str.clone(),
-                    }),
-                    _ => abort!(nested, "malformed `cbor` attribute"),
-                }
-            }
+            attr.parse_nested_meta(|meta| {
+                let value: LitStr = meta.value()?.parse()?;
+                out.push(Self {
+                    name: meta.path.clone(),
+                    value,
+                });
+                Ok(())
+            })
+            .unwrap_or_else(|e| abort!(attr, "malformed `cbor` attribute: {}", e));
         }
     }
 

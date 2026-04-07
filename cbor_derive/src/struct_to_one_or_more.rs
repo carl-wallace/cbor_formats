@@ -1,6 +1,6 @@
 //! Code supporting StructToArray procedural macro
 
-use proc_macro_error::abort;
+use proc_macro_error2::abort;
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use syn::{DeriveInput, Ident, Lifetime};

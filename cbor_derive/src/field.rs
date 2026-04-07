@@ -1,6 +1,6 @@
 //! Structure field processing code adapted from the RustCrypto formats library.
 
-use proc_macro_error::abort;
+use proc_macro_error2::abort;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Field, Ident, Type};

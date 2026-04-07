@@ -24,7 +24,7 @@ use crate::struct_to_array::DeriveStructToArray;
 use crate::struct_to_map::DeriveStructToMap;
 use crate::struct_to_one_or_more::DeriveStructToOneOrMore;
 use proc_macro::TokenStream;
-use proc_macro_error::proc_macro_error;
+use proc_macro_error2::proc_macro_error;
 use syn::{DeriveInput, parse_macro_input};
 
 /// The `StructToMap` derive macro marshals data from a structure into a `Vec<(Value, Value)>` for use with
