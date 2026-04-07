@@ -8,72 +8,88 @@ use serde::{Deserialize, Serialize};
 
 use alloc::{vec, vec::Vec};
 
-use crate::choices::*;
 use crate::maps::*;
 use alloc::format;
 use alloc::string::{String, ToString};
 use cbor_derive::StructToArray;
-use common::TextOrBinary;
 
-// todo - switch to CryptoKeyTypeChoice when corim repo catches up to the spec
-/// The `attest-key-triple-record` type is defined in [CoRIM Section 3.1.4.5].
+/// The `attest-key-triple-record` type is defined in [CoRIM Section 5.1.10].
 ///
 /// ```text
 /// attest-key-triple-record = [
 ///   environment-map
-///   [ + $crypto-key-type-choice ]
+///   [ + measurement-map ]
 /// ]
 /// ```
 ///
-/// [CoRIM Section 3.1.4.5]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.4.5
+/// [CoRIM Section 5.1.10]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.10
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct AttestKeyTripleRecord {
     #[cbor(value = "Map", cbor = "true")]
     pub environment_map: EnvironmentMap,
     #[cbor(value = "Array", cbor = "true")]
-    pub crypto_keys: Vec<VerificationKeyMap>,
-    // pub crypto_keys: Option<Vec<CryptoKeyTypeChoice>>,
+    pub measurement_map: Vec<MeasurementMap>,
 }
 
-/// The `coswid-triple-record` type is defined in [CoRIM Section 3.1.4.8].
+/// The `coswid-triple-record` type is defined in [CoRIM Section 5.1.12].
 ///
 /// ```text
-///    coswid-triple-record = [
-///      environment-map
-///      [ + concise-swid-tag-id ]
-///    ]
+/// coswid-triple-record = [
+///   environment-map
+///   [ + measurement-map ]
+/// ]
 /// ```
 ///
-/// [CoRIM Section 3.1.4.8]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.4.8
+/// [CoRIM Section 5.1.12]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.12
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct CoswidTripleRecord {
     #[cbor(value = "Map", cbor = "true")]
     pub environment_map: EnvironmentMap,
-    #[cbor(value = "Array")]
-    pub coswid_tags: Vec<TextOrBinary>,
+    #[cbor(value = "Array", cbor = "true")]
+    pub measurement_map: Vec<MeasurementMap>,
 }
 
-/// The `domain-dependency-triple-record` type is defined in [CoRIM Section 3.1.4.6].
+/// The `domain-dependency-triple-record` type is defined in [CoRIM Section 5.1.11.2].
 ///
 /// ```text
 /// domain-dependency-triple-record = [
-///  $domain-type-choice
-///  [ + $domain-type-choice ]
+///   environment-map
+///   [ + measurement-map ]
 /// ]
 /// ```
 ///
-/// [CoRIM Section 3.1.4.6]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.4.6
+/// [CoRIM Section 5.1.11.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.11.2
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct DomainDependencyTripleRecord {
-    pub domain_type_choice: DomainTypeChoice,
-    #[cbor(value = "Array")]
-    pub domain_type_choices: Vec<DomainTypeChoice>,
+    #[cbor(value = "Map", cbor = "true")]
+    pub environment_map: EnvironmentMap,
+    #[cbor(value = "Array", cbor = "true")]
+    pub measurement_map: Vec<MeasurementMap>,
 }
 
-/// The `endorsed-triple-record` type is defined in [CoRIM Section 3.1.4.3].
+/// The `domain-membership-triple-record` type is defined in [CoRIM Section 5.1.11.1].
+///
+/// ```text
+/// domain-membership-triple-record = [
+///   environment-map
+///   [ + measurement-map ]
+/// ]
+/// ```
+///
+/// [CoRIM Section 5.1.11.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.11.1
+#[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
+#[allow(missing_docs)]
+pub struct DomainMembershipTripleRecord {
+    #[cbor(value = "Map", cbor = "true")]
+    pub environment_map: EnvironmentMap,
+    #[cbor(value = "Array", cbor = "true")]
+    pub measurement_map: Vec<MeasurementMap>,
+}
+
+/// The `endorsed-triple-record` type is defined in [CoRIM Section 5.1.6].
 ///
 /// ```text
 /// endorsed-triple-record = [
@@ -82,7 +98,7 @@ pub struct DomainDependencyTripleRecord {
 /// ]
 /// ```
 ///
-/// [CoRIM Section 3.1.4.3]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.4.3
+/// [CoRIM Section 5.1.6]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.6
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct EndorsedTripleRecord {
@@ -92,37 +108,35 @@ pub struct EndorsedTripleRecord {
     pub measurement_map: Vec<MeasurementMap>,
 }
 
-// todo - switch to CryptoKeyTypeChoice when corim repo catches up to the spec
-/// The `identity-triple-record` type is defined in [CoRIM Section 3.1.4.4].
+/// The `identity-triple-record` type is defined in [CoRIM Section 5.1.9].
 ///
 /// ```text
 /// identity-triple-record = [
 ///   environment-map
-///   [ + $crypto-key-type-choice ]
+///   [ + measurement-map ]
 /// ]
 /// ```
 ///
-/// [CoRIM Section 3.1.4.4]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.4.4
+/// [CoRIM Section 5.1.9]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.9
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct IdentityTripleRecord {
     #[cbor(value = "Map", cbor = "true")]
     pub environment_map: EnvironmentMap,
     #[cbor(value = "Array", cbor = "true")]
-    pub crypto_keys: Vec<VerificationKeyMap>,
-    // pub crypto_keys: Vec<CryptoKeyTypeChoice>,
+    pub measurement_map: Vec<MeasurementMap>,
 }
 
-/// The `reference-triple-record` type is defined in [CoRIM Section 3.1.4.2].
+/// The `reference-triple-record` type is defined in [CoRIM Section 5.1.5].
 ///
 /// ```text
 /// reference-triple-record = [
-///   environment-map ; target environment
-///   [ + measurement-map ] ; reference measurements
+///   environment-map
+///   [ + measurement-map ]
 /// ]
 /// ```
 ///
-/// [CoRIM Section 3.1.4.2]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.4.2
+/// [CoRIM Section 5.1.5]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.5
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ReferenceTripleRecord {
@@ -132,4 +146,58 @@ pub struct ReferenceTripleRecord {
     #[cbor(value = "Array", cbor = "true")]
     #[serde(rename = "measurements")]
     pub measurement_map: Vec<MeasurementMap>,
+}
+
+/// The `conditional-endorsement-triple-record` type is defined in [CoRIM Section 5.1.7].
+///
+/// ```text
+/// conditional-endorsement-triple-record = [
+///   conditions: [ + measurement-map ]
+///   endorsements: [ + endorsed-triple-record ]
+/// ]
+/// ```
+///
+/// [CoRIM Section 5.1.7]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.7
+#[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
+#[allow(missing_docs)]
+pub struct ConditionalEndorsementTripleRecord {
+    #[cbor(value = "Array", cbor = "true")]
+    pub conditions: Vec<MeasurementMap>,
+    #[cbor(value = "Array", cbor = "true")]
+    pub endorsements: Vec<EndorsedTripleRecord>,
+}
+
+/// The `series-record` type is defined in [CoRIM Section 5.1.8].
+///
+/// ```text
+/// series-record = [selection: [+ measurement-map], addition: [+ measurement-map]]
+/// ```
+///
+/// [CoRIM Section 5.1.8]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.8
+#[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
+#[allow(missing_docs)]
+pub struct SeriesRecord {
+    #[cbor(value = "Array", cbor = "true")]
+    pub selection: Vec<MeasurementMap>,
+    #[cbor(value = "Array", cbor = "true")]
+    pub addition: Vec<MeasurementMap>,
+}
+
+/// The `conditional-endorsement-series-triple-record` type is defined in [CoRIM Section 5.1.8].
+///
+/// ```text
+/// conditional-endorsement-series-triple-record = [
+///   conditions: [ + measurement-map ]
+///   series: [ + series-record ]
+/// ]
+/// ```
+///
+/// [CoRIM Section 5.1.8]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.8
+#[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
+#[allow(missing_docs)]
+pub struct ConditionalEndorsementSeriesTripleRecord {
+    #[cbor(value = "Array", cbor = "true")]
+    pub conditions: Vec<MeasurementMap>,
+    #[cbor(value = "Array", cbor = "true")]
+    pub series: Vec<SeriesRecord>,
 }

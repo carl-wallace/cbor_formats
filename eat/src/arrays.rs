@@ -22,8 +22,8 @@ use common::{choices::*, *};
 /// `Nested-Token` is defined in [EAT Section 4.2.18] and is defined as a `JSON-Selector` for JSON-encoded EATs.
 /// The `JSON-Selector` choice in two places: in the definition of Submodule, in the definition of
 /// Detached-EAT-Bundle (as part of NestedToken). Where used within a DEB, the  Detached-EAT-Bundle
-/// option MUST NOT be used. This structure is used in the DEB context. Use [JsonSelector](JsonSelector)
-/// for submodule claims. Use [NestedTokenCbor](NestedTokenCbor) for CBOR-encoded EATs.
+/// option MUST NOT be used. This structure is used in the DEB context. Use [JsonSelector]
+/// for submodule claims. Use [NestedTokenCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// Nested-Token = JSON-Selector
@@ -114,10 +114,10 @@ impl TryFrom<&NestedTokenCbor> for NestedToken {
 /// CBOR-Nested-Token = JSON-Token-Inside-CBOR-Token / CBOR-Token-Inside-CBOR-Token
 /// Nested-Token = CBOR-Nested-Token
 /// ```
-/// This library defines the [SelectorCbor](`SelectorCbor`) in place of `CBOR-Nested-Token` to simplify
-/// the definition of a [DetachedEatBundle](`DetachedEatBundle`) that can be used with JSON or CBOR.
+/// This library defines the [SelectorCbor] in place of `CBOR-Nested-Token` to simplify
+/// the definition of a [DetachedEatBundle] that can be used with JSON or CBOR.
 /// See the [cbor_specific module](../cbor_specific/index.html) for this crate for more details.
-/// Use [NestedToken](NestedToken) for JSON-encoded EATs.
+/// Use [NestedToken] for JSON-encoded EATs.
 /// ```text
 /// CBOR-Selector = CBOR-Nested-Token / Detached-Submodule-Digest
 /// ```
@@ -168,7 +168,7 @@ impl TryFrom<&NestedToken> for NestedTokenCbor {
 /// JSON encoding/decoding of `json-wrapped-claims-set`, see [EAT Section 5]
 ///
 /// The `json-wrapped-claims-set` type used as the JSON part of a JC<> production that defines the
-/// `detached-claims-set` field of `Detached-EAT-Bundle`. Use [WrappedClaimsSetCbor](WrappedClaimsSetCbor)
+/// `detached-claims-set` field of `Detached-EAT-Bundle`. Use [WrappedClaimsSetCbor]
 /// for CBOR-encoded EATs.
 ///
 /// ```text
@@ -201,7 +201,7 @@ impl TryFrom<&WrappedClaimsSetCbor> for WrappedClaimsSet {
 /// CBOR encoding/decoding of `cbor-wrapped-claims-set`, see [EAT Section 5]
 ///
 /// The `cbor-wrapped-claims-set` type is used as the CBOR part of a JC<> production that defines the
-/// `detached-claims-set` field of `Detached-EAT-Bundle`. Use [WrappedClaimsSet](WrappedClaimsSet)
+/// `detached-claims-set` field of `Detached-EAT-Bundle`. Use [WrappedClaimsSet]
 /// for JSON-encoded EATs.
 ///
 /// ```text
@@ -257,7 +257,7 @@ impl TryFrom<&WrappedClaimsSet> for WrappedClaimsSetCbor {
 
 /// JSON encoding/decoding of `Detached-EAT-Bundle`, see [EAT Section 5].
 ///
-/// Use [DetachedEatBundleCbor](DetachedEatBundleCbor) for CBOR-encoded EATs.
+/// Use [DetachedEatBundleCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// Detached-EAT-Bundle = [
@@ -280,7 +280,7 @@ pub struct DetachedEatBundle {
 
 /// JSON encoding/decoding of `Detached-Submodule-Digest`, see [EAT Section 4.2.18].
 ///
-/// Use [DetachedSubmoduleDigestCbor](DetachedSubmoduleDigestCbor) for CBOR-encoded EATs.
+/// Use [DetachedSubmoduleDigestCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// Detached-Submodule-Digest = [
@@ -299,7 +299,7 @@ pub struct DetachedSubmoduleDigest {
 
 /// JSON encoding/decoding of `dloa-type`, see [EAT Section 4.2.14].
 ///
-/// Use [DloaTypeCbor](DloaTypeCbor) for CBOR-encoded EATs.
+/// Use [DloaTypeCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// dloa-type = [
@@ -322,7 +322,7 @@ pub struct DloaType {
 
 /// JSON encoding/decoding of `hardware-version-type`, see [EAT Section 4.2.5].
 ///
-/// Use [HardwareVersionTypeCbor](HardwareVersionTypeCbor) for CBOR-encoded EATs.
+/// Use [HardwareVersionTypeCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// hardware-version-type = [
@@ -342,7 +342,7 @@ pub struct HardwareVersionType {
 
 /// JSON encoding/decoding of `individual-result`, see [EAT Section 4.2.17].
 ///
-/// Use [IndividualResultCbor](IndividualResultCbor) for CBOR-encoded EATs.
+/// Use [IndividualResultCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// individual-result = [
@@ -360,7 +360,7 @@ pub struct IndividualResult {
 
 /// JSON encoding/decoding of `manifests-type`, see [EAT Section 4.2.15].
 ///
-/// Use [ManifestsTypeCbor](ManifestsTypeCbor) for CBOR-encoded EATs.
+/// Use [ManifestsTypeCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// manifests-type = [+ manifest-format]
@@ -372,7 +372,7 @@ pub struct ManifestsType(pub Vec<ManifestFormat>);
 
 /// CBOR encoding/decoding of `manifests-type`, see [EAT Section 4.2.15].
 ///
-/// Use [ManifestsType](ManifestsType) for JSON-encoded EATs.
+/// Use [ManifestsType] for JSON-encoded EATs.
 ///
 /// ```text
 /// manifests-type = [+ manifest-format]
@@ -432,7 +432,7 @@ impl TryFrom<&ManifestsTypeCbor> for ManifestsType {
 
 /// JSON encoding/decoding of `manifest-format`, see [EAT Section 4.2.15].
 ///
-/// Use [ManifestFormatCbor](ManifestFormatCbor) for CBOR-encoded EATs.
+/// Use [ManifestFormatCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// The $manifest-body-json and $manifest-body-cbor distill down to text or binary,
@@ -457,7 +457,7 @@ pub struct ManifestFormat {
 
 /// JSON encoding/decoding of `measurements-type`, see [EAT Section 4.2.16].
 ///
-/// Use [MeasurementsTypeCbor](MeasurementsTypeCbor) for CBOR-encoded EATs.
+/// Use [MeasurementsTypeCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// measurements-type = [+ measurements-format]
@@ -469,7 +469,7 @@ pub struct MeasurementsType(pub Vec<MeasurementsFormat>);
 
 /// CBOR encoding/decoding of `measurements-type`, see [EAT Section 4.2.16].
 ///
-/// Use [MeasurementsType](MeasurementsType) for JSON-encoded EATs.
+/// Use [MeasurementsType] for JSON-encoded EATs.
 ///
 /// ```text
 /// measurements-type = [+ measurements-format]
@@ -529,7 +529,7 @@ impl TryFrom<&MeasurementsTypeCbor> for MeasurementsType {
 
 /// JSON encoding/decoding of `measurements-format`, see [EAT Section 4.2.16].
 ///
-/// Use [MeasurementsFormatCbor](MeasurementsFormatCbor) for CBOR-encoded EATs.
+/// Use [MeasurementsFormatCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// For the moment, the $measurements-body-cbor socket is not supported and instead
@@ -551,7 +551,7 @@ pub struct MeasurementsFormat {
 
 /// JSON encoding/decoding of `measurements-type`, see [EAT Section 4.2.16].
 ///
-/// Use [MeasurementResultsGroupArrayCbor](MeasurementResultsGroupArrayCbor) for CBOR-encoded EATs.
+/// Use [MeasurementResultsGroupArrayCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// measurements-type = [+ measurements-format]
@@ -563,7 +563,7 @@ pub struct MeasurementResultsGroupArray(pub Vec<MeasurementResultsGroup>);
 
 /// CBOR encoding/decoding of `measurements-type`, see [EAT Section 4.2.16].
 ///
-/// Use [MeasurementResultsGroupArray](MeasurementResultsGroupArray) for JSON-encoded EATs.
+/// Use [MeasurementResultsGroupArray] for JSON-encoded EATs.
 ///
 /// ```text
 /// measurements-type = [+ measurements-format]
@@ -629,7 +629,7 @@ impl TryFrom<&MeasurementResultsGroupArrayCbor> for MeasurementResultsGroupArray
 
 /// JSON encoding/decoding of `measurement-results-group`, see [EAT Section 4.2.17].
 ///
-/// Use [MeasurementResultsGroupCbor](MeasurementResultsGroupCbor) for CBOR-encoded EATs.
+/// Use [MeasurementResultsGroupCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// measurement-results-group = [
@@ -649,7 +649,7 @@ pub struct MeasurementResultsGroup {
 
 /// JSON encoding/decoding of `sw-version-type`, see [EAT Section 4.2.7].
 ///
-/// Use [SwVersionTypeCbor](SwVersionTypeCbor) for CBOR-encoded EATs.
+/// Use [SwVersionTypeCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// sw-version-type = [

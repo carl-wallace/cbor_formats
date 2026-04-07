@@ -4,7 +4,6 @@ use alloc::collections::BTreeMap;
 use alloc::format;
 use alloc::string::{String, ToString};
 use alloc::{vec, vec::Vec};
-use ciborium::value::Integer;
 use ciborium::{cbor, value::Value};
 use core::{fmt, marker::PhantomData};
 use serde::de::{Error, MapAccess, Visitor};
@@ -18,7 +17,7 @@ use common::choices::*;
 use common::*;
 use serde::ser::Error as OtherError;
 
-/// The `class-map` type is defined in [CoRIM Section 3.1.4.1.2].
+/// The `class-map` type is defined in [CoRIM Section 5.1.4.2].
 ///
 /// ```text
 /// class-map = non-empty<{
@@ -30,7 +29,7 @@ use serde::ser::Error as OtherError;
 /// }>
 /// ```
 ///
-/// [CoRIM Section 3.1.4.1.2]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.4.1.2
+/// [CoRIM Section 5.1.4.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.2
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ClassMap {
@@ -46,20 +45,20 @@ pub struct ClassMap {
     pub index: Option<u128>,
 }
 
-/// The `concise-mid-tag` type is defined in [CoRIM Section 3.1].
+/// The `concise-mid-tag` type is defined in [CoRIM Section 5.1].
 ///
 /// ```text
 /// concise-mid-tag = {
 ///   ? &(language: 0) => text
 ///   &(tag-identity: 1) => tag-identity-map
-///   ? &(entities: 2) => [ + entity-map ]
+///   ? &(entities: 2) => [ + comid-entity-map ]
 ///   ? &(linked-tags: 3) => [ + linked-tag-map ]
 ///   &(triples: 4) => triples-map
 ///   * $$concise-mid-tag-extension
 /// }
 /// ```
 ///
-/// [CoRIM Section 3.1]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1
+/// [CoRIM Section 5.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ConciseMidTag {
@@ -78,16 +77,16 @@ pub struct ConciseMidTag {
     pub other: Option<Vec<Tuple>>,
 }
 
-/// The `corim-locator-map` type is defined in [CoRIM Section 2.1.3].
+/// The `corim-locator-map` type is defined in [CoRIM Section 4.1.3].
 ///
 /// ```text
 /// corim-locator-map = {
-///   &(href: 0) => uri
-///   ? &(thumbprint: 1) => hash-entry
+///   &(href: 0) => uri / [ + uri ]
+///   ? &(thumbprint: 1) => eatmc.digest / [ eatmc.digest ]
 /// }
 /// ```
 ///
-/// [CoRIM Section 2.1.3]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-2.1.3
+/// [CoRIM Section 4.1.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-4.1.3
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct CorimLocatorMap {
@@ -98,21 +97,21 @@ pub struct CorimLocatorMap {
     pub thumbprint: Option<HashEntry>,
 }
 
-/// The `corim-map` type is defined in [CoRIM Section 2.1].
+/// The `corim-map` type is defined in [CoRIM Section 4.1].
 ///
 /// ```text
 /// corim-map = {
 ///   &(id: 0) => $corim-id-type-choice
 ///   &(tags: 1) => [ + $concise-tag-type-choice ]
 ///   ? &(dependent-rims: 2) => [ + corim-locator-map ]
-///   ? &(profile: 3) => [ + profile-type-choice ]
+///   ? &(profile: 3) => $profile-type-choice
 ///   ? &(rim-validity: 4) => validity-map
 ///   ? &(entities: 5) => [ + corim-entity-map ]
 ///   * $$corim-map-extension
 /// }
 /// ```
 ///
-/// [CoRIM Section 2.1]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-2.1
+/// [CoRIM Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-4.1
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct CorimMap {
@@ -122,17 +121,15 @@ pub struct CorimMap {
     pub tags: Vec<ConciseTagTypeChoice>,
     #[cbor(tag = "2", value = "Array", cbor = "true")]
     pub dependent_rims: Option<Vec<CorimLocatorMap>>,
-    #[cbor(tag = "3", value = "Array", cbor = "true")]
-    pub profile: Option<Vec<ProfileTypeChoice>>,
+    #[cbor(tag = "3", cbor = "true")]
+    pub profile: Option<ProfileTypeChoice>,
     #[cbor(tag = "4", value = "Map", cbor = "true")]
     pub rim_validity: Option<ValidityMap>,
     #[cbor(tag = "5", value = "Array", cbor = "true")]
     pub entities: Option<Vec<EntityMap>>,
-    //todo extensibility
-    //extensions
 }
 
-/// The `coswid-triple-record` type is defined in [CoRIM Section 2.2.2].
+/// The `corim-meta-map` type is defined in [CoRIM Section 4.2.3].
 ///
 /// ```text
 /// corim-meta-map = {
@@ -141,7 +138,7 @@ pub struct CorimMap {
 /// }
 /// ```
 ///
-/// [CoRIM Section 2.2.2]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-2.2.2
+/// [CoRIM Section 4.2.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-4.2.3
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct CorimMetaMap {
@@ -151,7 +148,7 @@ pub struct CorimMetaMap {
     pub validity: Option<ValidityMap>,
 }
 
-/// The `corim-signer-map` type is defined in [CoRIM Section 2.2.2.1].
+/// The `corim-signer-map` type is defined in [CoRIM Section 4.2.3.1].
 ///
 /// ```text
 /// corim-signer-map = {
@@ -161,7 +158,7 @@ pub struct CorimMetaMap {
 /// }
 /// ```
 ///
-/// [CoRIM Section 2.2.2.1]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-2.2.2.1
+/// [CoRIM Section 4.2.3.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-4.2.3.1
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct CorimSignerMap {
@@ -173,32 +170,30 @@ pub struct CorimSignerMap {
     //extensions
 }
 
-/// The `entity-map` type is defined in [CoRIM Section 1.3.2].
+/// The `entity-map` type is defined in [CoRIM Section 7.2].
+///
+/// [CoRIM Section 7.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-7.2
 ///
 /// ```text
-/// entity-map<role-type-choice, extension-socket> = {
-///   &(entity-name: 0) => $entity-name-type-choice
-///   ? &(reg-id: 1) => uri
-///   &(role: 2) => [ + role-type-choice ]
-///   * extension-socket
+/// entity-map<role, extension> = {
+///   &(entity-name: 31) => $entity-name-type-choice
+///   ? &(reg-id: 32) => uri
+///   &(role: 33) => [ + role-type-choice ]
+///   * extension
 /// }
 /// ```
-///
-/// [CoRIM Section 1.3.2]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-1.3.2
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct EntityMap {
-    #[cbor(tag = "0")]
+    #[cbor(tag = "31")]
     pub name: EntityNameTypeChoice,
-    #[cbor(tag = "1", cbor = "true")]
+    #[cbor(tag = "32", cbor = "true")]
     pub regid: Option<TaggedUriType>,
-    #[cbor(tag = "2", value = "Array", cbor = "true")]
+    #[cbor(tag = "33", value = "Array", cbor = "true")]
     pub roles: Vec<CorimRoleTypeChoice>,
-    //todo extensibility
-    //extensions
 }
 
-/// The `environment-map` type is defined in [CoRIM Section 3.1.4.1.1].
+/// The `environment-map` type is defined in [CoRIM Section 5.1.4.1].
 ///
 /// ```text
 /// environment-map = non-empty<{
@@ -208,7 +203,7 @@ pub struct EntityMap {
 /// }>
 /// ```
 ///
-/// [CoRIM Section 3.1.4.1.1]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.4.1.1
+/// [CoRIM Section 5.1.4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.1
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct EnvironmentMap {
@@ -222,59 +217,51 @@ pub struct EnvironmentMap {
     //extensions
 }
 
-/// The `flags-map` type is defined in [CoRIM Section 3.1.4.1.5.5].
+/// The `flags-map` type is defined in [CoRIM Section 5.1.4.5.5].
+///
+/// [CoRIM Section 5.1.4.5.5]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5.5
 ///
 /// ```text
 ///   flags-map = {
-///      ? &(configured: 0) => bool
-///      ? &(secure: 1) => bool
-///      ? &(recovery: 2) => bool
-///      ? &(debug: 3) => bool
-///      ? &(replay-protected: 4) => bool
-///      ? &(integrity-protected: 5) => bool
+///      ? &(is-configured: 0) => bool
+///      ? &(is-secure: 1) => bool
+///      ? &(is-recovery: 2) => bool
+///      ? &(is-debug: 3) => bool
+///      ? &(is-replay-protected: 4) => bool
+///      ? &(is-integrity-protected: 5) => bool
+///      ? &(is-runtime-meas: 6) => bool
+///      ? &(is-immutable: 7) => bool
+///      ? &(is-tcb: 8) => bool
+///      ? &(is-confidentiality-protected: 9) => bool
 ///      * $$flags-map-extension
 ///    }
 /// ```
-///
-/// [CoRIM Section 3.1.4.1.5.5]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.4.1.5.5
-// #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
-// #[allow(missing_docs)]
-// pub struct FlagsMap {
-//     #[cbor(tag = "0", value = "Bool")]
-//     pub configured: Option<bool>,
-//     #[cbor(tag = "1", value = "Bool")]
-//     pub secure: Option<bool>,
-//     #[cbor(tag = "2", value = "Bool")]
-//     pub recovery: Option<bool>,
-//     #[cbor(tag = "3", value = "Bool")]
-//     pub debug: Option<bool>,
-//     #[cbor(tag = "4", value = "Bool")]
-//     pub replay_protected: Option<bool>,
-//     #[cbor(tag = "5", value = "Bool")]
-//     pub integrity_protected: Option<bool>,
-//     #[cbor(value = "Array", cbor = "true")]
-//     pub other: Option<Vec<Tuple>>,
-// }
-//todo using i8 to align with comid repo output (it is disaligned with corim spec)
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct FlagsMap(i8);
-impl TryFrom<&Value> for FlagsMap {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Integer(i) => {
-                let v: i8 = match Integer::try_into(*i) {
-                    Ok(i) => i,
-                    Err(e) => return Err(e.to_string()),
-                };
-                Ok(FlagsMap(v))
-            }
-            _ => Err("Failed to parse value as a FlagsMap".to_string()),
-        }
-    }
+#[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
+#[allow(missing_docs)]
+pub struct FlagsMap {
+    #[cbor(tag = "0", value = "Bool")]
+    pub is_configured: Option<bool>,
+    #[cbor(tag = "1", value = "Bool")]
+    pub is_secure: Option<bool>,
+    #[cbor(tag = "2", value = "Bool")]
+    pub is_recovery: Option<bool>,
+    #[cbor(tag = "3", value = "Bool")]
+    pub is_debug: Option<bool>,
+    #[cbor(tag = "4", value = "Bool")]
+    pub is_replay_protected: Option<bool>,
+    #[cbor(tag = "5", value = "Bool")]
+    pub is_integrity_protected: Option<bool>,
+    #[cbor(tag = "6", value = "Bool")]
+    pub is_runtime_meas: Option<bool>,
+    #[cbor(tag = "7", value = "Bool")]
+    pub is_immutable: Option<bool>,
+    #[cbor(tag = "8", value = "Bool")]
+    pub is_tcb: Option<bool>,
+    #[cbor(tag = "9", value = "Bool")]
+    pub is_confidentiality_protected: Option<bool>,
 }
 
-/// The `linked-tag-map` type is defined in [CoRIM Section 3.1.3].
+/// The `linked-tag-map` type is defined in [CoRIM Section 5.1.3].
 ///
 /// ```text
 /// linked-tag-map = {
@@ -283,7 +270,7 @@ impl TryFrom<&Value> for FlagsMap {
 /// }
 /// ```
 ///
-/// [CoRIM Section 3.1.3]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.3
+/// [CoRIM Section 5.1.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.3
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct LinkedTagMap {
@@ -293,16 +280,17 @@ pub struct LinkedTagMap {
     pub tag_rel: TagRelTypeChoice,
 }
 
-/// The `measurement-map` type is defined in [CoRIM Section 3.1.4.1.5].
+/// The `measurement-map` type is defined in [CoRIM Section 5.1.4.5].
+///
+/// [CoRIM Section 5.1.4.5]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5
 ///
 /// ```text
 /// measurement-map = {
 ///   ? &(mkey: 0) => $measured-element-type-choice
 ///   &(mval: 1) => measurement-values-map
+///   ? &(authorized-by: 2) => [ + $crypto-key-type-choice ]
 /// }
 /// ```
-///
-/// [CoRIM Section 3.1.4.1.5]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.4.1.5
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct MeasurementMap {
@@ -310,31 +298,34 @@ pub struct MeasurementMap {
     pub mkey: Option<MeasuredElementTypeChoice>,
     #[cbor(tag = "1", value = "Map", cbor = "true")]
     pub value: MeasurementValuesMap,
+    #[cbor(tag = "2", value = "Array", cbor = "true")]
+    pub authorized_by: Option<Vec<CryptoKeyTypeChoice>>,
 }
 
-/// The `measurement-values-map` type is defined in [CoRIM Section 3.1.4.1.5.2].
+/// The `measurement-values-map` type is defined in [CoRIM Section 5.1.4.5.2].
+///
+/// [CoRIM Section 5.1.4.5.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5.2
 ///
 /// ```text
 /// measurement-values-map = non-empty<{
 ///   ? &(version: 0) => version-map
 ///   ? &(svn: 1) => svn-type-choice
-///   ? &(digests: 2) => [ + hash-entry ]
+///   ? &(digests: 2) => digests-type
 ///   ? &(flags: 3) => flags-map
-///   ? (
-///       &(raw-value: 4) => $raw-value-type-choice,
-///       ? &(raw-value-mask: 5) => raw-value-mask-type
-///     )
+///   ? &(raw-value: 4) => $raw-value-type-choice
+///   ? &(raw-value-mask: 5) => raw-value-mask-type  ; deprecated
 ///   ? &(mac-addr: 6) => mac-addr-type-choice
-///   ? &(ip-addr: 7) =>  ip-addr-type-choice
+///   ? &(ip-addr: 7) => ip-addr-type-choice
 ///   ? &(serial-number: 8) => text
 ///   ? &(ueid: 9) => ueid-type
 ///   ? &(uuid: 10) => uuid-type
 ///   ? &(name: 11) => text
+///   ? &(cryptokeys: 13) => [ + $crypto-key-type-choice ]
+///   ? &(integrity-registers: 14) => integrity-registers
+///   ? &(int-range: 15) => $int-range-type-choice
 ///   * $$measurement-values-map-extension
 /// }>
 /// ```
-///
-/// [CoRIM Section 3.1.4.1.5.2]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.4.1.5.2
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct MeasurementValuesMap {
@@ -344,14 +335,13 @@ pub struct MeasurementValuesMap {
     pub svn: Option<SvnTypeChoice>,
     #[cbor(tag = "2", value = "Array", cbor = "true")]
     pub digests: Option<Vec<HashEntry>>,
-    #[cbor(tag = "3")]
+    #[cbor(tag = "3", value = "Map", cbor = "true")]
     #[serde(rename = "op-flags")]
     pub flags: Option<FlagsMap>,
-    //todo raw field support
-    // #[cbor(tag = "4")]
-    // pub raw_value: Option<RawValueTypeChoice>,
-    // #[cbor(tag = "5")]
-    // pub raw_value_mask: Option<RawValueMaskType>,
+    #[cbor(tag = "4")]
+    pub raw_value: Option<RawValueTypeChoice>,
+    #[cbor(tag = "5", value = "Bytes")]
+    pub raw_value_mask: Option<Vec<u8>>,
     #[cbor(tag = "6", value = "Bytes")]
     pub mac_addr: Option<Vec<u8>>,
     #[cbor(tag = "7", value = "Bytes")]
@@ -364,23 +354,28 @@ pub struct MeasurementValuesMap {
     pub uuid: Option<UuidType>,
     #[cbor(tag = "11", value = "Text")]
     pub name: Option<String>,
+    #[cbor(tag = "13", value = "Array", cbor = "true")]
+    pub cryptokeys: Option<Vec<CryptoKeyTypeChoice>>,
+    // #[cbor(tag = "14", value = "Map")]
+    // pub integrity_registers: Option<IntegrityRegisters>,
+    #[cbor(tag = "15")]
+    pub int_range: Option<IntRangeTypeChoice>,
     #[cbor(value = "Array", cbor = "true")]
     pub other: Option<Vec<Tuple>>,
 }
 
-/// The `protected-corim-header-map` type is defined in [CoRIM Section 2.2.1].
+/// The `protected-corim-header-map` type is defined in [CoRIM Section 4.2.1].
+///
+/// [CoRIM Section 4.2.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-4.2.1
 ///
 /// ```text
-/// protected-corim-header-map = {
-///   &(alg-id: 1) => int
-///   &(content-type: 3) => "application/corim-unsigned+cbor"
-///   &(issuer-key-id: 4) => bstr
-///   &(corim-meta: 8) => bstr .cbor corim-meta-map
+/// protected-corim-header-map-inline = {
+///   &(alg: 1) => int
+///   &(content-type: 3) => "application/rim+cbor"
+///   meta-group
 ///   * cose-label => cose-value
 /// }
 /// ```
-///
-/// [CoRIM Section 2.2.1]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-2.2.1
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ProtectedCorimHeaderMap {
@@ -388,15 +383,11 @@ pub struct ProtectedCorimHeaderMap {
     pub alg_id: u64,
     #[cbor(tag = "3", value = "Text")]
     content_type: String,
-    #[cbor(tag = "4", value = "Bytes")]
-    pub issuer_key_id: Vec<u8>,
     #[cbor(tag = "8", value = "Map", cbor = "true")]
     pub meta: CorimMetaMap,
-    // todo CoseValues
-    //pub cose_label: CoseValues
 }
 
-/// The `coswid-triple-record` type is defined in [CoRIM Section 3.1.1].
+/// The `tag-identity-map` type is defined in [CoRIM Section 5.1.1].
 ///
 /// ```text
 /// tag-identity-map = {
@@ -405,7 +396,7 @@ pub struct ProtectedCorimHeaderMap {
 /// }
 /// ```
 ///
-/// [CoRIM Section 3.1.1]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.1
+/// [CoRIM Section 5.1.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.1
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct TagIdentityMap {
@@ -418,8 +409,9 @@ pub struct TagIdentityMap {
     pub tag_version: Option<TagVersionType>,
 }
 
-// todo non-empty
-/// The `triples-map` type is defined in [CoRIM Section 3.1.4].
+/// The `triples-map` type is defined in [CoRIM Section 5.1.4].
+///
+/// [CoRIM Section 5.1.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4
 ///
 /// ```text
 /// triples-map = non-empty<{
@@ -430,11 +422,11 @@ pub struct TagIdentityMap {
 ///   ? &(dependency-triples: 4) => [ + domain-dependency-triple-record ]
 ///   ? &(membership-triples: 5) => [ + domain-membership-triple-record ]
 ///   ? &(coswid-triples: 6) => [ + coswid-triple-record ]
+///   ? &(conditional-endorsement-series-triples: 8) => [ + conditional-endorsement-series-triple-record ]
+///   ? &(conditional-endorsement-triples: 10) => [ + conditional-endorsement-triple-record ]
 ///   * $$triples-map-extension
 /// }>
 /// ```
-///
-/// [CoRIM Section 3.1.4]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.4
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct TriplesMap {
@@ -450,52 +442,38 @@ pub struct TriplesMap {
     #[cbor(tag = "4", value = "Array", cbor = "true")]
     pub dependency_triples: Option<Vec<DomainDependencyTripleRecord>>,
     #[cbor(tag = "5", value = "Array", cbor = "true")]
-    pub membership_triples: Option<Vec<DomainDependencyTripleRecord>>,
+    pub membership_triples: Option<Vec<DomainMembershipTripleRecord>>,
     #[cbor(tag = "6", value = "Array", cbor = "true")]
     pub coswid_triples: Option<Vec<CoswidTripleRecord>>,
+    #[cbor(tag = "8", value = "Array", cbor = "true")]
+    pub conditional_endorsement_series_triples:
+        Option<Vec<ConditionalEndorsementSeriesTripleRecord>>,
+    #[cbor(tag = "10", value = "Array", cbor = "true")]
+    pub conditional_endorsement_triples: Option<Vec<ConditionalEndorsementTripleRecord>>,
     #[cbor(value = "Array", cbor = "true")]
     pub other: Option<Vec<Tuple>>,
 }
 
-/// The `validity-map` type is defined in [CoRIM Section 1.3.3].
+/// The `validity-map` type is defined in [CoRIM Section 7.3].
+///
+/// [CoRIM Section 7.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-7.3
 ///
 /// ```text
 /// validity-map = {
 ///   ? &(not-before: 0) => time
-///   &(not-after: 1) => time
+///   ? &(not-after: 1) => time
 /// }
 /// ```
-///
-/// [CoRIM Section 1.3.3]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-1.3.3
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ValidityMap {
     #[cbor(tag = "0", cbor = "true")]
     pub not_before: Option<Time>,
     #[cbor(tag = "1", cbor = "true")]
-    pub not_after: Time,
+    pub not_after: Option<Time>,
 }
 
-// todo - the corim sample uses this struct still
-/// The `verification-key-map` type is not defined in the current CoRIM but is used
-/// in samples generated by the reference implementation (it had been in -02).
-///
-/// ```text
-///    verification-key-map = {
-///      comid.key => pkix-base64-key-type
-///      ? comid.keychain => [ + pkix-base64-cert-type ]
-///    }
-/// ```
-#[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
-#[allow(missing_docs)]
-pub struct VerificationKeyMap {
-    #[cbor(tag = "0", value = "Text")]
-    pub key: String,
-    #[cbor(tag = "1", value = "Array")]
-    pub keychain: Option<Vec<PkixBase64Type>>,
-}
-
-/// The `version-map` type is defined in [CoRIM Section 3.1.4.1.5.3].
+/// The `version-map` type is defined in [CoRIM Section 5.1.4.5.3].
 ///
 /// ```text
 /// version-type = text .default '0.0.0'
@@ -505,7 +483,7 @@ pub struct VerificationKeyMap {
 /// }
 /// ```
 ///
-/// [CoRIM Section 3.1.4.1.5.3]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.4.1.5.3
+/// [CoRIM Section 5.1.4.5.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5.3
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct VersionMap {
@@ -513,4 +491,26 @@ pub struct VersionMap {
     pub version: String,
     #[cbor(tag = "1")]
     pub version_scheme: Option<VersionScheme>,
+}
+
+/// The `concise-tl-tag` type is defined in [CoRIM Section 6.1].
+///
+/// [CoRIM Section 6.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-6.1
+///
+/// ```text
+/// concise-tl-tag = {
+///   &(tl-tag-id: 0) => $tag-id-type-choice
+///   ? &(tl-tag-version: 1) => uint
+///   &(tl-corim-ids: 2) => [ + $corim-id-type-choice ]
+/// }
+/// ```
+#[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
+#[allow(missing_docs)]
+pub struct ConciseTlTag {
+    #[cbor(tag = "0", cbor = "true")]
+    pub tag_id: TagIdTypeChoice,
+    #[cbor(tag = "1", value = "Integer")]
+    pub tag_version: Option<u64>,
+    #[cbor(tag = "2", value = "Array")]
+    pub corim_ids: Vec<CorimIdTypeChoice>,
 }

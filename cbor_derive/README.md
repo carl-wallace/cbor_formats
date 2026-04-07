@@ -16,7 +16,7 @@ original structs and the related auto-generated structs.
 
 ### Example
 
-The [CoRIM](https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03) specification defines the CorimMetaMap as follows:
+The [CoRIM](https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10) specification defines the CorimMetaMap as follows:
 
 ```text
 corim-meta-map = {
@@ -87,6 +87,7 @@ assert_eq!(encoded_token, enc_meta);
 // compare decoded result with expectations
 match &dec.signer.entity_name {
     EntityNameTypeChoice::Text(v) => assert_eq!(*v, "ACME Ltd.".to_string()),
+    _ => panic!(),
 };
 match &dec.signer.reg_id {
     Some(TaggedUriTypeCbor::U(v)) => assert_eq!(v.0, "https://acme.example".to_string()),
@@ -98,7 +99,7 @@ match &dec.validity {
             Some(TimeCbor::T(t)) => assert_eq!(t.0, 1601424000),
             None => panic!(),
         }
-        assert_eq!(v.not_after, TimeCbor::T(Required(1632960000)))
+        assert_eq!(v.not_after, Some(TimeCbor::T(Required(1632960000))))
     }
     None => panic!(),
 };
@@ -137,7 +138,7 @@ let scratch = CorimMetaMapCbor {
     },
     validity: Some(ValidityMapCbor {
         not_before: Some(TimeCbor::T(Required(1601424000))),
-        not_after: TimeCbor::T(Required(1632960000)),
+        not_after: Some(TimeCbor::T(Required(1632960000))),
     }),
 };
 let mut scratch_actual = vec![];

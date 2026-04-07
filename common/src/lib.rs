@@ -48,12 +48,97 @@ impl TryFrom<Value> for BytesType {
 /// Uri type
 pub type Uri = String;
 
-///tagged-int-type = #6.551(int)
-pub type TaggedIntType = Required<IntType, 551>;
+/// The `tagged-bytes` type is defined in [CoRIM Section 7.8].
+///
+/// ```text
+/// tagged-bytes = #6.560(bytes)
+/// ```
+///
+/// [CoRIM Section 7.8]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-7.8
+pub type TaggedBytes = Required<BytesType, 560>;
 
-//todo the cocli tests use tag 600 here
-///tagged-int-type = #6.600(int)
-pub type TaggedIntType2 = Required<IntType, 600>;
+/// The `tagged-key-thumbprint-type` is defined in [CoRIM Section 5.1.4.6].
+///
+/// ```text
+/// tagged-key-thumbprint-type = #6.557(hash-entry)
+/// ```
+///
+/// [CoRIM Section 5.1.4.6]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.6
+pub type TaggedKeyThumbprintType = Required<arrays::HashEntry, 557>;
+
+/// The `tagged-cose-key-type` is defined in [CoRIM Section 5.1.4.6].
+///
+/// ```text
+/// tagged-cose-key-type = #6.558(bytes)
+/// ```
+///
+/// [CoRIM Section 5.1.4.6]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.6
+pub type TaggedCoseKeyType = Required<BytesType, 558>;
+
+/// The `tagged-cert-thumbprint-type` is defined in [CoRIM Section 5.1.4.6].
+///
+/// ```text
+/// tagged-cert-thumbprint-type = #6.559(hash-entry)
+/// ```
+///
+/// [CoRIM Section 5.1.4.6]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.6
+pub type TaggedCertThumbprintType = Required<arrays::HashEntry, 559>;
+
+/// The `tagged-cert-path-thumbprint-type` is defined in [CoRIM Section 5.1.4.6].
+///
+/// ```text
+/// tagged-cert-path-thumbprint-type = #6.561(hash-entry)
+/// ```
+///
+/// [CoRIM Section 5.1.4.6]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.6
+pub type TaggedCertPathThumbprintType = Required<arrays::HashEntry, 561>;
+
+/// The `tagged-pkix-asn1-der-cert-type` is defined in [CoRIM Section 5.1.4.6].
+///
+/// ```text
+/// tagged-pkix-asn1-der-cert-type = #6.562(bytes)
+/// ```
+///
+/// [CoRIM Section 5.1.4.6]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.6
+pub type TaggedPkixAsn1DerCertType = Required<BytesType, 562>;
+
+/// The `tagged-masked-raw-value` is defined in [CoRIM Section 5.1.4.5.6].
+///
+/// ```text
+/// tagged-masked-raw-value = #6.563(masked-raw-value)
+/// ```
+///
+/// [CoRIM Section 5.1.4.5.6]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5.6
+pub type TaggedMaskedRawValue = Required<arrays::MaskedRawValueCbor, 563>;
+
+/// The `tagged-int-range` is defined in [CoRIM Section 5.1.4.8].
+///
+/// ```text
+/// tagged-int-range = #6.564(int-range)
+/// ```
+///
+/// [CoRIM Section 5.1.4.8]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.8
+pub type TaggedIntRange = Required<arrays::IntRangeCbor, 564>;
+
+/// The `digests-type` is defined in [CoRIM Section 7.7].
+///
+/// ```text
+/// digests-type = [ + hash-entry ]
+/// ```
+///
+/// [CoRIM Section 7.7]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-7.7
+pub type DigestsType = Vec<arrays::HashEntry>;
+
+/// The `integrity-registers` type is defined in [CoRIM Section 5.1.4.7].
+///
+/// ```text
+/// integrity-registers = { + $measured-element-type-choice => digests-type }
+/// ```
+///
+/// Represented as a Vec of (Value, Value) pairs since keys can be uint or text.
+///
+/// [CoRIM Section 5.1.4.7]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.7
+pub type IntegrityRegisters = Vec<(TextOrInt, DigestsType)>;
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -96,13 +181,31 @@ impl TryFrom<&Value> for IntType {
     }
 }
 
+/// The `tagged-pkix-base64-key-type` is defined in [CoRIM Section 5.1.4.6].
+///
+/// ```text
 /// tagged-pkix-base64-key-type = #6.554(tstr)
+/// ```
+///
+/// [CoRIM Section 5.1.4.6]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.6
 pub type TaggedPkixBase64KeyType = Required<String, 554>;
 
+/// The `tagged-pkix-base64-cert-type` is defined in [CoRIM Section 5.1.4.6].
+///
+/// ```text
 /// tagged-pkix-base64-cert-type = #6.555(tstr)
+/// ```
+///
+/// [CoRIM Section 5.1.4.6]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.6
 pub type TaggedPkixBase64CertType = Required<String, 555>;
 
+/// The `tagged-pkix-base64-cert-path-type` is defined in [CoRIM Section 5.1.4.6].
+///
+/// ```text
 /// tagged-pkix-base64-cert-path-type = #6.556(tstr)
+/// ```
+///
+/// [CoRIM Section 5.1.4.6]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.6
 pub type TaggedPkixBase64CertPathType = Required<String, 556>;
 
 /// ueid-type = bytes .size 33
@@ -123,7 +226,13 @@ impl TryFrom<&Value> for UeidType {
     }
 }
 
+/// The `tagged-ueid-type` is defined in [CoRIM Section 7.5].
+///
+/// ```text
 /// tagged-ueid-type = #6.550(ueid-type)
+/// ```
+///
+/// [CoRIM Section 7.5]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-7.5
 pub type TaggedUeidType = Required<UeidType, 550>;
 
 /// oid-type = bytes
@@ -134,7 +243,13 @@ pub enum OidType {
     #[serde(with = "serde_bytes")]
     Oid(Vec<u8>),
 }
+/// The `tagged-oid-type` is defined in [CoRIM Section 7.6].
+///
+/// ```text
 /// tagged-oid-type = #6.111(oid-type)
+/// ```
+///
+/// [CoRIM Section 7.6]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-7.6
 pub type TaggedOidTypeCbor = Required<OidType, 111>;
 
 #[allow(missing_docs)]
@@ -159,7 +274,13 @@ impl TryFrom<&Value> for UuidType {
     }
 }
 
+/// The `tagged-uuid-type` is defined in [CoRIM Section 7.4].
+///
+/// ```text
 /// tagged-uuid-type = #6.37(uuid-type)
+/// ```
+///
+/// [CoRIM Section 7.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-7.4
 pub type TaggedUuidType = Required<UuidType, 37>;
 
 //pub type TaggedUriType = Required<Uri, 32>;
@@ -343,13 +464,23 @@ impl TryFrom<&i64> for TimeCbor {
 /// coap-content-format = uint .le 65535
 pub type CoapContentFormat = u16;
 
+/// The `tagged-svn` type is defined in [CoRIM Section 5.1.4.5.4].
+///
+/// ```text
 /// svn-type = uint
-/// svn = svn-type
-/// min-svn = svn-type
-/// tagged-svn = #6.552(svn)
+/// tagged-svn = #6.552(svn-type)
+/// ```
+///
+/// [CoRIM Section 5.1.4.5.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5.4
 pub type TaggedSvn = Required<u64, 552>;
 
-/// tagged-min-svn = #6.553(min-svn)
+/// The `tagged-min-svn` type is defined in [CoRIM Section 5.1.4.5.4].
+///
+/// ```text
+/// tagged-min-svn = #6.553(svn-type)
+/// ```
+///
+/// [CoRIM Section 5.1.4.5.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5.4
 pub type TaggedMinSvn = Required<u64, 553>;
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

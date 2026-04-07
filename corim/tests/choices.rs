@@ -4,7 +4,7 @@ use ciborium::ser::into_writer;
 use ciborium::tag::Required;
 use ciborium::value::{Integer, Value};
 use common::choices::*;
-use common::{IntType, OidType, UeidType, UuidType};
+use common::{OidType, UeidType, UuidType};
 use corim::choices::*;
 
 mod utils;
@@ -32,7 +32,7 @@ fn class_id_type_choice_test() {
     let fab2_c: ClassIdTypeChoiceCbor = fab2_j.try_into().unwrap();
     assert_eq!(fab2, fab2_c);
 
-    let fab3 = ClassIdTypeChoiceCbor::Int(Required(IntType::Int([0x01].to_vec())));
+    let fab3 = ClassIdTypeChoiceCbor::Bytes(Required(common::BytesType::Bytes([0x01].to_vec())));
     let mut encoded_token3 = vec![];
     into_writer(&fab3, &mut encoded_token3).unwrap();
 
@@ -62,7 +62,7 @@ fn corim_id_type_choice_test() {
 
 #[test]
 fn corim_role_type_choice_test() {
-    let cr = CorimRoleTypeChoiceKnownCbor::Creator;
+    let cr = CorimRoleTypeChoiceKnownCbor::ManifestCreator;
     let mut encoded_token = vec![];
     into_writer(&cr, &mut encoded_token).unwrap();
     println!(
@@ -73,9 +73,8 @@ fn corim_role_type_choice_test() {
     assert_eq!(cr, cr_d);
 
     let vcr = vec![
-        CorimRoleTypeChoiceCbor::Known(CorimRoleTypeChoiceKnownCbor::Creator),
-        CorimRoleTypeChoiceCbor::Known(CorimRoleTypeChoiceKnownCbor::TagCreator),
-        CorimRoleTypeChoiceCbor::Known(CorimRoleTypeChoiceKnownCbor::Maintainer),
+        CorimRoleTypeChoiceCbor::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator),
+        CorimRoleTypeChoiceCbor::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner),
         CorimRoleTypeChoiceCbor::Extensions(55),
     ];
     let mut encoded_token2 = vec![];

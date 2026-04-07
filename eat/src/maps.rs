@@ -25,7 +25,7 @@ use crate::json_specific::Submodule;
 
 /// JSON encoding/decoding of `Claims-Set-Claims`, see [EAT Section 4.2].
 ///
-/// Use [ClaimsSetClaimsCbor](ClaimsSetClaimsCbor) for CBOR-encoded EATs.
+/// Use [ClaimsSetClaimsCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// string-or-uri = text
@@ -190,7 +190,7 @@ pub struct ClaimsSetClaims {
 
 /// JSON encoding/decoding of `location-type`, see [EAT Section 4.2.10].
 ///
-/// Use [LocationTypeCbor](LocationTypeCbor) for CBOR-encoded EATs.
+/// Use [LocationTypeCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// location-type = {
@@ -241,7 +241,7 @@ pub struct LocationType {
 
 /// JSON encoding/decoding of `sueids-type`, see [EAT Section 4.2.2].
 ///
-/// Use [SwVersionTypeCbor](SwVersionTypeCbor) for CBOR-encoded EATs.
+/// Use [SwVersionTypeCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// sueids-type = {
@@ -254,7 +254,7 @@ pub struct SueidsType(TupleMap);
 
 /// CBOR encoding/decoding of `sueids-type`, see [EAT Section 4.2.2].
 ///
-/// Use [SueidsType](SueidsType) for JSON-encoded EATs.
+/// Use [SueidsType] for JSON-encoded EATs.
 ///
 /// ```text
 /// sueids-type = {

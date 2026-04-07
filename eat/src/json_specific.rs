@@ -37,7 +37,7 @@ use crate::maps::{ClaimsSetClaims, ClaimsSetClaimsCbor};
 // Nested-Token = JSON-Selector
 
 /// Represents values used to indicate type of nested token in JSON-Selector as defined in [EAT Section 4.2.18].
-/// Note, while this enum is extensible the related [JsonSelectorValue](JsonSelectorValue) type is not, at present.
+/// Note, while this enum is extensible the related [JsonSelectorValue] type is not, at present.
 ///
 /// ```text
 /// $JSON-Selector-Type /= "JWT" / "CBOR" / "BUNDLE" / "DIGEST"
@@ -131,7 +131,7 @@ impl<'de> serde::Deserialize<'de> for JsonSelectorValue {
 ///    nested-token : $JSON-Selector-Value
 /// ]
 /// ```
-/// [SelectorForDeb](SelectorForDeb) is used for DetachedEATBundles.
+/// [SelectorForDeb] is used for DetachedEATBundles.
 ///
 /// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

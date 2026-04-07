@@ -1,7 +1,7 @@
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
 use ciborium::tag::Required;
-use common::{TextOrBinary, UeidType, UuidType};
+use common::{UeidType, UuidType};
 use corim::arrays::*;
 use corim::choices::*;
 use corim::maps::*;
@@ -20,9 +20,29 @@ fn attest_key_triple_record_test() {
             )))),
             group: None,
         },
-        crypto_keys: vec![VerificationKeyMapCbor {
-            key: "Some Key".to_string(),
-            keychain: None,
+        measurement_map: vec![MeasurementMapCbor {
+            mkey: None,
+            value: MeasurementValuesMapCbor {
+                version: Some(VersionMapCbor {
+                    version: "1.0.0".to_string(),
+                    version_scheme: None,
+                }),
+                svn: None,
+                digests: None,
+                flags: None,
+                raw_value: None,
+                raw_value_mask: None,
+                mac_addr: None,
+                ip_addr: None,
+                serial_number: None,
+                ueid: None,
+                uuid: None,
+                name: None,
+                cryptokeys: None,
+                int_range: None,
+                other: None,
+            },
+            authorized_by: None,
         }],
     };
 
@@ -41,7 +61,6 @@ fn attest_key_triple_record_test() {
             _ => panic!(),
         }
     );
-    assert_eq!("Some Key", fab.crypto_keys[0].key);
 
     let dec_j: AttestKeyTripleRecord = dec.try_into().unwrap();
     let _ = serde_json::to_string(&dec_j).unwrap();
@@ -72,7 +91,30 @@ fn coswid_triple_record_test() {
     };
     let fab = CoswidTripleRecordCbor {
         environment_map,
-        coswid_tags: vec![TextOrBinary::Text("Some CoSWID Tag ID".to_string())],
+        measurement_map: vec![MeasurementMapCbor {
+            mkey: None,
+            value: MeasurementValuesMapCbor {
+                version: Some(VersionMapCbor {
+                    version: "1.0.0".to_string(),
+                    version_scheme: None,
+                }),
+                svn: None,
+                digests: None,
+                flags: None,
+                raw_value: None,
+                raw_value_mask: None,
+                mac_addr: None,
+                ip_addr: None,
+                serial_number: None,
+                ueid: None,
+                uuid: None,
+                name: None,
+                cryptokeys: None,
+                int_range: None,
+                other: None,
+            },
+            authorized_by: None,
+        }],
     };
 
     let _ = into_writer(&fab, &mut encoded_token);
@@ -94,13 +136,6 @@ fn coswid_triple_record_test() {
             _ => panic!(),
         }
     );
-    assert_eq!(
-        "Some CoSWID Tag ID",
-        match &fab.coswid_tags[0] {
-            TextOrBinary::Text(s) => s.as_str(),
-            _ => panic!(),
-        }
-    );
 
     let dec_j: CoswidTripleRecord = dec.try_into().unwrap();
     let _ = serde_json::to_string(&dec_j).unwrap();
@@ -114,12 +149,37 @@ fn coswid_triple_record_test() {
 fn domain_dependency_triple_record_test() {
     let mut encoded_token = vec![];
     let fab = DomainDependencyTripleRecordCbor {
-        domain_type_choice: DomainTypeChoice::Text("Some DomainTypeChoice".to_string()),
-        domain_type_choices: vec![
-            DomainTypeChoice::Text("Some other DomainTypeChoice".to_string()),
-            DomainTypeChoice::U64(666u64),
-            DomainTypeChoice::Uuid(Required(UuidType::Uuid(TEST_UUID.as_bytes().to_vec()))),
-        ],
+        environment_map: EnvironmentMapCbor {
+            class: None,
+            instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType::Ueid(
+                TEST_UEID.to_vec(),
+            )))),
+            group: None,
+        },
+        measurement_map: vec![MeasurementMapCbor {
+            mkey: None,
+            value: MeasurementValuesMapCbor {
+                version: Some(VersionMapCbor {
+                    version: "2.0.0".to_string(),
+                    version_scheme: None,
+                }),
+                svn: None,
+                digests: None,
+                flags: None,
+                raw_value: None,
+                raw_value_mask: None,
+                mac_addr: None,
+                ip_addr: None,
+                serial_number: None,
+                ueid: None,
+                uuid: None,
+                name: None,
+                cryptokeys: None,
+                int_range: None,
+                other: None,
+            },
+            authorized_by: None,
+        }],
     };
 
     let _ = into_writer(&fab, &mut encoded_token);
@@ -129,34 +189,6 @@ fn domain_dependency_triple_record_test() {
     let _ = into_writer(&dec, &mut encoded_token2);
     assert_eq!(encoded_token, encoded_token2);
     assert_eq!(fab, dec);
-    assert_eq!(
-        "Some DomainTypeChoice",
-        match &fab.domain_type_choice {
-            DomainTypeChoice::Text(t) => t.as_str(),
-            _ => panic!(),
-        }
-    );
-    assert_eq!(
-        "Some other DomainTypeChoice",
-        match &fab.domain_type_choices[0] {
-            DomainTypeChoice::Text(t) => t.as_str(),
-            _ => panic!(),
-        }
-    );
-    assert_eq!(
-        666,
-        match &fab.domain_type_choices[1] {
-            DomainTypeChoice::U64(t) => *t,
-            _ => panic!(),
-        }
-    );
-    assert_eq!(
-        TEST_UUID.as_bytes().to_vec(),
-        match &fab.domain_type_choices[2] {
-            DomainTypeChoice::Uuid(ciborium::tag::Required(UuidType::Uuid(v))) => v.clone(),
-            _ => panic!(),
-        }
-    );
 
     let dec_j: DomainDependencyTripleRecord = dec.try_into().unwrap();
     let _ = serde_json::to_string(&dec_j).unwrap();
@@ -187,14 +219,19 @@ fn endorsed_triple_record_test() {
                 svn: None,
                 digests: None,
                 flags: None,
+                raw_value: None,
+                raw_value_mask: None,
                 mac_addr: None,
                 ip_addr: None,
                 serial_number: None,
                 ueid: None,
                 uuid: None,
                 name: None,
+                cryptokeys: None,
+                int_range: None,
                 other: None,
             },
+            authorized_by: None,
         }],
     };
 
@@ -242,9 +279,29 @@ fn identity_triple_record_test() {
             )))),
             group: None,
         },
-        crypto_keys: vec![VerificationKeyMapCbor {
-            key: "Some Key".to_string(),
-            keychain: None,
+        measurement_map: vec![MeasurementMapCbor {
+            mkey: None,
+            value: MeasurementValuesMapCbor {
+                version: Some(VersionMapCbor {
+                    version: "1.0.0".to_string(),
+                    version_scheme: None,
+                }),
+                svn: None,
+                digests: None,
+                flags: None,
+                raw_value: None,
+                raw_value_mask: None,
+                mac_addr: None,
+                ip_addr: None,
+                serial_number: None,
+                ueid: None,
+                uuid: None,
+                name: None,
+                cryptokeys: None,
+                int_range: None,
+                other: None,
+            },
+            authorized_by: None,
         }],
     };
 
@@ -263,7 +320,6 @@ fn identity_triple_record_test() {
             _ => panic!(),
         }
     );
-    assert_eq!("Some Key", fab.crypto_keys[0].key);
 
     let dec_j: IdentityTripleRecord = dec.try_into().unwrap();
     let _ = serde_json::to_string(&dec_j).unwrap();
@@ -294,14 +350,19 @@ fn reference_triple_record_test() {
                 svn: None,
                 digests: None,
                 flags: None,
+                raw_value: None,
+                raw_value_mask: None,
                 mac_addr: None,
                 ip_addr: None,
                 serial_number: None,
                 ueid: None,
                 uuid: None,
                 name: None,
+                cryptokeys: None,
+                int_range: None,
                 other: None,
             },
+            authorized_by: None,
         }],
     };
 

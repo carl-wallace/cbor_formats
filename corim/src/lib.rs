@@ -13,7 +13,6 @@ pub mod choices;
 pub mod maps;
 
 use alloc::vec::Vec;
-use ciborium::tag::Required;
 
 // corim = #6.500($concise-reference-integrity-manifest-type-choice)
 //
@@ -33,10 +32,7 @@ use ciborium::tag::Required;
 //   signature: bstr
 // ]
 
-/// $raw-value-type-choice /= #6.560(bytes)
-pub type RawValueTypeChoice = Required<Vec<u8>, 560>;
-
-/// raw-value-mask-type = bytes
+/// raw-value-mask-type = bytes (deprecated in draft-10, kept for backward compat)
 pub type RawValueMaskType = Vec<u8>;
 
 //    ip-addr-type-choice = ip4-addr-type / ip6-addr-type
