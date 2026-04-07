@@ -22,6 +22,7 @@ use alloc::boxed::Box;
 use alloc::string::String;
 use core::ops::Deref;
 
+use base64::{Engine, engine::general_purpose::STANDARD};
 use serde::{Deserialize, Serialize};
 
 use crate::arrays::{DetachedEatBundle, DetachedSubmoduleDigest};
@@ -216,7 +217,7 @@ impl TryFrom<&SubmoduleCbor> for Submodule {
             SubmoduleCbor::SelectorCbor(SelectorCbor::CborTokenInsideCborToken(b)) => {
                 let js = JsonSelector {
                     token_type: JsonSelectorType::Cbor,
-                    nested_token: JsonSelectorValue::CborTokenInsideJsonToken(base64::encode(b)),
+                    nested_token: JsonSelectorValue::CborTokenInsideJsonToken(STANDARD.encode(b)),
                 };
                 Ok(Submodule::JsonSelector(js))
             }

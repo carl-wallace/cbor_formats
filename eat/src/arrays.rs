@@ -6,6 +6,7 @@ use alloc::string::{String, ToString};
 use alloc::{vec, vec::Vec};
 use core::{fmt, marker::PhantomData, ops::Deref};
 
+use base64::{Engine, engine::general_purpose::STANDARD};
 use ciborium::{cbor, value::Value};
 use serde::ser::Error as OtherError;
 use serde::{Deserialize, Serialize};
@@ -47,7 +48,7 @@ impl TryFrom<NestedTokenCbor> for NestedToken {
                 let sfd = SelectorForDeb {
                     token_type: JsonSelectorType::Cbor,
                     nested_token: JsonSelectorForDebValue::CborTokenInsideJsonToken(
-                        base64::encode(v),
+                        STANDARD.encode(v),
                     ),
                 };
                 Ok(NestedToken(Box::new(sfd)))
@@ -84,7 +85,7 @@ impl TryFrom<&NestedTokenCbor> for NestedToken {
                 let sfd = SelectorForDeb {
                     token_type: JsonSelectorType::Cbor,
                     nested_token: JsonSelectorForDebValue::CborTokenInsideJsonToken(
-                        base64::encode(v),
+                        STANDARD.encode(v),
                     ),
                 };
                 Ok(NestedToken(Box::new(sfd)))
@@ -150,7 +151,7 @@ impl TryFrom<&NestedToken> for NestedTokenCbor {
             JsonSelectorForDebValue::JwtMessage(s) => Ok(NestedTokenCbor(
                 SelectorCbor::JsonTokenInsideCborToken(s.to_string()),
             )),
-            JsonSelectorForDebValue::CborTokenInsideJsonToken(s) => match base64::decode(s) {
+            JsonSelectorForDebValue::CborTokenInsideJsonToken(s) => match STANDARD.decode(s) {
                 Ok(v) => Ok(NestedTokenCbor(SelectorCbor::CborTokenInsideCborToken(v))),
                 Err(e) => Err(e.to_string()),
             },
@@ -188,13 +189,13 @@ pub struct WrappedClaimsSet(pub String);
 impl TryFrom<WrappedClaimsSetCbor> for WrappedClaimsSet {
     type Error = String;
     fn try_from(value: WrappedClaimsSetCbor) -> Result<Self, Self::Error> {
-        Ok(WrappedClaimsSet(base64::encode(value.0)))
+        Ok(WrappedClaimsSet(STANDARD.encode(value.0)))
     }
 }
 impl TryFrom<&WrappedClaimsSetCbor> for WrappedClaimsSet {
     type Error = String;
     fn try_from(value: &WrappedClaimsSetCbor) -> Result<Self, Self::Error> {
-        Ok(WrappedClaimsSet(base64::encode(value.0.clone())))
+        Ok(WrappedClaimsSet(STANDARD.encode(value.0.clone())))
     }
 }
 
@@ -239,7 +240,7 @@ impl TryFrom<&Value> for WrappedClaimsSetCbor {
 impl TryFrom<WrappedClaimsSet> for WrappedClaimsSetCbor {
     type Error = String;
     fn try_from(value: WrappedClaimsSet) -> Result<Self, Self::Error> {
-        match base64::decode(value.0) {
+        match STANDARD.decode(value.0) {
             Ok(v) => Ok(WrappedClaimsSetCbor(v)),
             Err(e) => Err(e.to_string()),
         }
@@ -248,7 +249,7 @@ impl TryFrom<WrappedClaimsSet> for WrappedClaimsSetCbor {
 impl TryFrom<&WrappedClaimsSet> for WrappedClaimsSetCbor {
     type Error = String;
     fn try_from(value: &WrappedClaimsSet) -> Result<Self, Self::Error> {
-        match base64::decode(&value.0) {
+        match STANDARD.decode(&value.0) {
             Ok(v) => Ok(WrappedClaimsSetCbor(v)),
             Err(e) => Err(e.to_string()),
         }

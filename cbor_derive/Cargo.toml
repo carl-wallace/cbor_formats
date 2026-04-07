@@ -23,7 +23,7 @@ syn = { version = "1.0.58", features = ["extra-traits"] }
 ciborium = "0.2.2"
 subtle-encoding = {version = "0.5.1", default-features = false, features = ["hex", "alloc"]}
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
-hex-literal = "0.3.4"
+hex-literal = "1.1.0"
 
 [dev-dependencies]
 cbor_derive = { version = "0.1.1", path = "../cbor_derive" }
@@ -34,7 +34,7 @@ serde = { version = "1.0", default-features = false, features = ["alloc", "deriv
 serde_bytes = "0.11"
 serde_json = "1.0.89"
 serde_repr = "0.1.9"
-hex-literal = "0.3.4"
+hex-literal = "1.1.0"
 
 [package.metadata.docs.rs]
 all-features = true

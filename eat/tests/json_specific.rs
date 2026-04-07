@@ -1,3 +1,4 @@
+use base64::{Engine, engine::general_purpose::STANDARD};
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
 use common::TextOrInt;
@@ -51,7 +52,7 @@ fn json_selector_value_test() {
     let eatbytes = hex!(
         "b0016941636d6520496e632e026772722d74726170036941636d6520496e632e04c10005c10006c1000746ffffffffffff0a4800000000000000000b5101deadbeefdeadbeefdeadbeefdeadbeef0c6941636d6520496e632e0d46ffffffffffff0e030ff5100111a201fb4028ae147ae147ae02fb404c63d70a3d70a413183c"
     );
-    let eatbase64 = base64::encode(eatbytes);
+    let eatbase64 = STANDARD.encode(eatbytes);
     let digest = &eatbytes.as_slice()[0..32];
 
     //todo replace with proper detached EAT bundle (this just uses bytes from above for both main taken
@@ -97,7 +98,7 @@ fn json_selector_for_deb_value_test() {
     let eatbytes = hex!(
         "b0016941636d6520496e632e026772722d74726170036941636d6520496e632e04c10005c10006c1000746ffffffffffff0a4800000000000000000b5101deadbeefdeadbeefdeadbeefdeadbeef0c6941636d6520496e632e0d46ffffffffffff0e030ff5100111a201fb4028ae147ae147ae02fb404c63d70a3d70a413183c"
     );
-    let eatbase64 = base64::encode(eatbytes);
+    let eatbase64 = STANDARD.encode(eatbytes);
     let digest = &eatbytes.as_slice()[0..32];
 
     //todo replace with actual detached submodule digest

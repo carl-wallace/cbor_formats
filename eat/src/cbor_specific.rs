@@ -44,6 +44,7 @@ use alloc::boxed::Box;
 use alloc::string::String;
 use alloc::{vec, vec::Vec};
 
+use base64::{Engine, engine::general_purpose::STANDARD};
 use ciborium::{ser::into_writer, value::Value};
 use serde::{Deserialize, Serialize};
 
@@ -133,7 +134,7 @@ impl TryFrom<Submodule> for SubmoduleCbor {
                     )),
                     JsonSelectorValue::CborTokenInsideJsonToken(v) => {
                         //todo unwrap
-                        let b = base64::decode(v).unwrap();
+                        let b = STANDARD.decode(v).unwrap();
                         Ok(SubmoduleCbor::SelectorCbor(
                             SelectorCbor::CborTokenInsideCborToken(b),
                         ))
@@ -175,7 +176,7 @@ impl TryFrom<&Submodule> for SubmoduleCbor {
                     )),
                     JsonSelectorValue::CborTokenInsideJsonToken(v) => {
                         //todo unwrap
-                        let b = base64::decode(v).unwrap();
+                        let b = STANDARD.decode(v).unwrap();
                         Ok(SubmoduleCbor::SelectorCbor(
                             SelectorCbor::CborTokenInsideCborToken(b),
                         ))
