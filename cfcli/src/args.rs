@@ -59,6 +59,9 @@ pub struct CorimCommand {
 pub enum CorimSubCommands {
     Create(CorimCreateSubcommand),
     Display(DisplaySubcommand),
+    Sign(CorimSignSubcommand),
+    Verify(CorimVerifySubcommand),
+    Extract(CorimExtractSubcommand),
 }
 #[derive(Args, Debug)]
 pub struct CorimCreateSubcommand {
@@ -87,6 +90,44 @@ pub struct CorimCreateSubcommand {
     pub template_dir: Option<String>,
 
     /// directory where the created files are stored
+    #[clap(short, long, default_value = ".")]
+    pub output_dir: String,
+}
+#[derive(Args, Debug)]
+pub struct CorimSignSubcommand {
+    /// an unsigned CoRIM file (in CBOR format)
+    #[clap(short, long)]
+    pub corim_file: String,
+
+    /// a JWK key file (in JSON format)
+    #[clap(short, long)]
+    pub key_file: String,
+
+    /// a CoRIM meta template file (in JSON format)
+    #[clap(short, long)]
+    pub meta_file: String,
+
+    /// directory where the signed file is stored
+    #[clap(short, long, default_value = ".")]
+    pub output_dir: String,
+}
+#[derive(Args, Debug)]
+pub struct CorimVerifySubcommand {
+    /// a signed CoRIM file (COSE Sign1, tag #18)
+    #[clap(short = 'f', long)]
+    pub signed_corim_file: String,
+
+    /// a JWK key file (in JSON format)
+    #[clap(short, long)]
+    pub key_file: String,
+}
+#[derive(Args, Debug)]
+pub struct CorimExtractSubcommand {
+    /// a signed CoRIM file (COSE Sign1, tag #18)
+    #[clap(short = 'f', long)]
+    pub signed_corim_file: String,
+
+    /// directory where extracted tags are stored
     #[clap(short, long, default_value = ".")]
     pub output_dir: String,
 }

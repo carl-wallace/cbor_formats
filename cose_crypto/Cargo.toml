@@ -1,0 +1,42 @@
+[package]
+name = "cose_crypto"
+version = "0.1.1"
+edition = "2024"
+rust-version = "1.85.0"
+license = "MIT OR Apache-2.0"
+description = "COSE cryptographic operations (signing, verification, MAC, AEAD) built on RFC 9052 structures"
+repository = "https://github.com/carl-wallace/cbor_formats"
+
+[dependencies]
+cose = { version = "0.1.1", path = "../cose" }
+common = { version = "0.1.1", path = "../common" }
+ciborium = "0.2.2"
+serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
+serde_json = "1.0"
+base64ct = { version = "1.7", features = ["alloc"] }
+
+# ECDSA
+p256 = { version = "0.13", default-features = false, features = ["ecdsa"] }
+p384 = { version = "0.13", default-features = false, features = ["ecdsa"] }
+ecdsa = { version = "0.16", default-features = false }
+elliptic-curve = { version = "0.13", default-features = false }
+
+# EdDSA
+ed25519-dalek = { version = "2", features = ["fast", "zeroize", "rand_core"] }
+
+# HMAC
+hmac = "0.12"
+sha2 = "0.10"
+
+# AES-GCM
+aes-gcm = "0.10"
+
+# Random
+rand = "0.8"
+
+[dev-dependencies]
+hex-literal = "1.1.0"
+p256 = { version = "0.13", features = ["ecdsa"] }
+p384 = { version = "0.13", features = ["ecdsa"] }
+ed25519-dalek = { version = "2", features = ["fast", "zeroize", "rand_core"] }
+rand = "0.8"
