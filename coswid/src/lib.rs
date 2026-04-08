@@ -1,5 +1,38 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
+//!
+//! ## CDDL-to-Rust Type Mapping
+//!
+//! The following table maps CDDL productions from
+//! [RFC 9393 Section 2.10](https://datatracker.ietf.org/doc/html/rfc9393#section-2.10)
+//! to their Rust implementations.
+//!
+//! ### Choice types ([`choices`] module)
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `payload-or-evidence` | [`choices::PayloadOrEvidence`] |
+//! | `$role` / known roles | [`choices::Role`] / [`choices::RoleKnown`] |
+//! | `one-or-more<role>` | [`choices::OneOrMoreRole`] |
+//! | `$ownership` / known values | [`choices::Ownership`] / [`choices::OwnershipKnown`] |
+//! | `$rel` / known values | [`choices::Rel`] / [`choices::RelKnown`] |
+//! | `$use-choice` / known values | [`choices::UseChoice`] / [`choices::UseChoiceKnown`] |
+//!
+//! ### Map types ([`maps`] module)
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `concise-swid-tag` | [`maps::ConciseSwidTag`] / [`maps::ConciseSwidTagCbor`] |
+//! | `entity-entry` | [`maps::EntityEntry`] / [`maps::EntityEntryCbor`] |
+//! | `file-entry` | [`maps::FileEntry`] / [`maps::FileEntryCbor`] |
+//! | `directory-entry` | [`maps::DirectoryEntry`] / [`maps::DirectoryEntryCbor`] |
+//! | `link-entry` | [`maps::LinkEntry`] / [`maps::LinkEntryCbor`] |
+//! | `payload-entry` | [`maps::PayloadEntry`] / [`maps::PayloadEntryCbor`] |
+//! | `evidence-entry` | [`maps::EvidenceEntry`] / [`maps::EvidenceEntryCbor`] |
+//! | `process-entry` | [`maps::ProcessEntry`] / [`maps::ProcessEntryCbor`] |
+//! | `resource-entry` | [`maps::ResourceEntry`] / [`maps::ResourceEntryCbor`] |
+//! | `software-meta-entry` | [`maps::SoftwareMetaEntry`] / [`maps::SoftwareMetaEntryCbor`] |
+//! | `path-elements-group` | [`maps::PathElementsGroup`] / [`maps::PathElementsGroupCbor`] |
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 #![allow(clippy::derive_partial_eq_without_eq)]

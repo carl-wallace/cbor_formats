@@ -1,4 +1,31 @@
-//! Choice-based structs from the Concise Reference Integrity Manifest (CoRIM) spec
+//! Choice-based types from the Concise Reference Integrity Manifest (CoRIM) spec
+//! ([draft-ietf-rats-corim-10]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `tagged-coswid-type = #6.505(concise-swid-tag)` | [`TaggedCoswid`] / [`TaggedCoswidCbor`] |
+//! | `tagged-concise-mid-tag = #6.506(concise-mid-tag)` | [`TaggedComid`] / [`TaggedComidCbor`] |
+//! | `$concise-tag-type-choice` | [`ConciseTagTypeChoice`] |
+//! | `$class-id-type-choice` | [`ClassIdTypeChoice`] / [`ClassIdTypeChoiceCbor`] |
+//! | `$corim-id-type-choice` | [`CorimIdTypeChoice`] |
+//! | `$corim-role-type-choice` | [`CorimRoleTypeChoice`] / [`CorimRoleTypeChoiceCbor`] |
+//! | `$crypto-key-type-choice` | [`CryptoKeyTypeChoice`] / [`CryptoKeyTypeChoiceCbor`] |
+//! | `$domain-type-choice` | [`DomainTypeChoice`] |
+//! | `$entity-name-type-choice` | [`EntityNameTypeChoice`] |
+//! | `$group-id-type-choice` | [`GroupIdTypeChoice`] |
+//! | `$instance-id-type-choice` | [`InstanceIdTypeChoice`] |
+//! | `$measured-element-type-choice` | [`MeasuredElementTypeChoice`] / [`MeasuredElementTypeChoiceCbor`] |
+//! | `$profile-type-choice` | [`ProfileTypeChoice`] / [`ProfileTypeChoiceCbor`] |
+//! | `$svn-type-choice` | [`SvnTypeChoice`] |
+//! | `$tag-id-type-choice` | [`TagIdTypeChoice`] / [`TagIdTypeChoiceCbor`] |
+//! | `$tag-rel-type-choice` | [`TagRelTypeChoice`] |
+//! | `$tag-version-type` | [`TagVersionType`] |
+//! | `$raw-value-type-choice` | [`RawValueTypeChoice`] / [`RawValueTypeChoiceCbor`] |
+//! | `$int-range-type-choice` | [`IntRangeTypeChoice`] / [`IntRangeTypeChoiceCbor`] |
+//!
+//! [draft-ietf-rats-corim-10]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10
 
 use alloc::format;
 use alloc::string::{String, ToString};

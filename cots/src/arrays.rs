@@ -1,4 +1,15 @@
 //! Array-based structs from the Concise Trust Anchor Store (CoTS) spec
+//! ([draft-ietf-rats-concise-ta-stores]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `concise-ta-stores = [+ concise-ta-store-map]` | [`ConciseTaStores`] / [`ConciseTaStoresCbor`] |
+//! | `environment-group-list` | [`EnvironmentGroupList`] / [`EnvironmentGroupListCbor`] |
+//! | `trust-anchor` | [`TrustAnchor`] / [`TrustAnchorCbor`] |
+//!
+//! [draft-ietf-rats-concise-ta-stores]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-concise-ta-stores
 use alloc::format;
 use alloc::string::{String, ToString};
 use ciborium::{cbor, value::Value};

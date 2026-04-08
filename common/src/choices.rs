@@ -1,4 +1,11 @@
-//! General-purpose choice types
+//! General-purpose choice types used across multiple specifications.
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `$version-scheme` | [`VersionScheme`] / [`VersionSchemeCbor`] |
+//! | known version scheme values | [`VersionSchemeKnown`] / [`VersionSchemeKnownCbor`] |
 
 use ciborium::value::Value;
 use num_enum::TryFromPrimitive;

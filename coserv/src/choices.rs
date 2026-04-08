@@ -1,4 +1,13 @@
-//! Choice-based types from the CoSERV specification (draft-ietf-rats-coserv-05)
+//! Choice-based types from the CoSERV specification ([draft-ietf-rats-coserv-05]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `$artifact-type` | [`ArtifactType`] |
+//! | `$result-type` | [`ResultType`] |
+//!
+//! [draft-ietf-rats-coserv-05]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05
 
 use ciborium::value::Value;
 

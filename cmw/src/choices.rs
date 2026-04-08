@@ -1,4 +1,21 @@
-//! Choice-based types from the CMW specification (draft-ietf-rats-msg-wrap-23)
+//! Choice-based types from the CMW specification ([draft-ietf-rats-msg-wrap-23]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `cmw = json-cmw / cbor-cmw` | [`Cmw`] |
+//! | `cbor-cmw = cbor-record / cbor-collection / $cbor-tag` | [`CborCmw`] |
+//! | `json-cmw = json-record / json-collection` | [`JsonCmw`] |
+//! | `coap-content-format-or-media-type = coap-content-format / media-type` | [`CoapContentFormatOrMediaType`] |
+//! | `cmw-indicator = uint .bits cm-type` | [`CmwIndicator`] |
+//! | `cm-type` | [`CmType`] |
+//! | `$cbor-tag /= #6.1668547091(cbor-collection)` | [`CborCmw::TagCollection`] |
+//! | `$cbor-tag /= #6.1668547092(COSE_Sign1)` | [`CborCmw::TagSigned`] |
+//! | `$cbor-tag /= #6.1668547093(bstr)` | [`CborCmw::TagCmwJsonCollectionData`] |
+//! | `$cbor-tag /= #6.1668547094(bstr)` | [`CborCmw::TagCmwJwsData`] |
+//!
+//! [draft-ietf-rats-msg-wrap-23]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23
 
 use ciborium::tag::Required;
 use ciborium::value::Value;

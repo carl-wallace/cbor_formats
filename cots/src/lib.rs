@@ -1,5 +1,35 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
+//!
+//! ## CDDL-to-Rust Type Mapping
+//!
+//! The following table maps CDDL productions from
+//! [draft-ietf-rats-concise-ta-stores Section 4](https://datatracker.ietf.org/doc/html/draft-ietf-rats-concise-ta-stores#section-4)
+//! to their Rust implementations.
+//!
+//! ### Array types ([`arrays`] module)
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `concise-ta-stores = [+ concise-ta-store-map]` | [`arrays::ConciseTaStores`] / [`arrays::ConciseTaStoresCbor`] |
+//! | `environment-group-list` | [`arrays::EnvironmentGroupList`] / [`arrays::EnvironmentGroupListCbor`] |
+//! | `trust-anchor` | [`arrays::TrustAnchor`] / [`arrays::TrustAnchorCbor`] |
+//!
+//! ### Choice types ([`choices`] module)
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `$pkix-ta-type` | [`choices::PkixTaType`] / [`choices::PkixTaTypeKnown`] |
+//! | `tas-list-purpose` | [`choices::TasListPurpose`] |
+//!
+//! ### Map types ([`maps`] module)
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `abbreviated-swid-tag` | [`maps::AbbreviatedSwidTag`] / [`maps::AbbreviatedSwidTagCbor`] |
+//! | `cas-and-tas-map` | [`maps::CasAndTasMap`] / [`maps::CasAndTasMapCbor`] |
+//! | `concise-ta-store-map` | [`maps::ConciseTaStoreMap`] / [`maps::ConciseTaStoreMapCbor`] |
+//! | `environment-group-list-map` | [`maps::EnvironmentGroupListMap`] / [`maps::EnvironmentGroupListMapCbor`] |
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 #![allow(clippy::derive_partial_eq_without_eq)]

@@ -1,4 +1,8 @@
-//! General-purpose TupleMap and TupleMapCbor types
+//! General-purpose TupleMap and TupleMapCbor types for representing CBOR maps with tagged entries.
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | generic map of key-value pairs | [`TupleMap`] / [`TupleMapCbor`] |
 
 use crate::tuple::*;
 use alloc::string::{String, ToString};

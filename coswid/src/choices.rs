@@ -1,4 +1,17 @@
-//! Choice-based structs from the Concise Software Identification Tags (CoSWID) spec
+//! Choice-based types from the Concise Software Identification Tags (CoSWID) spec ([RFC 9393]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `payload-or-evidence` | [`PayloadOrEvidence`] |
+//! | `$role` | [`Role`] / [`RoleKnown`] |
+//! | `one-or-more<role>` | [`OneOrMoreRole`] |
+//! | `$ownership` | [`Ownership`] / [`OwnershipKnown`] |
+//! | `$rel` | [`Rel`] / [`RelKnown`] |
+//! | `$use-choice` | [`UseChoice`] / [`UseChoiceKnown`] |
+//!
+//! [RFC 9393]: https://datatracker.ietf.org/doc/html/rfc9393
 
 use ciborium::value::Value;
 use serde::{Deserialize, Serialize};

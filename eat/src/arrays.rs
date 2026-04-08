@@ -1,4 +1,27 @@
-//! Array-based structs
+//! Array-based structs from the Entity Attestation Token (EAT) spec ([RFC 9711]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `Detached-Submodule-Digest` | [`DetachedSubmoduleDigest`] / [`DetachedSubmoduleDigestCbor`] |
+//! | `dloa-type` | [`DloaType`] / [`DloaTypeCbor`] |
+//! | `hardware-version-type` | [`HardwareVersionType`] / [`HardwareVersionTypeCbor`] |
+//! | `sw-version-type` | [`SwVersionType`] / [`SwVersionTypeCbor`] |
+//! | `individual-result` | [`IndividualResult`] / [`IndividualResultCbor`] |
+//! | `manifests-type` | [`ManifestsType`] / [`ManifestsTypeCbor`] |
+//! | `manifest-format` | [`ManifestFormat`] / [`ManifestFormatCbor`] |
+//! | `measurements-type` | [`MeasurementsType`] / [`MeasurementsTypeCbor`] |
+//! | `measurements-format` | [`MeasurementsFormat`] / [`MeasurementsFormatCbor`] |
+//! | `measurement-results-group` | [`MeasurementResultsGroup`] / [`MeasurementResultsGroupCbor`] |
+//! | `[ + measurement-results-group ]` | [`MeasurementResultsGroupArray`] / [`MeasurementResultsGroupArrayCbor`] |
+//! | `Nested-Token` (JSON) | [`NestedToken`] |
+//! | `Nested-Token` (CBOR) | [`NestedTokenCbor`] |
+//! | `Wrapped-Claims-Set` (JSON) | [`WrappedClaimsSet`] |
+//! | `Wrapped-Claims-Set` (CBOR) | [`WrappedClaimsSetCbor`] |
+//! | `Detached-EAT-Bundle` | [`DetachedEatBundle`] / [`DetachedEatBundleCbor`] |
+//!
+//! [RFC 9711]: https://datatracker.ietf.org/doc/html/rfc9711
 
 use alloc::boxed::Box;
 use alloc::format;

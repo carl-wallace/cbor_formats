@@ -1,4 +1,8 @@
-//! General-purpose Tuple and TupleCbor types
+//! General-purpose Tuple and TupleCbor types for representing CBOR tagged key-value pairs.
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | generic key-value pair (tag + value) | [`Tuple`] / [`TupleCbor`] |
 
 use alloc::boxed::Box;
 use alloc::string::{String, ToString};

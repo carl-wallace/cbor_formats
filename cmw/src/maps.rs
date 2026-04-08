@@ -1,4 +1,17 @@
-//! Collection types from the CMW specification (draft-ietf-rats-msg-wrap-23 Section 3)
+//! Collection map types from the CMW specification ([draft-ietf-rats-msg-wrap-23]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `cbor-collection = {? "__cmwc_t": ~uri / oid, + &(label: int / text) => cbor-cmw}` | [`CborCollection`] |
+//! | `json-collection = {? "__cmwc_t": ~uri / oid, + &(label: text) => json-cmw}` | [`JsonCollection`] |
+//!
+//! Collections use dynamic keys (integers or text for CBOR, text-only for JSON) rather than
+//! fixed-field structs, so they have custom [`Serialize`]/[`Deserialize`] implementations.
+//! The `+` in the CDDL requires at least one entry; deserialization rejects empty collections.
+//!
+//! [draft-ietf-rats-msg-wrap-23]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23
 
 use alloc::collections::BTreeMap;
 use alloc::string::String;

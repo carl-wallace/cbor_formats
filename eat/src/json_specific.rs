@@ -17,6 +17,15 @@
 //!
 //! This module provides support for JSON-encoded Submodule claims. See [cbor_specific](../cbor_specific/index.html) module for
 //! details regarding support for CBOR-encoded Submodule claims.
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `$JSON-Selector-Type` | [`JsonSelectorType`] |
+//! | `$JSON-Selector-Value` | [`JsonSelectorValue`] |
+//! | `JSON-Selector` | [`JsonSelector`] |
+//! | `$JSON-Selector-Value` (for-deb variant) | [`JsonSelectorForDebValue`] |
+//! | `Selector-For-Deb` | [`SelectorForDeb`] |
+//! | `Submodule` (JSON) | [`Submodule`] |
 
 use alloc::boxed::Box;
 use alloc::string::String;

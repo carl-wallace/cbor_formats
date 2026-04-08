@@ -1,4 +1,14 @@
-//! Map-based structs
+//! Map-based structs from the Entity Attestation Token (EAT) spec ([RFC 9711]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `Claims-Set` | [`ClaimsSetClaims`] / [`ClaimsSetClaimsCbor`] |
+//! | `location-type` | [`LocationType`] / [`LocationTypeCbor`] |
+//! | `sueids-type` | [`SueidsType`] / [`SueidsTypeCbor`] |
+//!
+//! [RFC 9711]: https://datatracker.ietf.org/doc/html/rfc9711
 
 use alloc::collections::BTreeMap;
 use alloc::format;

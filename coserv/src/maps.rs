@@ -1,4 +1,21 @@
-//! Map-based structs from the CoSERV specification (draft-ietf-rats-coserv-05)
+//! Map-based structs from the CoSERV specification ([draft-ietf-rats-coserv-05]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `coserv-map` | [`CoservMap`] / [`CoservMapCbor`] |
+//! | `query-map` | [`QueryMap`] / [`QueryMapCbor`] |
+//! | `environment-selector-map` | [`EnvironmentSelectorMap`] / [`EnvironmentSelectorMapCbor`] |
+//! | `results-map` | [`ResultsMap`] / [`ResultsMapCbor`] |
+//! | `refval-quad-map` | [`RefvalQuadMap`] / [`RefvalQuadMapCbor`] |
+//! | `endval-quad-map` | [`EndvalQuadMap`] / [`EndvalQuadMapCbor`] |
+//! | `cond-endval-quad-map` | [`CondEndvalQuadMap`] / [`CondEndvalQuadMapCbor`] |
+//! | `ak-quad-map` | [`AkQuadMap`] / [`AkQuadMapCbor`] |
+//! | `cots-stmt-map` | [`CotsStmtMap`] / [`CotsStmtMapCbor`] |
+//! | `tdate` | [`Tdate`] / [`TdateCbor`] |
+//!
+//! [draft-ietf-rats-coserv-05]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05
 
 use ciborium::{cbor, value::Value};
 use core::{fmt, marker::PhantomData};

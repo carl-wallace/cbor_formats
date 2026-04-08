@@ -1,4 +1,14 @@
-//! Array-based structs from the CoSERV specification (draft-ietf-rats-coserv-05)
+//! Array-based structs from the CoSERV specification ([draft-ietf-rats-coserv-05]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `stateful-class` | [`StatefulClass`] / [`StatefulClassCbor`] |
+//! | `stateful-instance` | [`StatefulInstance`] / [`StatefulInstanceCbor`] |
+//! | `stateful-group` | [`StatefulGroup`] / [`StatefulGroupCbor`] |
+//!
+//! [draft-ietf-rats-coserv-05]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05
 
 use ciborium::{cbor, value::Value};
 use core::{fmt, marker::PhantomData};

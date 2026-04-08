@@ -1,4 +1,14 @@
-//! Choice-based structs from the Concise Trust Anchor Store (CoTS) spec
+//! Choice-based types from the Concise Trust Anchor Store (CoTS) spec
+//! ([draft-ietf-rats-concise-ta-stores]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `$pkix-ta-type` | [`PkixTaType`] / [`PkixTaTypeKnown`] |
+//! | `tas-list-purpose` | [`TasListPurpose`] |
+//!
+//! [draft-ietf-rats-concise-ta-stores]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-concise-ta-stores
 
 use ciborium::value::Value;
 use serde::{Deserialize, Serialize};

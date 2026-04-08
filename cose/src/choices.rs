@@ -1,4 +1,15 @@
-//! Choice-based structs
+//! Choice-based types from the COSE specification ([RFC 9052]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `empty_or_serialized_map` | [`EmptyOrSerializedMap`] |
+//! | `Sig_structure` context (`"Signature"` / `"Signature1"`) | [`SignatureOrSignature1`] |
+//! | `Enc_structure` context | [`EncStructureContext`] |
+//! | `MAC_structure` context (`"MAC"` / `"MAC0"`) | [`MacStructureContext`] |
+//!
+//! [RFC 9052]: https://datatracker.ietf.org/doc/html/rfc9052
 
 // COSE_Messages = COSE_Untagged_Message / COSE_Tagged_Message
 //

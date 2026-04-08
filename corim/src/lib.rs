@@ -1,5 +1,76 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
+//!
+//! ## CDDL-to-Rust Type Mapping
+//!
+//! The following table maps CDDL productions from
+//! [draft-ietf-rats-corim-10 Appendix A](https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#appendix-A)
+//! to their Rust implementations.
+//!
+//! ### Array types ([`arrays`] module)
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `reference-triple-record` | [`arrays::ReferenceTripleRecord`] / [`arrays::ReferenceTripleRecordCbor`] |
+//! | `endorsed-triple-record` | [`arrays::EndorsedTripleRecord`] / [`arrays::EndorsedTripleRecordCbor`] |
+//! | `identity-triple-record` | [`arrays::IdentityTripleRecord`] / [`arrays::IdentityTripleRecordCbor`] |
+//! | `attest-key-triple-record` | [`arrays::AttestKeyTripleRecord`] / [`arrays::AttestKeyTripleRecordCbor`] |
+//! | `coswid-triple-record` | [`arrays::CoswidTripleRecord`] / [`arrays::CoswidTripleRecordCbor`] |
+//! | `domain-dependency-triple-record` | [`arrays::DomainDependencyTripleRecord`] / [`arrays::DomainDependencyTripleRecordCbor`] |
+//! | `domain-membership-triple-record` | [`arrays::DomainMembershipTripleRecord`] / [`arrays::DomainMembershipTripleRecordCbor`] |
+//! | `conditional-endorsement-triple-record` | [`arrays::ConditionalEndorsementTripleRecord`] / [`arrays::ConditionalEndorsementTripleRecordCbor`] |
+//! | `stateful-environment-record` | [`arrays::StatefulEnvironmentRecord`] / [`arrays::StatefulEnvironmentRecordCbor`] |
+//! | `conditional-series-record` | [`arrays::ConditionalSeriesRecord`] / [`arrays::ConditionalSeriesRecordCbor`] |
+//! | `conditional-endorsement-series-triple-record` | [`arrays::ConditionalEndorsementSeriesTripleRecord`] / [`arrays::ConditionalEndorsementSeriesTripleRecordCbor`] |
+//! | `conditional-endorsement-series-condition` | [`arrays::ConditionalEndorsementSeriesCondition`] / [`arrays::ConditionalEndorsementSeriesConditionCbor`] |
+//!
+//! ### Choice types ([`choices`] module)
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `tagged-coswid-type = #6.505(concise-swid-tag)` | [`choices::TaggedCoswid`] / [`choices::TaggedCoswidCbor`] |
+//! | `tagged-concise-mid-tag = #6.506(concise-mid-tag)` | [`choices::TaggedComid`] / [`choices::TaggedComidCbor`] |
+//! | `$concise-tag-type-choice` | [`choices::ConciseTagTypeChoice`] |
+//! | `$class-id-type-choice` | [`choices::ClassIdTypeChoice`] / [`choices::ClassIdTypeChoiceCbor`] |
+//! | `$corim-id-type-choice` | [`choices::CorimIdTypeChoice`] |
+//! | `$corim-role-type-choice` | [`choices::CorimRoleTypeChoice`] / [`choices::CorimRoleTypeChoiceCbor`] |
+//! | `$crypto-key-type-choice` | [`choices::CryptoKeyTypeChoice`] / [`choices::CryptoKeyTypeChoiceCbor`] |
+//! | `$domain-type-choice` | [`choices::DomainTypeChoice`] |
+//! | `$entity-name-type-choice` | [`choices::EntityNameTypeChoice`] |
+//! | `$group-id-type-choice` | [`choices::GroupIdTypeChoice`] |
+//! | `$instance-id-type-choice` | [`choices::InstanceIdTypeChoice`] |
+//! | `$measured-element-type-choice` | [`choices::MeasuredElementTypeChoice`] / [`choices::MeasuredElementTypeChoiceCbor`] |
+//! | `$profile-type-choice` | [`choices::ProfileTypeChoice`] / [`choices::ProfileTypeChoiceCbor`] |
+//! | `$svn-type-choice` | [`choices::SvnTypeChoice`] |
+//! | `$tag-id-type-choice` | [`choices::TagIdTypeChoice`] / [`choices::TagIdTypeChoiceCbor`] |
+//! | `$tag-rel-type-choice` | [`choices::TagRelTypeChoice`] |
+//! | `$tag-version-type` | [`choices::TagVersionType`] |
+//! | `$raw-value-type-choice` | [`choices::RawValueTypeChoice`] / [`choices::RawValueTypeChoiceCbor`] |
+//! | `$int-range-type-choice` | [`choices::IntRangeTypeChoice`] / [`choices::IntRangeTypeChoiceCbor`] |
+//!
+//! ### Map types ([`maps`] module)
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `unsigned-corim-map` | [`maps::CorimMap`] / [`maps::CorimMapCbor`] |
+//! | `corim-meta-map` | [`maps::CorimMetaMap`] / [`maps::CorimMetaMapCbor`] |
+//! | `corim-signer-map` | [`maps::CorimSignerMap`] / [`maps::CorimSignerMapCbor`] |
+//! | `corim-locator-map` | [`maps::CorimLocatorMap`] / [`maps::CorimLocatorMapCbor`] |
+//! | `concise-mid-tag` | [`maps::ConciseMidTag`] / [`maps::ConciseMidTagCbor`] |
+//! | `class-map` | [`maps::ClassMap`] / [`maps::ClassMapCbor`] |
+//! | `environment-map` | [`maps::EnvironmentMap`] / [`maps::EnvironmentMapCbor`] |
+//! | `measurement-map` | [`maps::MeasurementMap`] / [`maps::MeasurementMapCbor`] |
+//! | `measurement-values-map` | [`maps::MeasurementValuesMap`] / [`maps::MeasurementValuesMapCbor`] |
+//! | `flags-map` | [`maps::FlagsMap`] / [`maps::FlagsMapCbor`] |
+//! | `entity-map` | [`maps::EntityMap`] / [`maps::EntityMapCbor`] |
+//! | `tag-identity-map` | [`maps::TagIdentityMap`] / [`maps::TagIdentityMapCbor`] |
+//! | `linked-tag-map` | [`maps::LinkedTagMap`] / [`maps::LinkedTagMapCbor`] |
+//! | `triples-map` | [`maps::TriplesMap`] / [`maps::TriplesMapCbor`] |
+//! | `validity-map` | [`maps::ValidityMap`] / [`maps::ValidityMapCbor`] |
+//! | `version-map` | [`maps::VersionMap`] / [`maps::VersionMapCbor`] |
+//! | `protected-corim-header-map` | [`maps::ProtectedCorimHeaderMap`] / [`maps::ProtectedCorimHeaderMapCbor`] |
+//! | `attest-key-conditions-map` | [`maps::AttestKeyConditionsMap`] / [`maps::AttestKeyConditionsMapCbor`] |
+//! | `concise-tl-tag` | [`maps::ConciseTlTag`] / [`maps::ConciseTlTagCbor`] |
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 #![allow(clippy::derive_partial_eq_without_eq)]

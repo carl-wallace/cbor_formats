@@ -1,5 +1,70 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
+//!
+//! ## CDDL-to-Rust Type Mapping
+//!
+//! The following table maps CDDL productions from multiple specifications
+//! to their Rust implementations.
+//!
+//! ### Array types ([`arrays`] module)
+//!
+//! | CDDL | Rust | Spec |
+//! |------|------|------|
+//! | `hash-entry` | [`arrays::HashEntry`] / [`arrays::HashEntryCbor`] | CoRIM §7.7 |
+//! | `masked-raw-value` | [`arrays::MaskedRawValue`] / [`arrays::MaskedRawValueCbor`] | CoRIM §5.1.4.5.6 |
+//! | `int-range` | [`arrays::IntRange`] / [`arrays::IntRangeCbor`] | CoRIM §5.1.4.8 |
+//!
+//! ### Choice types ([`choices`] module)
+//!
+//! | CDDL | Rust | Spec |
+//! |------|------|------|
+//! | `$version-scheme` | [`choices::VersionScheme`] / [`choices::VersionSchemeCbor`] | CoRIM §5.1.4.5.3 |
+//! | known version schemes | [`choices::VersionSchemeKnown`] / [`choices::VersionSchemeKnownCbor`] | CoRIM §5.1.4.5.3 |
+//!
+//! ### Tuple types ([`mod@tuple`] / [`tuple_map`] modules)
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | generic key-value pair | [`Tuple`] / [`TupleCbor`] |
+//! | generic key-value map | [`tuple_map::TupleMap`] / [`tuple_map::TupleMapCbor`] |
+//!
+//! ### Inline types (this module)
+//!
+//! | CDDL | Rust | Spec |
+//! |------|------|------|
+//! | `bstr` wrapper | [`BytesType`] | COSE |
+//! | `nonce-type` | [`NonceType`] | EAT |
+//! | `ueid-type = bstr .size (7..33)` | [`UeidType`] | EAT |
+//! | `oid-type = bytes` | [`OidType`] | CoRIM |
+//! | `uuid-type = bytes .size 16` | [`UuidType`] | CoRIM |
+//! | `uri` | [`Uri`] | general |
+//! | `time-int = #6.1(int)` | [`Time`] / [`TimeCbor`] | common |
+//! | `tstr / bstr` | [`TextOrBinary`] | COSE |
+//! | `bstr / nil` | [`BinaryOrNil`] | COSE |
+//! | `tstr / int` | [`TextOrInt`] | COSE |
+//! | `pkix-base64-type = tstr` | [`PkixBase64Type`] | CoRIM |
+//! | `pkix-ca = bstr` | [`PkixCa`] | CoRIM |
+//! | `~oid / ~uri` | [`OidOrUri`] / [`OidOrUriCbor`] | CoRIM |
+//! | `tagged-uri-type = #6.32(uri)` | [`TaggedUriType`] / [`TaggedUriTypeCbor`] | RFC 7049 |
+//! | `tagged-oid-type = #6.111(oid-type)` | [`TaggedOidType`] / [`TaggedOidTypeCbor`] | CoRIM §7.6 |
+//! | `tagged-uuid-type = #6.37(uuid-type)` | [`TaggedUuidType`] | CoRIM §7.4 |
+//! | `tagged-ueid-type = #6.550(ueid-type)` | [`TaggedUeidType`] | CoRIM §7.5 |
+//! | `tagged-bytes = #6.560(bytes)` | [`TaggedBytes`] | CoRIM §7.8 |
+//! | `tagged-svn = #6.552(svn-type)` | [`TaggedSvn`] | CoRIM §5.1.4.5.4 |
+//! | `tagged-min-svn = #6.553(svn-type)` | [`TaggedMinSvn`] | CoRIM §5.1.4.5.4 |
+//! | `tagged-pkix-base64-key-type = #6.554(tstr)` | [`TaggedPkixBase64KeyType`] | CoRIM §5.1.4.6 |
+//! | `tagged-pkix-base64-cert-type = #6.555(tstr)` | [`TaggedPkixBase64CertType`] | CoRIM §5.1.4.6 |
+//! | `tagged-pkix-base64-cert-path-type = #6.556(tstr)` | [`TaggedPkixBase64CertPathType`] | CoRIM §5.1.4.6 |
+//! | `tagged-key-thumbprint-type = #6.557(hash-entry)` | [`TaggedKeyThumbprintType`] | CoRIM §5.1.4.6 |
+//! | `tagged-cose-key-type = #6.558(bytes)` | [`TaggedCoseKeyType`] | CoRIM §5.1.4.6 |
+//! | `tagged-cert-thumbprint-type = #6.559(hash-entry)` | [`TaggedCertThumbprintType`] | CoRIM §5.1.4.6 |
+//! | `tagged-masked-raw-value = #6.563(masked-raw-value)` | [`TaggedMaskedRawValue`] | CoRIM §5.1.4.5.6 |
+//! | `tagged-int-range = #6.564(int-range)` | [`TaggedIntRange`] | CoRIM §5.1.4.8 |
+//! | `tagged-pkix-asn1-der-cert-type = #6.562(bytes)` | [`TaggedPkixAsn1DerCertType`] | CoRIM §5.1.4.6 |
+//! | `tagged-cert-path-thumbprint-type = #6.561(hash-entry)` | [`TaggedCertPathThumbprintType`] | CoRIM §5.1.4.6 |
+//! | `digests-type = [ + hash-entry ]` | [`DigestsType`] | CoRIM §7.7 |
+//! | `integrity-registers` | [`IntegrityRegisters`] | CoRIM §5.1.4.7 |
+//! | `coap-content-format = uint .le 65535` | [`CoapContentFormat`] | RFC 7252 |
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 #![allow(unexpected_cfgs)]

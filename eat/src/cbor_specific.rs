@@ -40,6 +40,13 @@
 //! To adhere to the naming conventions in this library, JSON-Selector is represented by the Selector enum
 //! and CBOR-Selector is represented by the SelectorCbor enum.
 //!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `CBOR-Selector` | [`SelectorCbor`] |
+//! | `Submodule` (CBOR) | [`SubmoduleCbor`] |
+//! | `Nested-Token` (CBOR) | [`super::arrays::NestedTokenCbor`] |
+//! | `Wrapped-Claims-Set` (CBOR) | [`super::arrays::WrappedClaimsSetCbor`] |
+//!
 use alloc::boxed::Box;
 use alloc::format;
 use alloc::string::String;

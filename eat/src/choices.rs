@@ -1,4 +1,15 @@
-//! Choice-based structs
+//! Choice-based types from the Entity Attestation Token (EAT) spec ([RFC 9711]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `debug-status-type` | [`DebugStatusType`] |
+//! | `intended-use-type` | [`IntendedUseType`] |
+//! | `oemid` | [`Oemid`] |
+//! | `result-type` | [`ResultType`] |
+//!
+//! [RFC 9711]: https://datatracker.ietf.org/doc/html/rfc9711
 
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
