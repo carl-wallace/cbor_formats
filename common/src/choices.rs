@@ -8,7 +8,7 @@ use serde_repr::Serialize_repr;
 
 use alloc::string::{String, ToString};
 
-/// The `version-scheme` socket is defined in [CoRIM Section 3.1.4.1.5.3].
+/// The `version-scheme` socket is defined in [CoRIM Section 5.1.4.5.3].
 ///
 /// ```text
 /// $version-scheme /= &(multipartnumeric: 1)
@@ -19,7 +19,7 @@ use alloc::string::{String, ToString};
 /// $version-scheme /= int / text
 /// ```
 ///
-/// [CoRIM Section 3.1.4.1.5.3]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.4.1.5.3
+/// [CoRIM Section 5.1.4.5.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5.3
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 #[serde(untagged)]

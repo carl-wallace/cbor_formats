@@ -237,7 +237,9 @@ pub type ConciseTagTypeChoice = BytesType;
 //     }
 // }
 
-/// The `class-id-type-choice` socket is defined in CoRIM Section 3.1.4.1.2.
+/// The `class-id-type-choice` socket is defined in [CoRIM Section 5.1.4.2].
+///
+/// [CoRIM Section 5.1.4.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.2
 ///
 /// ```text
 /// $class-id-type-choice /= tagged-oid-type
@@ -1437,6 +1439,12 @@ impl TryFrom<&TagIdTypeChoice> for TagIdTypeChoiceCbor {
             TagIdTypeChoice::Str(s) => Ok(Self::Str(s.clone())),
             TagIdTypeChoice::Uuid(b) => Ok(Self::Uuid(b.clone())),
         }
+    }
+}
+impl TryFrom<Value> for TagIdTypeChoiceCbor {
+    type Error = String;
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        Self::try_from(&value)
     }
 }
 impl TryFrom<&Value> for TagIdTypeChoiceCbor {

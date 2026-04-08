@@ -8,6 +8,7 @@ use serde::{de::Error, de::Visitor};
 
 use alloc::{vec, vec::Vec};
 
+use crate::choices::*;
 use crate::maps::*;
 use alloc::format;
 use alloc::string::{String, ToString};
@@ -17,8 +18,12 @@ use cbor_derive::StructToArray;
 ///
 /// ```text
 /// attest-key-triple-record = [
-///   environment-map
-///   [ + measurement-map ]
+///   environment: environment-map
+///   key-list: [ + $crypto-key-type-choice ]
+///   ? conditions: non-empty<{
+///     ? &(mkey: 0) => $measured-element-type-choice,
+///     ? &(authorized-by: 1) => [ + $crypto-key-type-choice ]
+///   }>
 /// ]
 /// ```
 ///
@@ -27,9 +32,11 @@ use cbor_derive::StructToArray;
 #[allow(missing_docs)]
 pub struct AttestKeyTripleRecord {
     #[cbor(value = "Map", cbor = "true")]
-    pub environment_map: EnvironmentMap,
-    #[cbor(value = "Array", cbor = "true")]
-    pub measurement_map: Vec<MeasurementMap>,
+    pub environment: EnvironmentMap,
+    #[cbor(value = "Array")]
+    pub key_list: Vec<CryptoKeyTypeChoice>,
+    #[cbor(value = "Map", cbor = "true")]
+    pub conditions: Option<AttestKeyConditionsMap>,
 }
 
 /// The `coswid-triple-record` type is defined in [CoRIM Section 5.1.12].
@@ -37,7 +44,7 @@ pub struct AttestKeyTripleRecord {
 /// ```text
 /// coswid-triple-record = [
 ///   environment-map
-///   [ + measurement-map ]
+///   [ + concise-swid-tag-id ]
 /// ]
 /// ```
 ///
@@ -48,15 +55,15 @@ pub struct CoswidTripleRecord {
     #[cbor(value = "Map", cbor = "true")]
     pub environment_map: EnvironmentMap,
     #[cbor(value = "Array", cbor = "true")]
-    pub measurement_map: Vec<MeasurementMap>,
+    pub tag_ids: Vec<TagIdTypeChoice>,
 }
 
 /// The `domain-dependency-triple-record` type is defined in [CoRIM Section 5.1.11.2].
 ///
 /// ```text
 /// domain-dependency-triple-record = [
-///   environment-map
-///   [ + measurement-map ]
+///   domain-id: domain-type
+///   trustees: [ + domain-type ]
 /// ]
 /// ```
 ///
@@ -64,18 +71,17 @@ pub struct CoswidTripleRecord {
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct DomainDependencyTripleRecord {
-    #[cbor(value = "Map", cbor = "true")]
-    pub environment_map: EnvironmentMap,
-    #[cbor(value = "Array", cbor = "true")]
-    pub measurement_map: Vec<MeasurementMap>,
+    pub domain_id: DomainTypeChoice,
+    #[cbor(value = "Array")]
+    pub trustees: Vec<DomainTypeChoice>,
 }
 
 /// The `domain-membership-triple-record` type is defined in [CoRIM Section 5.1.11.1].
 ///
 /// ```text
 /// domain-membership-triple-record = [
-///   environment-map
-///   [ + measurement-map ]
+///   domain-id: domain-type
+///   members: [ + domain-type ]
 /// ]
 /// ```
 ///
@@ -83,10 +89,9 @@ pub struct DomainDependencyTripleRecord {
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct DomainMembershipTripleRecord {
-    #[cbor(value = "Map", cbor = "true")]
-    pub environment_map: EnvironmentMap,
-    #[cbor(value = "Array", cbor = "true")]
-    pub measurement_map: Vec<MeasurementMap>,
+    pub domain_id: DomainTypeChoice,
+    #[cbor(value = "Array")]
+    pub members: Vec<DomainTypeChoice>,
 }
 
 /// The `endorsed-triple-record` type is defined in [CoRIM Section 5.1.6].
@@ -112,8 +117,12 @@ pub struct EndorsedTripleRecord {
 ///
 /// ```text
 /// identity-triple-record = [
-///   environment-map
-///   [ + measurement-map ]
+///   environment: environment-map
+///   key-list: [ + $crypto-key-type-choice ]
+///   ? conditions: non-empty<{
+///     ? &(mkey: 0) => $measured-element-type-choice,
+///     ? &(authorized-by: 1) => [ + $crypto-key-type-choice ]
+///   }>
 /// ]
 /// ```
 ///
@@ -122,9 +131,11 @@ pub struct EndorsedTripleRecord {
 #[allow(missing_docs)]
 pub struct IdentityTripleRecord {
     #[cbor(value = "Map", cbor = "true")]
-    pub environment_map: EnvironmentMap,
-    #[cbor(value = "Array", cbor = "true")]
-    pub measurement_map: Vec<MeasurementMap>,
+    pub environment: EnvironmentMap,
+    #[cbor(value = "Array")]
+    pub key_list: Vec<CryptoKeyTypeChoice>,
+    #[cbor(value = "Map", cbor = "true")]
+    pub conditions: Option<AttestKeyConditionsMap>,
 }
 
 /// The `reference-triple-record` type is defined in [CoRIM Section 5.1.5].
@@ -152,7 +163,7 @@ pub struct ReferenceTripleRecord {
 ///
 /// ```text
 /// conditional-endorsement-triple-record = [
-///   conditions: [ + measurement-map ]
+///   conditions: [ + stateful-environment-record ]
 ///   endorsements: [ + endorsed-triple-record ]
 /// ]
 /// ```
@@ -162,33 +173,82 @@ pub struct ReferenceTripleRecord {
 #[allow(missing_docs)]
 pub struct ConditionalEndorsementTripleRecord {
     #[cbor(value = "Array", cbor = "true")]
-    pub conditions: Vec<MeasurementMap>,
+    pub conditions: Vec<StatefulEnvironmentRecord>,
     #[cbor(value = "Array", cbor = "true")]
     pub endorsements: Vec<EndorsedTripleRecord>,
 }
 
-/// The `series-record` type is defined in [CoRIM Section 5.1.8].
+/// The `stateful-environment-record` type is defined in [CoRIM Section 5.1.7].
 ///
 /// ```text
-/// series-record = [selection: [+ measurement-map], addition: [+ measurement-map]]
+/// stateful-environment-record = [
+///   environment: environment-map,
+///   claims-list: [ + measurement-map ]
+/// ]
+/// ```
+///
+/// [CoRIM Section 5.1.7]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.7
+#[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
+#[allow(missing_docs)]
+pub struct StatefulEnvironmentRecord {
+    #[cbor(value = "Map", cbor = "true")]
+    pub environment: EnvironmentMap,
+    #[cbor(value = "Array", cbor = "true")]
+    pub claims_list: Vec<MeasurementMap>,
+}
+
+/// The `conditional-series-record` type is defined in [CoRIM Section 5.1.8].
+///
+/// ```text
+/// conditional-series-record = [
+///   selection: [ + measurement-map ]
+///   addition: [ + measurement-map ]
+/// ]
 /// ```
 ///
 /// [CoRIM Section 5.1.8]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.8
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
-pub struct SeriesRecord {
+pub struct ConditionalSeriesRecord {
     #[cbor(value = "Array", cbor = "true")]
     pub selection: Vec<MeasurementMap>,
     #[cbor(value = "Array", cbor = "true")]
     pub addition: Vec<MeasurementMap>,
 }
 
+/// The condition in a `conditional-endorsement-series-triple-record`, defined in
+/// [CoRIM Section 5.1.8].
+///
+/// ```text
+/// condition = [
+///   environment: environment-map,
+///   claims-list: [ * measurement-map ],
+///   ? authorized-by: [ + $crypto-key-type-choice ]
+/// ]
+/// ```
+///
+/// [CoRIM Section 5.1.8]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.8
+#[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
+#[allow(missing_docs)]
+pub struct ConditionalEndorsementSeriesCondition {
+    #[cbor(value = "Map", cbor = "true")]
+    pub environment: EnvironmentMap,
+    #[cbor(value = "Array", cbor = "true")]
+    pub claims_list: Vec<MeasurementMap>,
+    #[cbor(value = "Array")]
+    pub authorized_by: Option<Vec<CryptoKeyTypeChoice>>,
+}
+
 /// The `conditional-endorsement-series-triple-record` type is defined in [CoRIM Section 5.1.8].
 ///
 /// ```text
 /// conditional-endorsement-series-triple-record = [
-///   conditions: [ + measurement-map ]
-///   series: [ + series-record ]
+///   condition: [
+///     environment: environment-map,
+///     claims-list: [ * measurement-map ],
+///     ? authorized-by: [ + $crypto-key-type-choice ]
+///   ]
+///   series: [ + conditional-series-record ]
 /// ]
 /// ```
 ///
@@ -196,8 +256,8 @@ pub struct SeriesRecord {
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ConditionalEndorsementSeriesTripleRecord {
+    #[cbor(cbor = "true")]
+    pub condition: ConditionalEndorsementSeriesCondition,
     #[cbor(value = "Array", cbor = "true")]
-    pub conditions: Vec<MeasurementMap>,
-    #[cbor(value = "Array", cbor = "true")]
-    pub series: Vec<SeriesRecord>,
+    pub series: Vec<ConditionalSeriesRecord>,
 }

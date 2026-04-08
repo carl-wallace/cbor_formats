@@ -75,7 +75,7 @@ impl TryFrom<&Tdate> for TdateCbor {
 //   ? results: results-map
 // }
 
-/// The top-level `coserv` map from [CoSERV Section 4.1].
+/// The top-level `coserv` map from [CoSERV Section 4].
 ///
 /// ```text
 /// coserv = {
@@ -85,7 +85,7 @@ impl TryFrom<&Tdate> for TdateCbor {
 /// }
 /// ```
 ///
-/// [CoSERV Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.1
+/// [CoSERV Section 4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct CoservMap {
@@ -103,7 +103,7 @@ pub struct CoservMap {
 //   result-type: result-type
 // }
 
-/// The `query-map` from [CoSERV Section 4.1].
+/// The `query-map` from [CoSERV Section 4.3].
 ///
 /// ```text
 /// query-map = {
@@ -113,7 +113,7 @@ pub struct CoservMap {
 /// }
 /// ```
 ///
-/// [CoSERV Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.1
+/// [CoSERV Section 4.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.3
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct QueryMap {
@@ -131,7 +131,7 @@ pub struct QueryMap {
 //   ? group: [+ stateful-group]
 // }
 
-/// The `environment-selector-map` from [CoSERV Section 4.1].
+/// The `environment-selector-map` from [CoSERV Section 4.3.2].
 ///
 /// ```text
 /// environment-selector-map = {
@@ -141,7 +141,7 @@ pub struct QueryMap {
 /// }
 /// ```
 ///
-/// [CoSERV Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.1
+/// [CoSERV Section 4.3.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.3.2
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct EnvironmentSelectorMap {
@@ -163,7 +163,7 @@ pub struct EnvironmentSelectorMap {
 //   ? source-artifacts: [+ cmw.cbor-record]
 // }
 
-/// The `results-map` from [CoSERV Section 4.1].
+/// The `results-map` from [CoSERV Section 4.4].
 ///
 /// ```text
 /// results-map = {
@@ -177,7 +177,7 @@ pub struct EnvironmentSelectorMap {
 /// }
 /// ```
 ///
-/// [CoSERV Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.1
+/// [CoSERV Section 4.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.4
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ResultsMap {
@@ -202,7 +202,7 @@ pub struct ResultsMap {
 //   rv-triple: reference-triple-record
 // }
 
-/// The `refval-quad-map` from [CoSERV Section 4.1].
+/// The `refval-quad-map` from [CoSERV Section 4.4].
 ///
 /// ```text
 /// refval-quad-map = {
@@ -211,7 +211,7 @@ pub struct ResultsMap {
 /// }
 /// ```
 ///
-/// [CoSERV Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.1
+/// [CoSERV Section 4.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.4
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct RefvalQuadMap {
@@ -226,7 +226,7 @@ pub struct RefvalQuadMap {
 //   ev-triple: endorsed-triple-record
 // }
 
-/// The `endval-quad-map` from [CoSERV Section 4.1].
+/// The `endval-quad-map` from [CoSERV Section 4.4].
 ///
 /// ```text
 /// endval-quad-map = {
@@ -235,7 +235,7 @@ pub struct RefvalQuadMap {
 /// }
 /// ```
 ///
-/// [CoSERV Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.1
+/// [CoSERV Section 4.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.4
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct EndvalQuadMap {
@@ -250,7 +250,7 @@ pub struct EndvalQuadMap {
 //   ce-triple: conditional-endorsement-triple-record
 // }
 
-/// The `cond-endval-quad-map` from [CoSERV Section 4.1].
+/// The `cond-endval-quad-map` from [CoSERV Section 4.4].
 ///
 /// ```text
 /// cond-endval-quad-map = {
@@ -259,7 +259,7 @@ pub struct EndvalQuadMap {
 /// }
 /// ```
 ///
-/// [CoSERV Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.1
+/// [CoSERV Section 4.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.4
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct CondEndvalQuadMap {
@@ -274,7 +274,7 @@ pub struct CondEndvalQuadMap {
 //   ak-triple: attest-key-triple-record
 // }
 
-/// The `ak-quad-map` from [CoSERV Section 4.1].
+/// The `ak-quad-map` from [CoSERV Section 4.4].
 ///
 /// ```text
 /// ak-quad-map = {
@@ -283,7 +283,7 @@ pub struct CondEndvalQuadMap {
 /// }
 /// ```
 ///
-/// [CoSERV Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.1
+/// [CoSERV Section 4.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.4
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct AkQuadMap {
@@ -298,7 +298,7 @@ pub struct AkQuadMap {
 //   cots: concise-ta-store-map
 // }
 
-/// The `cots-stmt-map` from [CoSERV Section 4.1].
+/// The `cots-stmt-map` from [CoSERV Section 4.4].
 ///
 /// ```text
 /// cots-stmt-map = {
@@ -307,7 +307,7 @@ pub struct AkQuadMap {
 /// }
 /// ```
 ///
-/// [CoSERV Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.1
+/// [CoSERV Section 4.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.4
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct CotsStmtMap {

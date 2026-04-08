@@ -497,18 +497,18 @@ impl StructField {
             if is_option {
                 quote! {
                     #field_ident: match v.get(#index) {
-                        Ok(val) => {
+                        Some(val) => {
                             match #f2::try_from(
                                 match val.as_map() {
                                     Some(val) => val.clone(),
                                     None => return Err("".to_string())
                                 }
                             ){
-                                Ok(val) => val,
+                                Ok(val) => Some(val),
                                 Err(_) => return Err("".to_string())
                             }
                         },
-                        Err(_) => None
+                        None => None
                     },
                 }
             } else {

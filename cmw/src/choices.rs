@@ -19,11 +19,11 @@ use serde_repr::Serialize_repr;
 // )
 
 /// Known conceptual message type indicator bit positions, as defined by the `cm-type` group
-/// in [CMW Section 4.1].
+/// in [CMW Section 3.1.1].
 ///
 /// These are bit positions within the `cmw-indicator` bitmask.
 ///
-/// [CMW Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23#section-4.1
+/// [CMW Section 3.1.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23#section-3.1.1
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -41,9 +41,9 @@ pub enum CmType {
 // media-type = tstr
 
 /// A choice between a CoAP Content-Format number and a media type string, as defined by
-/// `coap-content-format-or-media-type` in [CMW Section 4].
+/// `coap-content-format-or-media-type` in [CMW Section 3.1].
 ///
-/// [CMW Section 4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23#section-4
+/// [CMW Section 3.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23#section-3.1
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -86,11 +86,11 @@ impl TryFrom<Value> for CoapContentFormatOrMediaType {
 
 // cmw-indicator = uint .bits cm-type
 
-/// Wrapper for the CMW indicator bitmask, as defined by `cmw-indicator` in [CMW Section 4.1].
+/// Wrapper for the CMW indicator bitmask, as defined by `cmw-indicator` in [CMW Section 3.1.1].
 ///
 /// The indicator is a `uint` whose bits encode one or more `cm-type` values.
 ///
-/// [CMW Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23#section-4.1
+/// [CMW Section 3.1.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23#section-3.1.1
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct CmwIndicator(pub u64);

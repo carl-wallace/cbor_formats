@@ -20,7 +20,7 @@ use corim::maps::{ClassMap, ClassMapCbor, MeasurementMap, MeasurementMapCbor};
 //   ? measurements: [+ comid.measurement-map]
 // ]
 
-/// The `stateful-class` type from [CoSERV Section 4.1].
+/// The `stateful-class` type from [CoSERV Section 4.3.2].
 ///
 /// ```text
 /// stateful-class = [
@@ -29,7 +29,7 @@ use corim::maps::{ClassMap, ClassMapCbor, MeasurementMap, MeasurementMapCbor};
 /// ]
 /// ```
 ///
-/// [CoSERV Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.1
+/// [CoSERV Section 4.3.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.3.2
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct StatefulClass {
@@ -44,7 +44,7 @@ pub struct StatefulClass {
 //   ? measurements: [+ comid.measurement-map]
 // ]
 
-/// The `stateful-instance` type from [CoSERV Section 4.1].
+/// The `stateful-instance` type from [CoSERV Section 4.3.2].
 ///
 /// ```text
 /// stateful-instance = [
@@ -53,7 +53,7 @@ pub struct StatefulClass {
 /// ]
 /// ```
 ///
-/// [CoSERV Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.1
+/// [CoSERV Section 4.3.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.3.2
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct StatefulInstance {
@@ -67,7 +67,7 @@ pub struct StatefulInstance {
 //   ? measurements: [+ comid.measurement-map]
 // ]
 
-/// The `stateful-group` type from [CoSERV Section 4.1].
+/// The `stateful-group` type from [CoSERV Section 4.3.2].
 ///
 /// ```text
 /// stateful-group = [
@@ -76,7 +76,7 @@ pub struct StatefulInstance {
 /// ]
 /// ```
 ///
-/// [CoSERV Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.1
+/// [CoSERV Section 4.3.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.3.2
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct StatefulGroup {

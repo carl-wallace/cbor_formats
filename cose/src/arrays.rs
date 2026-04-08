@@ -248,7 +248,7 @@ pub struct CoseMac {
 /// [COSE Section 6.1]: https://datatracker.ietf.org/doc/html/rfc9052#name-maced-message-with-recipien
 pub type TaggedCoseMac = Required<CoseMacCbor, 97>;
 
-/// CBOR and JSON encoding/decoding of `COSE_Mac0`, see [COSE Section 6.1].
+/// CBOR and JSON encoding/decoding of `COSE_Mac0`, see [COSE Section 6.2].
 ///
 /// ```text
 /// COSE_Mac0 = [
@@ -257,7 +257,7 @@ pub type TaggedCoseMac = Required<CoseMacCbor, 97>;
 ///    tag : bstr,
 /// ]
 /// ```
-/// [COSE Section 6.1]: https://datatracker.ietf.org/doc/html/rfc9052#name-maced-message-with-recipien
+/// [COSE Section 6.2]: https://datatracker.ietf.org/doc/html/rfc9052#name-maced-messages-with-implicit-key
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct CoseMac0 {
@@ -268,12 +268,12 @@ pub struct CoseMac0 {
     pub tag: BytesType,
 }
 
-/// `COSE_Mac_Tagged` support, see [COSE Section 6.1].
+/// `COSE_Mac0_Tagged` support, see [COSE Section 6.2].
 ///
 /// ```text
 /// COSE_Mac0_Tagged = #6.17(COSE_Mac0)
 /// ```
-/// [COSE Section 6.1]: https://datatracker.ietf.org/doc/html/rfc9052#name-maced-message-with-recipien
+/// [COSE Section 6.2]: https://datatracker.ietf.org/doc/html/rfc9052#name-maced-messages-with-implicit-key
 pub type TaggedCoseMac0 = Required<CoseMac0Cbor, 17>;
 
 /// CBOR and JSON encoding/decoding of `MAC_structure`, see [COSE Section 6.3].

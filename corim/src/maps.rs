@@ -17,6 +17,26 @@ use common::choices::*;
 use common::*;
 use serde::ser::Error as OtherError;
 
+/// The `conditions` map used in `attest-key-triple-record` and `identity-triple-record`,
+/// defined in [CoRIM Section 5.1.10].
+///
+/// ```text
+/// conditions = non-empty<{
+///   ? &(mkey: 0) => $measured-element-type-choice,
+///   ? &(authorized-by: 1) => [ + $crypto-key-type-choice ]
+/// }>
+/// ```
+///
+/// [CoRIM Section 5.1.10]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.10
+#[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
+#[allow(missing_docs)]
+pub struct AttestKeyConditionsMap {
+    #[cbor(tag = "0", cbor = "true")]
+    pub mkey: Option<MeasuredElementTypeChoice>,
+    #[cbor(tag = "1", value = "Array")]
+    pub authorized_by: Option<Vec<CryptoKeyTypeChoice>>,
+}
+
 /// The `class-map` type is defined in [CoRIM Section 5.1.4.2].
 ///
 /// ```text

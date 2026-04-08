@@ -13,37 +13,17 @@ use utils::*;
 fn attest_key_triple_record_test() {
     let mut encoded_token = vec![];
     let fab = AttestKeyTripleRecordCbor {
-        environment_map: EnvironmentMapCbor {
+        environment: EnvironmentMapCbor {
             class: None,
             instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType::Ueid(
                 TEST_UEID.to_vec(),
             )))),
             group: None,
         },
-        measurement_map: vec![MeasurementMapCbor {
-            mkey: None,
-            value: MeasurementValuesMapCbor {
-                version: Some(VersionMapCbor {
-                    version: "1.0.0".to_string(),
-                    version_scheme: None,
-                }),
-                svn: None,
-                digests: None,
-                flags: None,
-                raw_value: None,
-                raw_value_mask: None,
-                mac_addr: None,
-                ip_addr: None,
-                serial_number: None,
-                ueid: None,
-                uuid: None,
-                name: None,
-                cryptokeys: None,
-                int_range: None,
-                other: None,
-            },
-            authorized_by: None,
-        }],
+        key_list: vec![CryptoKeyTypeChoice::Key(Required(
+            "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE".to_string(),
+        ))],
+        conditions: None,
     };
 
     let _ = into_writer(&fab, &mut encoded_token);
@@ -54,7 +34,7 @@ fn attest_key_triple_record_test() {
     assert_eq!(fab, dec);
     assert_eq!(
         TEST_UEID.to_vec(),
-        match &dec.environment_map.instance {
+        match &dec.environment.instance {
             Some(InstanceIdTypeChoice::Ueid(ciborium::tag::Required(UeidType::Ueid(v)))) => {
                 v.clone()
             }
@@ -91,30 +71,7 @@ fn coswid_triple_record_test() {
     };
     let fab = CoswidTripleRecordCbor {
         environment_map,
-        measurement_map: vec![MeasurementMapCbor {
-            mkey: None,
-            value: MeasurementValuesMapCbor {
-                version: Some(VersionMapCbor {
-                    version: "1.0.0".to_string(),
-                    version_scheme: None,
-                }),
-                svn: None,
-                digests: None,
-                flags: None,
-                raw_value: None,
-                raw_value_mask: None,
-                mac_addr: None,
-                ip_addr: None,
-                serial_number: None,
-                ueid: None,
-                uuid: None,
-                name: None,
-                cryptokeys: None,
-                int_range: None,
-                other: None,
-            },
-            authorized_by: None,
-        }],
+        tag_ids: vec![TagIdTypeChoiceCbor::Str("example-tag-id".to_string())],
     };
 
     let _ = into_writer(&fab, &mut encoded_token);
@@ -149,37 +106,8 @@ fn coswid_triple_record_test() {
 fn domain_dependency_triple_record_test() {
     let mut encoded_token = vec![];
     let fab = DomainDependencyTripleRecordCbor {
-        environment_map: EnvironmentMapCbor {
-            class: None,
-            instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType::Ueid(
-                TEST_UEID.to_vec(),
-            )))),
-            group: None,
-        },
-        measurement_map: vec![MeasurementMapCbor {
-            mkey: None,
-            value: MeasurementValuesMapCbor {
-                version: Some(VersionMapCbor {
-                    version: "2.0.0".to_string(),
-                    version_scheme: None,
-                }),
-                svn: None,
-                digests: None,
-                flags: None,
-                raw_value: None,
-                raw_value_mask: None,
-                mac_addr: None,
-                ip_addr: None,
-                serial_number: None,
-                ueid: None,
-                uuid: None,
-                name: None,
-                cryptokeys: None,
-                int_range: None,
-                other: None,
-            },
-            authorized_by: None,
-        }],
+        domain_id: DomainTypeChoice::Text("example-domain".to_string()),
+        trustees: vec![DomainTypeChoice::Text("trusted-domain".to_string())],
     };
 
     let _ = into_writer(&fab, &mut encoded_token);
@@ -272,37 +200,17 @@ fn endorsed_triple_record_test() {
 fn identity_triple_record_test() {
     let mut encoded_token = vec![];
     let fab = IdentityTripleRecordCbor {
-        environment_map: EnvironmentMapCbor {
+        environment: EnvironmentMapCbor {
             class: None,
             instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType::Ueid(
                 TEST_UEID.to_vec(),
             )))),
             group: None,
         },
-        measurement_map: vec![MeasurementMapCbor {
-            mkey: None,
-            value: MeasurementValuesMapCbor {
-                version: Some(VersionMapCbor {
-                    version: "1.0.0".to_string(),
-                    version_scheme: None,
-                }),
-                svn: None,
-                digests: None,
-                flags: None,
-                raw_value: None,
-                raw_value_mask: None,
-                mac_addr: None,
-                ip_addr: None,
-                serial_number: None,
-                ueid: None,
-                uuid: None,
-                name: None,
-                cryptokeys: None,
-                int_range: None,
-                other: None,
-            },
-            authorized_by: None,
-        }],
+        key_list: vec![CryptoKeyTypeChoice::Key(Required(
+            "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE".to_string(),
+        ))],
+        conditions: None,
     };
 
     let _ = into_writer(&fab, &mut encoded_token);
@@ -313,7 +221,7 @@ fn identity_triple_record_test() {
     assert_eq!(fab, dec);
     assert_eq!(
         TEST_UEID.to_vec(),
-        match &dec.environment_map.instance {
+        match &dec.environment.instance {
             Some(InstanceIdTypeChoice::Ueid(ciborium::tag::Required(UeidType::Ueid(v)))) => {
                 v.clone()
             }

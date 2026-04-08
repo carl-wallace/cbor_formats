@@ -16,9 +16,9 @@ use serde_repr::Serialize_repr;
 
 /// Represents the type of artifact being queried or returned in a CoSERV exchange.
 ///
-/// Defined by the `artifact-type` enumeration in [CoSERV Section 4.1].
+/// Defined by the `artifact-type` enumeration in [CoSERV Section 4.3.1].
 ///
-/// [CoSERV Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.1
+/// [CoSERV Section 4.3.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.3.1
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[repr(i64)]
 #[allow(missing_docs)]
@@ -67,9 +67,9 @@ impl TryFrom<&Value> for ArtifactType {
 
 /// Represents the desired result format in a CoSERV query.
 ///
-/// Defined by the `result-type` enumeration in [CoSERV Section 4.1].
+/// Defined by the `result-type` enumeration in [CoSERV Section 4.3.3].
 ///
-/// [CoSERV Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.1
+/// [CoSERV Section 4.3.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.3.3
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[repr(i64)]
 #[allow(missing_docs)]
