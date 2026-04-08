@@ -29,6 +29,7 @@ use serde::ser::Error as OtherError;
 ///
 /// [CoRIM Section 5.1.10]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.10
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
+#[cbor(non_empty = "true")]
 #[allow(missing_docs)]
 pub struct AttestKeyConditionsMap {
     #[cbor(tag = "0", cbor = "true")]
@@ -51,6 +52,7 @@ pub struct AttestKeyConditionsMap {
 ///
 /// [CoRIM Section 5.1.4.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.2
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
+#[cbor(non_empty = "true")]
 #[allow(missing_docs)]
 pub struct ClassMap {
     #[cbor(tag = "0", cbor = "true")]
@@ -225,6 +227,7 @@ pub struct EntityMap {
 ///
 /// [CoRIM Section 5.1.4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.1
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
+#[cbor(non_empty = "true")]
 #[allow(missing_docs)]
 pub struct EnvironmentMap {
     #[cbor(tag = "0", cbor = "true")]
@@ -347,6 +350,7 @@ pub struct MeasurementMap {
 /// }>
 /// ```
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
+#[cbor(non_empty = "true")]
 #[allow(missing_docs)]
 pub struct MeasurementValuesMap {
     #[cbor(tag = "0", value = "Map", cbor = "true")]
@@ -448,6 +452,7 @@ pub struct TagIdentityMap {
 /// }>
 /// ```
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
+#[cbor(non_empty = "true")]
 #[allow(missing_docs)]
 pub struct TriplesMap {
     #[cbor(tag = "0", value = "Array", cbor = "true")]

@@ -11,6 +11,39 @@ use crate::field::TagNumber;
 /// Attribute name.
 pub(crate) const ATTR_NAME: &str = "cbor";
 
+/// Struct-level attributes.
+#[derive(Clone, Debug, Default)]
+pub(crate) struct TypeAttrs {
+    /// Whether the struct has the `non-empty` CDDL constraint.
+    pub non_empty: bool,
+}
+
+impl TypeAttrs {
+    /// Parse attributes from a struct definition.
+    pub fn parse(attrs: &[Attribute]) -> Self {
+        let mut non_empty = None;
+        let mut parsed_attrs = Vec::new();
+        AttrNameValue::from_attributes(attrs, &mut parsed_attrs);
+        for attr in parsed_attrs {
+            if let Some(val) = attr.parse_value::<bool>("non_empty") {
+                if non_empty.is_some() {
+                    abort!(attr.name, "duplicate cbor `non_empty` attribute");
+                }
+                non_empty = Some(val);
+            } else {
+                abort!(
+                    attr.name,
+                    "unknown struct-level `cbor` attribute \
+                    (valid options are `non_empty`)",
+                );
+            }
+        }
+        Self {
+            non_empty: non_empty.unwrap_or(false),
+        }
+    }
+}
+
 /// Field-level attributes.
 #[derive(Clone, Debug, Default)]
 pub(crate) struct FieldAttrs {

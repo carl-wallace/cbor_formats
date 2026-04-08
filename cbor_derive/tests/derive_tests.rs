@@ -354,6 +354,83 @@ fn struct_to_map_with_vec_field() {
     assert_eq!(orig, back);
 }
 
+// --- non-empty constraint tests (map) ---
+
+#[derive(Clone, Debug, PartialEq, Eq, StructToMap, Serialize, Deserialize)]
+#[cbor(non_empty = "true")]
+pub struct NonEmptyMap {
+    #[cbor(tag = "0", value = "Text")]
+    pub field_a: Option<String>,
+    #[cbor(tag = "1", value = "Integer")]
+    pub field_b: Option<u64>,
+}
+
+#[test]
+fn non_empty_map_serialize_with_field_present() {
+    let orig = NonEmptyMapCbor {
+        field_a: Some("hello".to_string()),
+        field_b: None,
+    };
+    let mut buf = vec![];
+    into_writer(&orig, &mut buf).unwrap();
+    let decoded: NonEmptyMapCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(orig, decoded);
+}
+
+#[test]
+fn non_empty_map_serialize_all_none_fails() {
+    let empty = NonEmptyMapCbor {
+        field_a: None,
+        field_b: None,
+    };
+    let mut buf = vec![];
+    let result = into_writer(&empty, &mut buf);
+    assert!(result.is_err());
+}
+
+#[test]
+fn non_empty_map_deserialize_empty_fails() {
+    let empty_map = Value::Map(vec![]);
+    let mut buf = vec![];
+    into_writer(&empty_map, &mut buf).unwrap();
+    let result: Result<NonEmptyMapCbor, _> = from_reader(buf.as_slice());
+    assert!(result.is_err());
+}
+
+// --- non-empty constraint tests (array) ---
+
+#[derive(Clone, Debug, PartialEq, Eq, StructToArray, Serialize, Deserialize)]
+#[cbor(non_empty = "true")]
+pub struct NonEmptyArray {
+    #[cbor(value = "Text")]
+    pub field_a: Option<String>,
+    #[cbor(value = "Text")]
+    pub field_b: Option<String>,
+}
+
+#[test]
+fn non_empty_array_serialize_with_field_present() {
+    let orig = NonEmptyArrayCbor {
+        field_a: Some("hello".to_string()),
+        field_b: None,
+    };
+    let mut buf = vec![];
+    into_writer(&orig, &mut buf).unwrap();
+    let decoded: NonEmptyArrayCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(orig, decoded);
+}
+
+#[test]
+fn non_empty_array_serialize_all_none_fails() {
+    let empty = NonEmptyArrayCbor {
+        field_a: None,
+        field_b: None,
+    };
+    let mut buf = vec![];
+    let result = into_writer(&empty, &mut buf);
+    assert!(result.is_err());
+}
+
 // --- Malformed input errors ---
 
 #[test]

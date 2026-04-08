@@ -5,6 +5,7 @@ use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use syn::{DeriveInput, Ident, Lifetime};
 
+use crate::attributes::TypeAttrs;
 use crate::cbor_derive_utils::{extract_type, is_option, is_option_vec, is_vec};
 use crate::default_lifetime;
 use crate::field::StructField;
@@ -25,6 +26,9 @@ pub(crate) struct DeriveStructToMap {
 
     /// Name of alternative struct
     alt_struct_name: String,
+
+    /// Struct-level attributes
+    type_attrs: TypeAttrs,
 }
 
 impl DeriveStructToMap {
@@ -44,7 +48,7 @@ impl DeriveStructToMap {
             .next()
             .map(|lt| lt.lifetime.clone());
 
-        // let type_attrs = TypeAttrs::parse(&input.attrs);
+        let type_attrs = TypeAttrs::parse(&input.attrs);
 
         let fields = data.fields.iter().map(StructField::new).collect();
 
@@ -54,6 +58,7 @@ impl DeriveStructToMap {
             fields,
             alt_struct: TokenStream::new(),
             alt_struct_name: String::new(),
+            type_attrs,
         };
 
         state.derive_alt_struct();
@@ -157,6 +162,18 @@ impl DeriveStructToMap {
             from_cbor.push(field.to_try_from_tokens(false));
         }
         let alt_struct = &self.alt_struct;
+
+        let non_empty_ser_check = if self.type_attrs.non_empty {
+            quote! {
+                if v.is_empty() {
+                    return Err(__S::Error::custom(
+                        concat!("non-empty constraint violated: ", #ident_name, " has no present fields")
+                    ));
+                }
+            }
+        } else {
+            quote! {}
+        };
 
         let tsindices = quote! {
             let indices = vec![#(#vindices)*];
@@ -329,6 +346,8 @@ impl DeriveStructToMap {
                         Ok(r) => r,
                         Err(e) => {return  Err(__S::Error::custom(e));}
                     };
+
+                    #non_empty_ser_check
 
                     let m = Value::Map(v);
                     m.serialize(__serializer)

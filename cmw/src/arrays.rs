@@ -20,7 +20,7 @@ use crate::choices::*;
 //     ? ind: uint .bits cm-type
 // ]
 
-/// The `cbor-record` type is defined in [CMW Section 4].
+/// The `cbor-record` type is defined in [CMW Section 3.1].
 ///
 /// ```text
 /// cbor-record = [
@@ -30,7 +30,7 @@ use crate::choices::*;
 /// ]
 /// ```
 ///
-/// [CMW Section 4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23#section-4
+/// [CMW Section 3.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23#section-3.1
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct CborRecord {
@@ -47,7 +47,7 @@ pub struct CborRecord {
 //     ? ind: uint .bits cm-type
 // ]
 
-/// The `json-record` type is defined in [CMW Section 4].
+/// The `json-record` type is defined in [CMW Section 3.1].
 ///
 /// ```text
 /// json-record = [
@@ -57,7 +57,7 @@ pub struct CborRecord {
 /// ]
 /// ```
 ///
-/// [CMW Section 4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23#section-4
+/// [CMW Section 3.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23#section-3.1
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct JsonRecord {

@@ -9,3 +9,4 @@ extern crate alloc;
 
 pub mod arrays;
 pub mod choices;
+pub mod maps;
