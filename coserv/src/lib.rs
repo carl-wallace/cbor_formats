@@ -26,16 +26,22 @@
 //!
 //! | CDDL | Rust |
 //! |------|------|
-//! | `coserv-map` | [`maps::CoservMap`] / [`maps::CoservMapCbor`] |
-//! | `query-map` | [`maps::QueryMap`] / [`maps::QueryMapCbor`] |
+//! | `coserv` | [`maps::CoservMap`] / [`maps::CoservMapCbor`] |
+//! | `query` | [`maps::QueryMap`] / [`maps::QueryMapCbor`] |
 //! | `environment-selector-map` | [`maps::EnvironmentSelectorMap`] / [`maps::EnvironmentSelectorMapCbor`] |
-//! | `results-map` | [`maps::ResultsMap`] / [`maps::ResultsMapCbor`] |
-//! | `refval-quad-map` | [`maps::RefvalQuadMap`] / [`maps::RefvalQuadMapCbor`] |
-//! | `endval-quad-map` | [`maps::EndvalQuadMap`] / [`maps::EndvalQuadMapCbor`] |
-//! | `cond-endval-quad-map` | [`maps::CondEndvalQuadMap`] / [`maps::CondEndvalQuadMapCbor`] |
-//! | `ak-quad-map` | [`maps::AkQuadMap`] / [`maps::AkQuadMapCbor`] |
-//! | `cots-stmt-map` | [`maps::CotsStmtMap`] / [`maps::CotsStmtMapCbor`] |
+//! | `results` | [`maps::ResultsMap`] / [`maps::ResultsMapCbor`] |
+//! | `refval-quad` | [`maps::RefvalQuadMap`] / [`maps::RefvalQuadMapCbor`] |
+//! | `endval-quad` | [`maps::EndvalQuadMap`] / [`maps::EndvalQuadMapCbor`] |
+//! | `cond-endval-quad` | [`maps::CondEndvalQuadMap`] / [`maps::CondEndvalQuadMapCbor`] |
+//! | `ak-quad` | [`maps::AkQuadMap`] / [`maps::AkQuadMapCbor`] |
+//! | `cots-stmt` | [`maps::CotsStmtMap`] / [`maps::CotsStmtMapCbor`] |
 //! | `tdate` | [`maps::Tdate`] / [`maps::TdateCbor`] |
+//!
+//! ### Signed types ([`signed`] module)
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `signed-coserv` | [`signed::SignedCoserv`] |
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 #![allow(clippy::derive_partial_eq_without_eq)]
@@ -46,3 +52,4 @@ extern crate alloc;
 pub mod arrays;
 pub mod choices;
 pub mod maps;
+pub mod signed;

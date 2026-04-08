@@ -385,3 +385,140 @@ fn software_meta_entry_test() {
     let _ = into_writer(&cbor_roundtrip, &mut buf2);
     assert_eq!(buf, buf2);
 }
+
+#[test]
+fn resource_collection_test() {
+    let rc = ResourceCollectionCbor {
+        directory: Some(OneOrMoreDirectoryEntryCbor::One(DirectoryEntryCbor {
+            key: None,
+            location: Some("/opt".to_string()),
+            fs_name: "myapp".to_string(),
+            root: None,
+            lang: None,
+            other: None,
+        })),
+        file: Some(OneOrMoreFileEntryCbor::One(FileEntryCbor {
+            key: None,
+            location: Some("/opt/myapp".to_string()),
+            fs_name: "config.yaml".to_string(),
+            root: None,
+            size: Some(512),
+            file_version: Some("1.0".to_string()),
+            hash: None,
+            lang: None,
+            other: None,
+        })),
+        process: Some(OneOrMoreProcessEntryCbor::One(ProcessEntryCbor {
+            process_name: "myapp-daemon".to_string(),
+            pid: Some(5678),
+            lang: None,
+            other: None,
+        })),
+        resource: Some(OneOrMoreResourceEntryCbor::One(ResourceEntryCbor {
+            resource_entry_type: "hardware".to_string(),
+            lang: None,
+            other: None,
+        })),
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&rc, &mut buf);
+    let decoded: ResourceCollectionCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(rc, decoded);
+    assert_eq!(
+        decoded.directory.as_ref().unwrap(),
+        rc.directory.as_ref().unwrap()
+    );
+    assert_eq!(decoded.file.as_ref().unwrap(), rc.file.as_ref().unwrap());
+    assert_eq!(
+        decoded.process.as_ref().unwrap(),
+        rc.process.as_ref().unwrap()
+    );
+    assert_eq!(
+        decoded.resource.as_ref().unwrap(),
+        rc.resource.as_ref().unwrap()
+    );
+
+    let json: ResourceCollection = decoded.try_into().unwrap();
+    let cbor_roundtrip: ResourceCollectionCbor = json.try_into().unwrap();
+    let mut buf2 = vec![];
+    let _ = into_writer(&cbor_roundtrip, &mut buf2);
+    assert_eq!(buf, buf2);
+}
+
+#[test]
+fn path_elements_group_file_test() {
+    let peg = PathElementsGroupCbor {
+        directory: None,
+        file: Some(OneOrMoreFileEntryCbor::One(FileEntryCbor {
+            key: Some(false),
+            location: Some("/var/log".to_string()),
+            fs_name: "app.log".to_string(),
+            root: None,
+            size: Some(2048),
+            file_version: None,
+            hash: None,
+            lang: None,
+            other: None,
+        })),
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&peg, &mut buf);
+    let decoded: PathElementsGroupCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(peg, decoded);
+
+    let json: PathElementsGroup = decoded.try_into().unwrap();
+    let cbor_roundtrip: PathElementsGroupCbor = json.try_into().unwrap();
+    let mut buf2 = vec![];
+    let _ = into_writer(&cbor_roundtrip, &mut buf2);
+    assert_eq!(buf, buf2);
+}
+
+#[test]
+fn path_elements_group_both_test() {
+    let peg = PathElementsGroupCbor {
+        directory: Some(OneOrMoreDirectoryEntryCbor::One(DirectoryEntryCbor {
+            key: None,
+            location: Some("/etc".to_string()),
+            fs_name: "myapp.d".to_string(),
+            root: None,
+            lang: None,
+            other: None,
+        })),
+        file: Some(OneOrMoreFileEntryCbor::One(FileEntryCbor {
+            key: None,
+            location: Some("/etc/myapp.d".to_string()),
+            fs_name: "settings.conf".to_string(),
+            root: None,
+            size: Some(256),
+            file_version: None,
+            hash: None,
+            lang: None,
+            other: None,
+        })),
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&peg, &mut buf);
+    let decoded: PathElementsGroupCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(peg, decoded);
+    assert!(decoded.directory.is_some());
+    assert!(decoded.file.is_some());
+
+    let json: PathElementsGroup = decoded.try_into().unwrap();
+    let cbor_roundtrip: PathElementsGroupCbor = json.try_into().unwrap();
+    let mut buf2 = vec![];
+    let _ = into_writer(&cbor_roundtrip, &mut buf2);
+    assert_eq!(buf, buf2);
+}
+
+#[test]
+fn veraison_coswid_decode() {
+    let data =
+        std::fs::read("./tests/data/coswid-veraison.cbor").expect("test vector file missing");
+    let decoded: ConciseSwidTagCbor = from_reader(data.as_slice()).unwrap();
+
+    // roundtrip
+    let mut buf = vec![];
+    let _ = into_writer(&decoded, &mut buf);
+    let decoded2: ConciseSwidTagCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(decoded, decoded2);
+}

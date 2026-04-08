@@ -16,6 +16,8 @@
 //! | `$cbor-tag /= #6.1668547092(COSE_Sign1)` | [`choices::CborCmw::TagSigned`] |
 //! | `$cbor-tag /= #6.1668547093(bstr)` | [`choices::CborCmw::TagCmwJsonCollectionData`] |
 //! | `$cbor-tag /= #6.1668547094(bstr)` | [`choices::CborCmw::TagCmwJwsData`] |
+//! | `tag-cm-data<tn> = #6.<tn>(bytes)` | [`choices::CborCmw::TagData`] |
+//! | `signed-cbor-cmw` | [`signed::SignedCborCmw`] |
 //! | `cbor-record = [type, value, ? ind]` | [`arrays::CborRecord`] / [`arrays::CborRecordCbor`] |
 //! | `json-record = [type, value, ? ind]` | [`arrays::JsonRecord`] / [`arrays::JsonRecordCbor`] |
 //! | `cbor-collection = {? "__cmwc_t", + label => cbor-cmw}` | [`maps::CborCollection`] |
@@ -33,3 +35,4 @@ extern crate alloc;
 pub mod arrays;
 pub mod choices;
 pub mod maps;
+pub mod signed;

@@ -245,6 +245,36 @@ pub struct EntityMap {
     pub roles: Vec<CorimRoleTypeChoice>,
 }
 
+/// The `corim-entity-map` instantiation of [`EntityMap`].
+///
+/// ```text
+/// corim-entity-map = entity-map<$corim-role-type-choice,
+///                               $$corim-entity-map-extension>
+/// ```
+///
+/// See [CoRIM Section 4.1.4].
+///
+/// [CoRIM Section 4.1.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-4.1.4
+pub type CorimEntityMap = EntityMap;
+
+/// CBOR-encoded form of [`CorimEntityMap`].
+pub type CorimEntityMapCbor = EntityMapCbor;
+
+/// The `comid-entity-map` instantiation of [`EntityMap`].
+///
+/// ```text
+/// comid-entity-map = entity-map<$comid-role-type-choice,
+///                               $$comid-entity-map-extension>
+/// ```
+///
+/// See [CoRIM Section 5.1.3].
+///
+/// [CoRIM Section 5.1.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.3
+pub type ComidEntityMap = EntityMap;
+
+/// CBOR-encoded form of [`ComidEntityMap`].
+pub type ComidEntityMapCbor = EntityMapCbor;
+
 /// The `environment-map` type is defined in [CoRIM Section 5.1.4.1].
 ///
 /// ```text

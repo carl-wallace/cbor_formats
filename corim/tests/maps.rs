@@ -688,3 +688,18 @@ fn version_map_test() {
     let _ = into_writer(&cbor_roundtrip, &mut buf2);
     assert_eq!(buf, buf2);
 }
+
+#[test]
+fn veraison_comid_dice_refval_decode() {
+    let data = read_cbor(&Some(
+        "./tests/examples/comid-dice-refval-veraison.cbor".to_string(),
+    ));
+    assert!(!data.is_empty(), "test vector file missing");
+    let decoded: ConciseMidTagCbor = from_reader(data.as_slice()).unwrap();
+
+    // roundtrip
+    let mut buf = vec![];
+    let _ = into_writer(&decoded, &mut buf);
+    let decoded2: ConciseMidTagCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(decoded, decoded2);
+}

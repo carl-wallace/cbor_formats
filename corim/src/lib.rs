@@ -63,6 +63,8 @@
 //! | `measurement-values-map` | [`maps::MeasurementValuesMap`] / [`maps::MeasurementValuesMapCbor`] |
 //! | `flags-map` | [`maps::FlagsMap`] / [`maps::FlagsMapCbor`] |
 //! | `entity-map` | [`maps::EntityMap`] / [`maps::EntityMapCbor`] |
+//! | `corim-entity-map` | [`maps::CorimEntityMap`] / [`maps::CorimEntityMapCbor`] |
+//! | `comid-entity-map` | [`maps::ComidEntityMap`] / [`maps::ComidEntityMapCbor`] |
 //! | `tag-identity-map` | [`maps::TagIdentityMap`] / [`maps::TagIdentityMapCbor`] |
 //! | `linked-tag-map` | [`maps::LinkedTagMap`] / [`maps::LinkedTagMapCbor`] |
 //! | `triples-map` | [`maps::TriplesMap`] / [`maps::TriplesMapCbor`] |
@@ -71,6 +73,24 @@
 //! | `protected-corim-header-map` | [`maps::ProtectedCorimHeaderMap`] / [`maps::ProtectedCorimHeaderMapCbor`] |
 //! | `attest-key-conditions-map` | [`maps::AttestKeyConditionsMap`] / [`maps::AttestKeyConditionsMapCbor`] |
 //! | `concise-tl-tag` | [`maps::ConciseTlTag`] / [`maps::ConciseTlTagCbor`] |
+//!
+//! ### Type aliases ([root module])
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `tagged-unsigned-corim-map` (`#6.501`) | [`TaggedUnsignedCorimMap`] |
+//! | `raw-value-mask-type` | [`RawValueMaskType`] |
+//!
+//! Additional CoRIM-defined types are in the [`common`] crate:
+//! `digests-type`, `integrity-registers`, `tagged-masked-raw-value`,
+//! and the various `tagged-*` key/cert types. See the
+//! [`common` crate docs](common) for the full list.
+//!
+//! ### Signed types ([`signed`] module)
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `COSE-Sign1-corim` | [`signed::SignedCorim`] |
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 #![allow(clippy::derive_partial_eq_without_eq)]
@@ -82,26 +102,28 @@ extern crate alloc;
 pub mod arrays;
 pub mod choices;
 pub mod maps;
+pub mod signed;
 
 use alloc::vec::Vec;
 
-// corim = #6.500($concise-reference-integrity-manifest-type-choice)
-//
-// $concise-reference-integrity-manifest-type-choice /= #6.501(unsigned-corim-map)
-// $concise-reference-integrity-manifest-type-choice /= #6.502(signed-corim)
-//
-// signed-corim = #6.18(COSE-Sign1-corim)
-//
-// unprotected-signed-corim-header-map = {
-//   * cose-label => cose-values
-// }
-//
-// COSE-Sign1-corim = [
-//   protected: bstr .cbor protected-signed-corim-header-map
-//   unprotected: unprotected-signed-corim-header-map
-//   payload: bstr .cbor unsigned-corim-map
-//   signature: bstr
-// ]
+use ciborium::tag::Required;
+
+use maps::{CorimMapCbor, EntityMap, EntityMapCbor};
+
+/// `tagged-unsigned-corim-map` = `#6.501(unsigned-corim-map)`.
+///
+/// See [CoRIM Section 4.1].
+///
+/// [CoRIM Section 4.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-4.1
+pub type TaggedUnsignedCorimMap = Required<CorimMapCbor, 501>;
+
+/// The `corim-entity-map` instantiation of [`EntityMap`].
+///
+/// See [`maps::CorimEntityMap`].
+pub type CorimEntityMap = EntityMap;
+
+/// CBOR-encoded form of [`CorimEntityMap`].
+pub type CorimEntityMapCbor = EntityMapCbor;
 
 /// raw-value-mask-type = bytes (deprecated in draft-10, kept for backward compat)
 pub type RawValueMaskType = Vec<u8>;

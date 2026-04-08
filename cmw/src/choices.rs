@@ -14,6 +14,7 @@
 //! | `$cbor-tag /= #6.1668547092(COSE_Sign1)` | [`CborCmw::TagSigned`] |
 //! | `$cbor-tag /= #6.1668547093(bstr)` | [`CborCmw::TagCmwJsonCollectionData`] |
 //! | `$cbor-tag /= #6.1668547094(bstr)` | [`CborCmw::TagCmwJwsData`] |
+//! | `tag-cm-data<tn> = #6.<tn>(bytes)` | [`CborCmw::TagData`] |
 //!
 //! [draft-ietf-rats-msg-wrap-23]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23
 
@@ -244,6 +245,19 @@ pub enum CborCmw {
     Record(CborRecordCbor),
     /// Untagged `cbor-collection`
     Collection(CborCollection),
+    /// `tag-cm-data<tn>` — application-defined tag wrapping opaque bytes.
+    /// Captures any tag in the CMW range [`CMW_TAG_MIN`]..=[`CMW_TAG_MAX`] not
+    /// matched by one of the well-known variants above.
+    ///
+    /// See [CMW Section 3.2].
+    ///
+    /// [CMW Section 3.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23#section-3.2
+    TagData {
+        /// CBOR tag number (must be in the CMW tag range)
+        tag: u64,
+        /// Opaque payload bytes
+        value: BytesType,
+    },
 }
 
 /// Tag numbers for CMW CBOR tags
@@ -251,6 +265,19 @@ const TAG_COLLECTION: u64 = 1668547091;
 const TAG_SIGNED: u64 = 1668547092;
 const TAG_CMW_JSON_COLLECTION_DATA: u64 = 1668547093;
 const TAG_CMW_JWS_DATA: u64 = 1668547094;
+
+/// Minimum CBOR tag number in the CMW range per RFC 9277 TN() transform.
+/// Corresponds to `TN(0)` = `0x63740101`.
+pub const CMW_TAG_MIN: u64 = 1668546817;
+
+/// Maximum CBOR tag number in the CMW range per RFC 9277 TN() transform.
+/// Corresponds to `TN(65535)` = `0x6374FFFF`.
+pub const CMW_TAG_MAX: u64 = 1668612095;
+
+/// Returns true if the given tag number falls within the CMW tag range.
+pub fn is_cmw_tag(tag: u64) -> bool {
+    (CMW_TAG_MIN..=CMW_TAG_MAX).contains(&tag)
+}
 
 /// Helper: serialize a ciborium::Value to bytes, then deserialize as T.
 fn value_to_type<T: serde::de::DeserializeOwned>(val: &Value) -> Result<T, String> {
@@ -268,6 +295,10 @@ impl Serialize for CborCmw {
             CborCmw::TagCmwJwsData(v) => v.serialize(serializer),
             CborCmw::Record(v) => v.serialize(serializer),
             CborCmw::Collection(v) => v.serialize(serializer),
+            CborCmw::TagData { tag, value } => {
+                let BytesType::Bytes(bytes) = value;
+                Value::Tag(*tag, Box::new(Value::Bytes(bytes.clone()))).serialize(serializer)
+            }
         }
     }
 }
@@ -293,7 +324,16 @@ impl<'de> Deserialize<'de> for CborCmw {
                     let bytes: BytesType = value_to_type(inner).map_err(de::Error::custom)?;
                     Ok(CborCmw::TagCmwJwsData(Required(bytes)))
                 }
-                other => Err(de::Error::custom(format!("unknown cbor-cmw tag: {other}"))),
+                other if is_cmw_tag(other) => {
+                    let bytes: BytesType = value_to_type(inner).map_err(de::Error::custom)?;
+                    Ok(CborCmw::TagData {
+                        tag: other,
+                        value: bytes,
+                    })
+                }
+                other => Err(de::Error::custom(format!(
+                    "tag {other} outside CMW range [{CMW_TAG_MIN}, {CMW_TAG_MAX}]"
+                ))),
             },
             Value::Array(_) => {
                 let record: CborRecordCbor = value_to_type(&value).map_err(de::Error::custom)?;

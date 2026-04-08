@@ -269,7 +269,7 @@ impl StructField {
                 quote! {
                     #field_ident: match m.get(&#t) {
                         Some(v) => match #f2::try_from(
-                            match m[&#t].as_map() {
+                            match v.as_map() {
                             Some(val) => val.clone(),
                             None => return Err(format!("Failed to to process {} as a map: {:?}", #field_ident_str, v))
                         }
@@ -282,14 +282,17 @@ impl StructField {
                 }
             } else {
                 quote! {
-                    #field_ident: match #f2::try_from(
-                            match m[&#t].as_map() {
+                    #field_ident: match m.get(&#t) {
+                        Some(v) => match #f2::try_from(
+                            match v.as_map() {
                             Some(val) => val.clone(),
-                            None => return Err(format!("Failed to to process {} as a map: {:?}", #field_ident_str, m[&#t]))
+                            None => return Err(format!("Failed to to process {} as a map: {:?}", #field_ident_str, v))
                         }
                     ) {
                         Ok(val) => val,
                         Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                    },
+                        None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                     },
                 }
             }
@@ -309,12 +312,15 @@ impl StructField {
                 }
             } else {
                 quote! {
-                    #field_ident: match m[&#t].as_array() {
-                        Some(a) => {
-                            let items: Result<Vec<_>, String> = a.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone())).collect();
-                            items?
+                    #field_ident: match m.get(&#t) {
+                        Some(v) => match v.as_array() {
+                            Some(a) => {
+                                let items: Result<Vec<_>, String> = a.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone())).collect();
+                                items?
+                            },
+                            None => return Err(format!("Failed to process {} as an array: {:?}", #field_ident_str, v))
                         },
-                        None => return Err(format!("Failed to process {} as an array: {:?}", #field_ident_str, m[&#t]))
+                        None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                     },
                 }
             }
@@ -332,9 +338,12 @@ impl StructField {
                 }
             } else {
                 quote! {
-                    #field_ident: match m[&#t].as_text() {
-                        Some(val) => val.to_string(),
-                        None => return Err(format!("Failed to to process {} as text: {:?}", #field_ident_str, m[&#t]))
+                    #field_ident: match m.get(&#t) {
+                        Some(v) => match v.as_text() {
+                            Some(val) => val.to_string(),
+                            None => return Err(format!("Failed to to process {} as text: {:?}", #field_ident_str, v))
+                        },
+                        None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                     },
                 }
             }
@@ -357,14 +366,17 @@ impl StructField {
                 }
             } else {
                 quote! {
-                    #field_ident: match m[&#t].as_integer() {
-                        Some(i) => {
-                            match i.try_into() {
-                                Ok(val) => val,
-                                Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                    #field_ident: match m.get(&#t) {
+                        Some(v) => match v.as_integer() {
+                            Some(i) => {
+                                match i.try_into() {
+                                    Ok(val) => val,
+                                    Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                                }
                             }
-                        }
-                        None => return Err(format!("Failed to to process {} as an integer", #field_ident_str))
+                            None => return Err(format!("Failed to to process {} as an integer", #field_ident_str))
+                        },
+                        None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                     },
                 }
             }
@@ -382,9 +394,12 @@ impl StructField {
                 }
             } else {
                 quote! {
-                    #field_ident: match m[&#t].as_bool() {
-                        Some(val) => val,
-                        None => return Err(format!("Failed to to process {} as a boolean", #field_ident_str))
+                    #field_ident: match m.get(&#t) {
+                        Some(v) => match v.as_bool() {
+                            Some(val) => val,
+                            None => return Err(format!("Failed to to process {} as a boolean", #field_ident_str))
+                        },
+                        None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                     },
                 }
             }
@@ -402,9 +417,12 @@ impl StructField {
             }
         } else {
             quote! {
-                #field_ident: match #f2::try_from(&m[&#t]) {
-                    Ok(v) => v,
-                    Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                #field_ident: match m.get(&#t) {
+                    Some(v) => match #f2::try_from(v) {
+                        Ok(val) => val,
+                        Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                    },
+                    None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                 },
             }
         }

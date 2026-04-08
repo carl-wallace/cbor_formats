@@ -4,15 +4,15 @@
 //!
 //! | CDDL | Rust |
 //! |------|------|
-//! | `coserv-map` | [`CoservMap`] / [`CoservMapCbor`] |
-//! | `query-map` | [`QueryMap`] / [`QueryMapCbor`] |
+//! | `coserv` | [`CoservMap`] / [`CoservMapCbor`] |
+//! | `query` | [`QueryMap`] / [`QueryMapCbor`] |
 //! | `environment-selector-map` | [`EnvironmentSelectorMap`] / [`EnvironmentSelectorMapCbor`] |
-//! | `results-map` | [`ResultsMap`] / [`ResultsMapCbor`] |
-//! | `refval-quad-map` | [`RefvalQuadMap`] / [`RefvalQuadMapCbor`] |
-//! | `endval-quad-map` | [`EndvalQuadMap`] / [`EndvalQuadMapCbor`] |
-//! | `cond-endval-quad-map` | [`CondEndvalQuadMap`] / [`CondEndvalQuadMapCbor`] |
-//! | `ak-quad-map` | [`AkQuadMap`] / [`AkQuadMapCbor`] |
-//! | `cots-stmt-map` | [`CotsStmtMap`] / [`CotsStmtMapCbor`] |
+//! | `results` | [`ResultsMap`] / [`ResultsMapCbor`] |
+//! | `refval-quad` | [`RefvalQuadMap`] / [`RefvalQuadMapCbor`] |
+//! | `endval-quad` | [`EndvalQuadMap`] / [`EndvalQuadMapCbor`] |
+//! | `cond-endval-quad` | [`CondEndvalQuadMap`] / [`CondEndvalQuadMapCbor`] |
+//! | `ak-quad` | [`AkQuadMap`] / [`AkQuadMapCbor`] |
+//! | `cots-stmt` | [`CotsStmtMap`] / [`CotsStmtMapCbor`] |
 //! | `tdate` | [`Tdate`] / [`TdateCbor`] |
 //!
 //! [draft-ietf-rats-coserv-05]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05
@@ -88,8 +88,8 @@ impl TryFrom<&Tdate> for TdateCbor {
 
 // coserv = {
 //   profile: comid.oid-type / ~uri
-//   query: query-map
-//   ? results: results-map
+//   query: query
+//   ? results: results
 // }
 
 /// The top-level `coserv` map from [CoSERV Section 4].
@@ -97,8 +97,8 @@ impl TryFrom<&Tdate> for TdateCbor {
 /// ```text
 /// coserv = {
 ///   profile: comid.oid-type / ~uri
-///   query: query-map
-///   ? results: results-map
+///   query: query
+///   ? results: results
 /// }
 /// ```
 ///
@@ -114,16 +114,16 @@ pub struct CoservMap {
     pub results: Option<ResultsMap>,
 }
 
-// query-map = {
+// query = {
 //   artifact-type: artifact-type
 //   environment-selector: environment-selector-map
 //   result-type: result-type
 // }
 
-/// The `query-map` from [CoSERV Section 4.3].
+/// The `query` from [CoSERV Section 4.3].
 ///
 /// ```text
-/// query-map = {
+/// query = {
 ///   artifact-type: artifact-type
 ///   environment-selector: environment-selector-map
 ///   result-type: result-type
@@ -170,25 +170,25 @@ pub struct EnvironmentSelectorMap {
     pub group: Option<Vec<StatefulGroup>>,
 }
 
-// results-map = {
-//   ? rvq: [+ refval-quad-map]
-//   ? evq: [+ endval-quad-map]
-//   ? ceq: [+ cond-endval-quad-map]
-//   ? akq: [+ ak-quad-map]
-//   ? tas: [+ cots-stmt-map]
+// results = {
+//   ? rvq: [+ refval-quad]
+//   ? evq: [+ endval-quad]
+//   ? ceq: [+ cond-endval-quad]
+//   ? akq: [+ ak-quad]
+//   ? tas: [+ cots-stmt]
 //   expiry: tdate
 //   ? source-artifacts: [+ cmw.cbor-record]
 // }
 
-/// The `results-map` from [CoSERV Section 4.4].
+/// The `results` from [CoSERV Section 4.4].
 ///
 /// ```text
-/// results-map = {
-///   ? rvq: [+ refval-quad-map]
-///   ? evq: [+ endval-quad-map]
-///   ? ceq: [+ cond-endval-quad-map]
-///   ? akq: [+ ak-quad-map]
-///   ? tas: [+ cots-stmt-map]
+/// results = {
+///   ? rvq: [+ refval-quad]
+///   ? evq: [+ endval-quad]
+///   ? ceq: [+ cond-endval-quad]
+///   ? akq: [+ ak-quad]
+///   ? tas: [+ cots-stmt]
 ///   expiry: tdate
 ///   ? source-artifacts: [+ cmw.cbor-record]
 /// }
@@ -214,15 +214,15 @@ pub struct ResultsMap {
     pub source_artifacts: Option<Vec<CborRecord>>,
 }
 
-// refval-quad-map = {
+// refval-quad = {
 //   authorities: [+ $crypto-key-type-choice]
 //   rv-triple: reference-triple-record
 // }
 
-/// The `refval-quad-map` from [CoSERV Section 4.4].
+/// The `refval-quad` from [CoSERV Section 4.4].
 ///
 /// ```text
-/// refval-quad-map = {
+/// refval-quad = {
 ///   authorities: [+ $crypto-key-type-choice]
 ///   rv-triple: reference-triple-record
 /// }
@@ -238,15 +238,15 @@ pub struct RefvalQuadMap {
     pub rv_triple: ReferenceTripleRecord,
 }
 
-// endval-quad-map = {
+// endval-quad = {
 //   authorities: [+ $crypto-key-type-choice]
 //   ev-triple: endorsed-triple-record
 // }
 
-/// The `endval-quad-map` from [CoSERV Section 4.4].
+/// The `endval-quad` from [CoSERV Section 4.4].
 ///
 /// ```text
-/// endval-quad-map = {
+/// endval-quad = {
 ///   authorities: [+ $crypto-key-type-choice]
 ///   ev-triple: endorsed-triple-record
 /// }
@@ -262,15 +262,15 @@ pub struct EndvalQuadMap {
     pub ev_triple: EndorsedTripleRecord,
 }
 
-// cond-endval-quad-map = {
+// cond-endval-quad = {
 //   authorities: [+ $crypto-key-type-choice]
 //   ce-triple: conditional-endorsement-triple-record
 // }
 
-/// The `cond-endval-quad-map` from [CoSERV Section 4.4].
+/// The `cond-endval-quad` from [CoSERV Section 4.4].
 ///
 /// ```text
-/// cond-endval-quad-map = {
+/// cond-endval-quad = {
 ///   authorities: [+ $crypto-key-type-choice]
 ///   ce-triple: conditional-endorsement-triple-record
 /// }
@@ -286,15 +286,15 @@ pub struct CondEndvalQuadMap {
     pub ce_triple: ConditionalEndorsementTripleRecord,
 }
 
-// ak-quad-map = {
+// ak-quad = {
 //   authorities: [+ $crypto-key-type-choice]
 //   ak-triple: attest-key-triple-record
 // }
 
-/// The `ak-quad-map` from [CoSERV Section 4.4].
+/// The `ak-quad` from [CoSERV Section 4.4].
 ///
 /// ```text
-/// ak-quad-map = {
+/// ak-quad = {
 ///   authorities: [+ $crypto-key-type-choice]
 ///   ak-triple: attest-key-triple-record
 /// }
@@ -310,15 +310,15 @@ pub struct AkQuadMap {
     pub ak_triple: AttestKeyTripleRecord,
 }
 
-// cots-stmt-map = {
+// cots-stmt = {
 //   authorities: [+ $crypto-key-type-choice]
 //   cots: concise-ta-store-map
 // }
 
-/// The `cots-stmt-map` from [CoSERV Section 4.4].
+/// The `cots-stmt` from [CoSERV Section 4.4].
 ///
 /// ```text
-/// cots-stmt-map = {
+/// cots-stmt = {
 ///   authorities: [+ $crypto-key-type-choice]
 ///   cots: concise-ta-store-map
 /// }
