@@ -11,6 +11,7 @@ use cose_crypto::crypto::ecdsa::{Es256Signer, Es256Verifier};
 use cose_crypto::sign::{CoseSign1Builder, verify_sign1};
 use coserv::maps::CoservMapCbor;
 use coserv::signed::*;
+use p256::elliptic_curve::Generate;
 
 fn roundtrip_cbor<
     T: serde::Serialize + serde::de::DeserializeOwned + PartialEq + std::fmt::Debug,
@@ -169,10 +170,10 @@ fn signed_coserv_invalid_payload_rejected() {
 
 /// Generate a P-256 key pair and return (signer, verifier).
 fn make_es256_key_pair() -> (Es256Signer, Es256Verifier) {
-    let signing_key = p256::ecdsa::SigningKey::random(&mut rand::thread_rng());
+    let signing_key = p256::ecdsa::SigningKey::generate();
     let d = signing_key.to_bytes();
     let verifying_key = signing_key.verifying_key();
-    let point = verifying_key.to_encoded_point(false);
+    let point = verifying_key.to_sec1_point(false);
     let x = point.x().unwrap().to_vec();
     let y = point.y().unwrap().to_vec();
 

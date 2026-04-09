@@ -23,7 +23,7 @@ pub struct Es256Signer {
 impl Es256Signer {
     /// Create from raw private key scalar bytes (32 bytes).
     pub fn from_bytes(d: &[u8]) -> Result<Self, CoseCryptoError> {
-        let key = p256::ecdsa::SigningKey::from_bytes(d.into())
+        let key = p256::ecdsa::SigningKey::from_slice(d)
             .map_err(|e| CoseCryptoError::InvalidKey(e.to_string()))?;
         Ok(Self { key })
     }
@@ -58,13 +58,7 @@ pub struct Es256Verifier {
 impl Es256Verifier {
     /// Create from uncompressed SEC1 x and y coordinate bytes (32 bytes each).
     pub fn from_xy(x: &[u8], y: &[u8]) -> Result<Self, CoseCryptoError> {
-        let mut uncompressed = Vec::with_capacity(1 + x.len() + y.len());
-        uncompressed.push(0x04);
-        uncompressed.extend_from_slice(x);
-        uncompressed.extend_from_slice(y);
-        let point = p256::EncodedPoint::from_bytes(&uncompressed)
-            .map_err(|e| CoseCryptoError::InvalidKey(e.to_string()))?;
-        let key = p256::ecdsa::VerifyingKey::from_encoded_point(&point)
+        let key = p256::ecdsa::VerifyingKey::from_sec1_bytes(&[&[0x04], x, y].concat())
             .map_err(|e| CoseCryptoError::InvalidKey(e.to_string()))?;
         Ok(Self { key })
     }
@@ -85,7 +79,7 @@ impl Es256Verifier {
 
 impl CoseVerifier for Es256Verifier {
     fn verify(&self, data: &[u8], signature: &[u8]) -> Result<(), CoseCryptoError> {
-        let sig = p256::ecdsa::Signature::from_bytes(signature.into())
+        let sig = p256::ecdsa::Signature::from_slice(signature)
             .map_err(|_| CoseCryptoError::VerificationFailed)?;
         self.key
             .verify(data, &sig)
@@ -107,7 +101,7 @@ pub struct Es384Signer {
 impl Es384Signer {
     /// Create from raw private key scalar bytes (48 bytes).
     pub fn from_bytes(d: &[u8]) -> Result<Self, CoseCryptoError> {
-        let key = p384::ecdsa::SigningKey::from_bytes(d.into())
+        let key = p384::ecdsa::SigningKey::from_slice(d)
             .map_err(|e| CoseCryptoError::InvalidKey(e.to_string()))?;
         Ok(Self { key })
     }
@@ -142,13 +136,7 @@ pub struct Es384Verifier {
 impl Es384Verifier {
     /// Create from uncompressed SEC1 x and y coordinate bytes (48 bytes each).
     pub fn from_xy(x: &[u8], y: &[u8]) -> Result<Self, CoseCryptoError> {
-        let mut uncompressed = Vec::with_capacity(1 + x.len() + y.len());
-        uncompressed.push(0x04);
-        uncompressed.extend_from_slice(x);
-        uncompressed.extend_from_slice(y);
-        let point = p384::EncodedPoint::from_bytes(&uncompressed)
-            .map_err(|e| CoseCryptoError::InvalidKey(e.to_string()))?;
-        let key = p384::ecdsa::VerifyingKey::from_encoded_point(&point)
+        let key = p384::ecdsa::VerifyingKey::from_sec1_bytes(&[&[0x04], x, y].concat())
             .map_err(|e| CoseCryptoError::InvalidKey(e.to_string()))?;
         Ok(Self { key })
     }
@@ -169,7 +157,7 @@ impl Es384Verifier {
 
 impl CoseVerifier for Es384Verifier {
     fn verify(&self, data: &[u8], signature: &[u8]) -> Result<(), CoseCryptoError> {
-        let sig = p384::ecdsa::Signature::from_bytes(signature.into())
+        let sig = p384::ecdsa::Signature::from_slice(signature)
             .map_err(|_| CoseCryptoError::VerificationFailed)?;
         self.key
             .verify(data, &sig)

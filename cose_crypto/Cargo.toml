@@ -16,27 +16,27 @@ serde_json = "1.0"
 base64ct = { version = "1.7", features = ["alloc"] }
 
 # ECDSA
-p256 = { version = "0.13", default-features = false, features = ["ecdsa"] }
-p384 = { version = "0.13", default-features = false, features = ["ecdsa"] }
-ecdsa = { version = "0.16", default-features = false }
-elliptic-curve = { version = "0.13", default-features = false }
+p256 = { version = "0.14.0-rc.8", default-features = false, features = ["ecdsa"] }
+p384 = { version = "0.14.0-rc.8", default-features = false, features = ["ecdsa"] }
+ecdsa = { version = "0.17.0-rc.16", default-features = false }
+elliptic-curve = { version = "0.14.0-rc.16", default-features = false }
 
 # EdDSA
-ed25519-dalek = { version = "2", features = ["fast", "zeroize", "rand_core"] }
+ed25519-dalek = { version = "3.0.0-pre.6", features = ["fast", "zeroize", "rand_core"] }
 
 # HMAC
-hmac = "0.12"
-sha2 = "0.10"
+hmac = "0.13.0"
+sha2 = "0.11.0"
 
 # AES-GCM
-aes-gcm = "0.10"
+aes-gcm = "0.11.0-rc.3"
 
 # Random
-rand = "0.8"
+rand = "0.10"
 
 [dev-dependencies]
 hex-literal = "1.1.0"
-p256 = { version = "0.13", features = ["ecdsa"] }
-p384 = { version = "0.13", features = ["ecdsa"] }
-ed25519-dalek = { version = "2", features = ["fast", "zeroize", "rand_core"] }
-rand = "0.8"
+p256 = { version = "0.14.0-rc.8", features = ["ecdsa"] }
+p384 = { version = "0.14.0-rc.8", features = ["ecdsa"] }
+ed25519-dalek = { version = "3.0.0-pre.6", features = ["fast", "zeroize", "rand_core"] }
+rand = "0.10"

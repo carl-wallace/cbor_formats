@@ -3,7 +3,7 @@
 use alloc::string::ToString;
 use alloc::vec::Vec;
 
-use ::hmac::{Hmac, Mac};
+use ::hmac::{Hmac, KeyInit, Mac};
 use cose::maps::CoseKeyCbor;
 use sha2::{Sha256, Sha384, Sha512};
 

@@ -1,5 +1,3 @@
-#![allow(deprecated)]
-
 use cose_crypto::algorithm::CoseAlgorithm;
 use cose_crypto::crypto::aes_gcm::AesGcmKey;
 use cose_crypto::crypto::ecdsa::{Es256Signer, Es256Verifier, Es384Signer, Es384Verifier};
@@ -9,21 +7,22 @@ use cose_crypto::encrypt::{CoseEncrypt0Builder, decrypt_encrypt0};
 use cose_crypto::helpers;
 use cose_crypto::mac::{CoseMac0Builder, verify_mac0};
 use cose_crypto::sign::{CoseSign1Builder, verify_sign1};
+use p256::elliptic_curve::Generate;
 
 // ── ES256 Sign1 round-trip ──
 
 #[test]
 fn sign1_es256_round_trip() {
     // Generate a P-256 key pair
-    let signing_key = p256::ecdsa::SigningKey::random(&mut rand::thread_rng());
+    let signing_key = p256::ecdsa::SigningKey::generate();
     let d = signing_key.to_bytes();
     let verifying_key = signing_key.verifying_key();
-    let point = verifying_key.to_encoded_point(false);
-    let x = point.x().unwrap().as_slice();
-    let y = point.y().unwrap().as_slice();
+    let point = verifying_key.to_sec1_point(false);
+    let x = point.x().unwrap().to_vec();
+    let y = point.y().unwrap().to_vec();
 
     let signer = Es256Signer::from_bytes(&d).unwrap();
-    let verifier = Es256Verifier::from_xy(x, y).unwrap();
+    let verifier = Es256Verifier::from_xy(&x, &y).unwrap();
 
     let payload = b"This is the content.";
     let protected = helpers::header_with_algorithm(CoseAlgorithm::Es256);
@@ -41,15 +40,15 @@ fn sign1_es256_round_trip() {
 
 #[test]
 fn sign1_es384_round_trip() {
-    let signing_key = p384::ecdsa::SigningKey::random(&mut rand::thread_rng());
+    let signing_key = p384::ecdsa::SigningKey::generate();
     let d = signing_key.to_bytes();
     let verifying_key = signing_key.verifying_key();
-    let point = verifying_key.to_encoded_point(false);
-    let x = point.x().unwrap().as_slice();
-    let y = point.y().unwrap().as_slice();
+    let point = verifying_key.to_sec1_point(false);
+    let x = point.x().unwrap().to_vec();
+    let y = point.y().unwrap().to_vec();
 
     let signer = Es384Signer::from_bytes(&d).unwrap();
-    let verifier = Es384Verifier::from_xy(x, y).unwrap();
+    let verifier = Es384Verifier::from_xy(&x, &y).unwrap();
 
     let payload = b"This is the content.";
     let protected = helpers::header_with_algorithm(CoseAlgorithm::Es384);
@@ -67,7 +66,7 @@ fn sign1_es384_round_trip() {
 
 #[test]
 fn sign1_eddsa_round_trip() {
-    let signing_key = ed25519_dalek::SigningKey::generate(&mut rand::thread_rng());
+    let signing_key = ed25519_dalek::SigningKey::generate(&mut rand::rng());
     let d = signing_key.to_bytes();
     let x = signing_key.verifying_key().to_bytes();
 
@@ -90,18 +89,18 @@ fn sign1_eddsa_round_trip() {
 
 #[test]
 fn sign1_es256_wrong_key_fails() {
-    let signing_key = p256::ecdsa::SigningKey::random(&mut rand::thread_rng());
+    let signing_key = p256::ecdsa::SigningKey::generate();
     let d = signing_key.to_bytes();
 
     // Different key pair for verification
-    let wrong_key = p256::ecdsa::SigningKey::random(&mut rand::thread_rng());
+    let wrong_key = p256::ecdsa::SigningKey::generate();
     let wrong_vk = wrong_key.verifying_key();
-    let point = wrong_vk.to_encoded_point(false);
-    let x = point.x().unwrap().as_slice();
-    let y = point.y().unwrap().as_slice();
+    let point = wrong_vk.to_sec1_point(false);
+    let x = point.x().unwrap().to_vec();
+    let y = point.y().unwrap().to_vec();
 
     let signer = Es256Signer::from_bytes(&d).unwrap();
-    let verifier = Es256Verifier::from_xy(x, y).unwrap();
+    let verifier = Es256Verifier::from_xy(&x, &y).unwrap();
 
     let payload = b"This is the content.";
     let protected = helpers::header_with_algorithm(CoseAlgorithm::Es256);
@@ -261,15 +260,15 @@ fn encrypt0_wrong_key_fails() {
 
 #[test]
 fn sign1_with_external_aad() {
-    let signing_key = p256::ecdsa::SigningKey::random(&mut rand::thread_rng());
+    let signing_key = p256::ecdsa::SigningKey::generate();
     let d = signing_key.to_bytes();
     let verifying_key = signing_key.verifying_key();
-    let point = verifying_key.to_encoded_point(false);
-    let x = point.x().unwrap().as_slice();
-    let y = point.y().unwrap().as_slice();
+    let point = verifying_key.to_sec1_point(false);
+    let x = point.x().unwrap().to_vec();
+    let y = point.y().unwrap().to_vec();
 
     let signer = Es256Signer::from_bytes(&d).unwrap();
-    let verifier = Es256Verifier::from_xy(x, y).unwrap();
+    let verifier = Es256Verifier::from_xy(&x, &y).unwrap();
 
     let payload = b"This is the content.";
     let external_aad = b"additional context";
@@ -293,15 +292,15 @@ fn sign1_with_external_aad() {
 
 #[test]
 fn sign1_cbor_serialization_round_trip() {
-    let signing_key = p256::ecdsa::SigningKey::random(&mut rand::thread_rng());
+    let signing_key = p256::ecdsa::SigningKey::generate();
     let d = signing_key.to_bytes();
     let verifying_key = signing_key.verifying_key();
-    let point = verifying_key.to_encoded_point(false);
-    let x = point.x().unwrap().as_slice();
-    let y = point.y().unwrap().as_slice();
+    let point = verifying_key.to_sec1_point(false);
+    let x = point.x().unwrap().to_vec();
+    let y = point.y().unwrap().to_vec();
 
     let signer = Es256Signer::from_bytes(&d).unwrap();
-    let verifier = Es256Verifier::from_xy(x, y).unwrap();
+    let verifier = Es256Verifier::from_xy(&x, &y).unwrap();
 
     let payload = b"This is the content.";
     let protected = helpers::header_with_algorithm(CoseAlgorithm::Es256);
