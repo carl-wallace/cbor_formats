@@ -26,6 +26,15 @@ pub enum CoseAlgorithm {
     A192Gcm,
     /// AES-GCM 256-bit key (IANA label 3)
     A256Gcm,
+    /// ML-DSA-44 (IANA label -48)
+    #[cfg(feature = "pqc")]
+    MlDsa44,
+    /// ML-DSA-65 (IANA label -49)
+    #[cfg(feature = "pqc")]
+    MlDsa65,
+    /// ML-DSA-87 (IANA label -50)
+    #[cfg(feature = "pqc")]
+    MlDsa87,
 }
 
 impl CoseAlgorithm {
@@ -42,6 +51,12 @@ impl CoseAlgorithm {
             1 => Ok(Self::A128Gcm),
             2 => Ok(Self::A192Gcm),
             3 => Ok(Self::A256Gcm),
+            #[cfg(feature = "pqc")]
+            -48 => Ok(Self::MlDsa44),
+            #[cfg(feature = "pqc")]
+            -49 => Ok(Self::MlDsa65),
+            #[cfg(feature = "pqc")]
+            -50 => Ok(Self::MlDsa87),
             other => Err(CoseCryptoError::UnsupportedAlgorithm(other)),
         }
     }
@@ -59,6 +74,12 @@ impl CoseAlgorithm {
             Self::A128Gcm => 1,
             Self::A192Gcm => 2,
             Self::A256Gcm => 3,
+            #[cfg(feature = "pqc")]
+            Self::MlDsa44 => -48,
+            #[cfg(feature = "pqc")]
+            Self::MlDsa65 => -49,
+            #[cfg(feature = "pqc")]
+            Self::MlDsa87 => -50,
         }
     }
 

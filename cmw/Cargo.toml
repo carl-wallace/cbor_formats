@@ -15,6 +15,7 @@ rust-version = "1.85.0"
 [features]
 default = []
 crypto = ["cose_crypto"]
+pqc = ["cose_crypto/pqc"]
 
 [dependencies]
 cbor_derive = { version = "0.1.1", path = "../cbor_derive" }

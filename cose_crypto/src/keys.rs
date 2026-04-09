@@ -11,6 +11,9 @@ use crate::error::CoseCryptoError;
 const KTY_OKP: i64 = 1;
 const KTY_EC2: i64 = 2;
 const KTY_SYMMETRIC: i64 = 4;
+/// AKP key type (kty=7) for algorithm key pairs (ML-DSA, etc.)
+#[cfg(feature = "pqc")]
+const KTY_AKP: i64 = 7;
 
 /// EC2/OKP curve values (crv parameter, label -1).
 const CRV_P256: i64 = 1;
@@ -61,6 +64,24 @@ pub enum ParsedCoseKey {
         /// Key bytes
         k: Vec<u8>,
     },
+    /// AKP private key: (alg, pub, priv)
+    #[cfg(feature = "pqc")]
+    AkpPrivate {
+        /// Algorithm identifier (required for AKP keys)
+        alg: i64,
+        /// Public key bytes (label -1)
+        pub_key: Vec<u8>,
+        /// Private key bytes (label -2)
+        priv_key: Vec<u8>,
+    },
+    /// AKP public key: (alg, pub)
+    #[cfg(feature = "pqc")]
+    AkpPublic {
+        /// Algorithm identifier (required for AKP keys)
+        alg: i64,
+        /// Public key bytes (label -1)
+        pub_key: Vec<u8>,
+    },
 }
 
 /// Extract a parameter value from the `other` field of a CoseKeyCbor by integer label.
@@ -110,6 +131,8 @@ pub fn parse_cose_key(key: &CoseKeyCbor) -> Result<ParsedCoseKey, CoseCryptoErro
         KTY_EC2 => parse_ec2_key(key),
         KTY_OKP => parse_okp_key(key),
         KTY_SYMMETRIC => parse_symmetric_key(key),
+        #[cfg(feature = "pqc")]
+        KTY_AKP => parse_akp_key(key),
         _ => Err(CoseCryptoError::InvalidKey(alloc::format!(
             "unsupported kty: {kty}"
         ))),
@@ -161,6 +184,35 @@ fn parse_symmetric_key(key: &CoseKeyCbor) -> Result<ParsedCoseKey, CoseCryptoErr
         .ok_or_else(|| CoseCryptoError::InvalidKey("missing k (-1)".to_string()))?;
     let k = value_to_bytes(&k_val)?;
     Ok(ParsedCoseKey::Symmetric { k })
+}
+
+#[cfg(feature = "pqc")]
+fn parse_akp_key(key: &CoseKeyCbor) -> Result<ParsedCoseKey, CoseCryptoError> {
+    // AKP keys require the alg parameter (label 3) to distinguish variants
+    let alg = match &key.alg {
+        Some(common::TextOrInt::Int(i)) => *i,
+        _ => {
+            return Err(CoseCryptoError::InvalidKey(
+                "AKP keys require alg parameter".to_string(),
+            ));
+        }
+    };
+
+    let pub_val = get_param(key, -1)
+        .ok_or_else(|| CoseCryptoError::InvalidKey("missing pub (-1)".to_string()))?;
+    let pub_key = value_to_bytes(&pub_val)?;
+
+    match get_param(key, -2) {
+        Some(priv_val) => {
+            let priv_key = value_to_bytes(&priv_val)?;
+            Ok(ParsedCoseKey::AkpPrivate {
+                alg,
+                pub_key,
+                priv_key,
+            })
+        }
+        None => Ok(ParsedCoseKey::AkpPublic { alg, pub_key }),
+    }
 }
 
 /// Returns the curve identifier for the given CoseKeyCbor, if it's an EC2 or OKP key.

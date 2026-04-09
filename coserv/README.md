@@ -39,6 +39,7 @@ development.
 ## Crate Feature Flags
 
 - `crypto` enables `SignedCoservBuilder` for creating signed CoSERV objects using COSE Sign1 via the `cose_crypto` crate (ES256, ES384, EdDSA). This feature is not enabled by default.
+- `pqc` enables post-quantum ML-DSA signing and verification (ML-DSA-44, ML-DSA-65, ML-DSA-87) in the `cose_crypto` crate. This feature is not enabled by default.
 
 ## Minimum Supported Rust Version
 

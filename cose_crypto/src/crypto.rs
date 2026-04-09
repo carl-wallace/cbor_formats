@@ -9,6 +9,8 @@ pub mod aes_gcm;
 pub mod ecdsa;
 pub mod eddsa;
 pub mod hmac;
+#[cfg(feature = "pqc")]
+pub mod ml_dsa;
 
 /// A signer that can produce signatures over data.
 pub trait CoseSigner {

@@ -7,6 +7,10 @@ license = "MIT OR Apache-2.0"
 description = "COSE cryptographic operations (signing, verification, MAC, AEAD) built on RFC 9052 structures"
 repository = "https://github.com/carl-wallace/cbor_formats"
 
+[features]
+default = []
+pqc = ["ml-dsa"]
+
 [dependencies]
 cose = { version = "0.1.1", path = "../cose" }
 common = { version = "0.1.1", path = "../common" }
@@ -30,6 +34,9 @@ sha2 = "0.11.0"
 
 # AES-GCM
 aes-gcm = "0.11.0-rc.3"
+
+# ML-DSA (PQC)
+ml-dsa = { version = "0.1.0-rc.8", optional = true }
 
 # Random
 rand = "0.10"

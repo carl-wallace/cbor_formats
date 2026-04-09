@@ -42,8 +42,13 @@ development.
 ## Supported Algorithms
 
 - **Signing:** ES256 (P-256), ES384 (P-384), EdDSA (Ed25519)
+- **Signing (PQC):** ML-DSA-44, ML-DSA-65, ML-DSA-87 (requires `pqc` feature)
 - **MAC:** HMAC-SHA-256, HMAC-SHA-256/64, HMAC-SHA-384, HMAC-SHA-512
 - **AEAD:** AES-128-GCM, AES-256-GCM
+
+## Crate Feature Flags
+
+- `pqc` enables ML-DSA-44, ML-DSA-65, and ML-DSA-87 post-quantum signing and verification per [draft-ietf-cose-dilithium-11](https://datatracker.ietf.org/doc/html/draft-ietf-cose-dilithium-11), using the `ml-dsa` crate. This feature is not enabled by default.
 
 ## Minimum Supported Rust Version
 
