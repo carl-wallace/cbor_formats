@@ -3,7 +3,34 @@
 ![Apache2/MIT licensed][license-image]
 ![Rust Version][rustc-image]
 
-Cryptographic operations for COSE (RFC 9052) message types, built on the `cose` crate's data structures.
+Cryptographic operations for COSE ([RFC 9052](https://www.rfc-editor.org/rfc/rfc9052))
+message types, built on the [`cose`](../cose/index.html) crate's data structures.
+This crate provides builders for constructing and verifying COSE Sign1, MAC0, and
+Encrypt0 messages, as well as JWK key parsing for interoperability.
+
+```rust,no_run
+use cose_crypto::algorithm::CoseAlgorithm;
+use cose_crypto::crypto::ecdsa::{Es256Signer, Es256Verifier};
+use cose_crypto::helpers::header_with_algorithm;
+use cose_crypto::sign::{CoseSign1Builder, verify_sign1};
+
+// Generate or load a P-256 key pair
+// let signer = Es256Signer::from_bytes(&private_key_bytes).unwrap();
+// let verifier = Es256Verifier::from_xy(&x, &y).unwrap();
+
+// Sign a payload
+// let sign1 = CoseSign1Builder::new()
+//     .payload(b"Hello, COSE!")
+//     .protected(header_with_algorithm(CoseAlgorithm::Es256))
+//     .sign(&signer)
+//     .unwrap();
+
+// Verify
+// verify_sign1(&sign1, &verifier, &[]).unwrap();
+```
+
+JWK key parsing is available via the `jwk` module for loading keys from JSON Web Key files
+(EC P-256, P-384, and OKP Ed25519).
 
 ## Status
 

@@ -3,7 +3,26 @@
 ![Apache2/MIT licensed][license-image]
 ![Rust Version][rustc-image]
 
-Encoders and decoders for WebAuthn Attestation Statement Format structures.
+CBOR encoders and decoders for [Web Authentication Level 2](https://www.w3.org/TR/webauthn-2/)
+attestation and assertion object formats. These structures are used in the WebAuthn
+registration and authentication ceremonies to convey authenticator attestation data.
+
+Key types include `AttestationObject` (standard WebAuthn attestation),
+`AppleAttestationObject` (Apple App Attest format), `AppleAssertionObject`,
+and the `Supported` enum for identifying which attestation statement format
+was decoded. These types use serde directly for both CBOR and JSON serialization.
+
+```rust,no_run
+use ciborium::de::from_reader;
+use webauthn_asf::AttestationObject;
+
+// Decode a CBOR-encoded WebAuthn attestation object
+let cbor_bytes: &[u8] = &[/* attestation object bytes */];
+let att: AttestationObject = from_reader(cbor_bytes).unwrap();
+
+// Access fields
+println!("Format: {}", att.fmt);
+```
 
 ## Status
 

@@ -3,7 +3,28 @@
 ![Apache2/MIT licensed][license-image]
 ![Rust Version][rustc-image]
 
-This crate provides encoders and decoders for structures defined in the [Entity Attestation Token (EAT) specification](https://datatracker.ietf.org/doc/html/rfc9711).
+CBOR and JSON encoders and decoders for Entity Attestation Token (EAT) structures
+as defined in [RFC 9711](https://www.rfc-editor.org/rfc/rfc9711). EAT provides a
+standardized token format for conveying claims about an attesting entity, such as
+hardware identity, software measurements, and security state.
+
+The top-level type is `ClaimsSetClaims`/`ClaimsSetClaimsCbor`. Additional types cover
+measurements, submodules, hardware and software versions, location, debug status,
+DLoA (Device Location of Attestation), and both CBOR-specific and JSON-specific
+selector types.
+
+```rust,no_run
+use ciborium::de::from_reader;
+use eat::maps::{ClaimsSetClaimsCbor, ClaimsSetClaims};
+
+// Decode a CBOR-encoded EAT
+let cbor_bytes: &[u8] = &[/* ... */];
+let eat_cbor: ClaimsSetClaimsCbor = from_reader(cbor_bytes).unwrap();
+
+// Convert to JSON-friendly form
+let eat_json: ClaimsSetClaims = eat_cbor.try_into().unwrap();
+let json = serde_json::to_string_pretty(&eat_json).unwrap();
+```
 
 ## Status
 

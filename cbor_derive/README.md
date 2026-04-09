@@ -3,7 +3,7 @@
 ![Apache2/MIT licensed][license-image]
 ![Rust Version][rustc-image]
 
-The cbor_derive crate provides procedural macros that can be used to derive support for marshaling data between a Rust 
+The `cbor_derive` crate provides procedural macros that can be used to derive support for marshaling data between a Rust 
 struct and the vectors used by the [ciborium](https://crates.io/crates/ciborium) library to process CBOR-encoded 
 maps and arrays. The `StructToMap` macro maps the fields of a struct onto a `Vec<(Value,Value)>`.
 The `StructToArray` macro maps the fields of a struct onto a `Vec<Value>`. 

@@ -21,6 +21,7 @@ development.
 | `corim` | CoRIM (Concise Reference Integrity Manifest) | [draft-ietf-rats-corim](https://datatracker.ietf.org/doc/draft-ietf-rats-corim/) |
 | `coswid` | CoSWID (Concise Software Identifier) | [RFC 9393](https://www.rfc-editor.org/rfc/rfc9393) |
 | `cots` | CoTS (Concise Trust Anchor Store) | [draft-ietf-rats-concise-ta-stores](https://datatracker.ietf.org/doc/draft-ietf-rats-concise-ta-stores/) |
+| `coserv` | CoSERV (Concise Service) | [draft-ietf-rats-coserv](https://datatracker.ietf.org/doc/draft-ietf-rats-coserv/) |
 | `eat` | EAT (Entity Attestation Token) | [RFC 9711](https://www.rfc-editor.org/rfc/rfc9711) |
 
 ## Usage
@@ -33,6 +34,7 @@ Commands:
   corim   Create, display, sign, verify, and extract CoRIM objects
   coswid  Create and display CoSWID objects
   cots    Create and display CoTS objects
+  coserv  Create, display, sign, verify, and extract CoSERV objects
   eat     Create and display EAT objects
 ```
 
@@ -78,6 +80,29 @@ cfcli corim verify \
 # Extract payload and tags from a signed CoRIM
 cfcli corim extract \
   --signed-corim-file signed-corim.cbor \
+  --output-dir out/
+```
+
+### CoSERV signing and verification
+
+The `coserv` command supports signing, verifying, and extracting CoSERV payloads
+using COSE Sign1 with JWK keys (EC P-256, P-384, and Ed25519).
+
+```sh
+# Sign a CoSERV
+cfcli coserv sign \
+  --coserv-file unsigned-coserv.cbor \
+  --key-file ec-p256.jwk \
+  --output-dir out/
+
+# Verify a signed CoSERV
+cfcli coserv verify \
+  --signed-coserv-file signed-coserv.cbor \
+  --key-file ec-p256.jwk
+
+# Extract payload from a signed CoSERV
+cfcli coserv extract \
+  --signed-coserv-file signed-coserv.cbor \
   --output-dir out/
 ```
 

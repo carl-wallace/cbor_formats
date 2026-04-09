@@ -12,6 +12,8 @@ pub enum Commands {
     Coswid(CoswidCommand),
     /// Create and display CoTS (Concise Trust Anchor Store) objects
     Cots(CotsCommand),
+    /// Create, display, sign, verify, and extract CoSERV (Concise Service) objects
+    Coserv(CoservCommand),
     /// Create and display EAT (Entity Attestation Token) objects
     Eat(EatCommand),
 }
@@ -293,6 +295,77 @@ pub struct CotsCreateCorimSubcommand {
     #[clap(short, long)]
     pub output: String,
 }
+//----------------------------------------------------------
+// CoSERV
+//----------------------------------------------------------
+/// CoSERV operations
+#[derive(Args, Debug)]
+pub struct CoservCommand {
+    #[clap(subcommand)]
+    pub command: CoservSubCommands,
+}
+#[derive(Subcommand, Debug)]
+pub enum CoservSubCommands {
+    /// Create a CBOR-encoded CoSERV from a JSON template
+    Create(CoservCreateSubcommand),
+    /// Decode and display a CBOR-encoded CoSERV
+    Display(DisplaySubcommand),
+    /// Sign a CoSERV using a COSE Sign1 structure with a JWK key
+    Sign(CoservSignSubcommand),
+    /// Verify the signature on a signed CoSERV using a JWK key
+    Verify(CoservVerifySubcommand),
+    /// Extract the payload from a signed CoSERV
+    Extract(CoservExtractSubcommand),
+}
+#[derive(Args, Debug)]
+pub struct CoservCreateSubcommand {
+    /// a CoSERV template file (in JSON format)
+    #[clap(short, long)]
+    pub template: Option<String>,
+
+    /// a directory containing CoSERV template files
+    #[clap(short = 'T', long)]
+    pub template_dir: Option<String>,
+
+    /// directory where the created files are stored
+    #[clap(short, long, default_value = ".")]
+    pub output_dir: String,
+}
+#[derive(Args, Debug)]
+pub struct CoservSignSubcommand {
+    /// an unsigned CoSERV file (in CBOR format)
+    #[clap(short = 'f', long)]
+    pub coserv_file: String,
+
+    /// a JWK key file (in JSON format)
+    #[clap(short, long)]
+    pub key_file: String,
+
+    /// directory where the signed file is stored
+    #[clap(short, long, default_value = ".")]
+    pub output_dir: String,
+}
+#[derive(Args, Debug)]
+pub struct CoservVerifySubcommand {
+    /// a signed CoSERV file (COSE Sign1, tag #18)
+    #[clap(short = 'f', long)]
+    pub signed_coserv_file: String,
+
+    /// a JWK key file (in JSON format)
+    #[clap(short, long)]
+    pub key_file: String,
+}
+#[derive(Args, Debug)]
+pub struct CoservExtractSubcommand {
+    /// a signed CoSERV file (COSE Sign1, tag #18)
+    #[clap(short = 'f', long)]
+    pub signed_coserv_file: String,
+
+    /// directory where the extracted payload is stored
+    #[clap(short, long, default_value = ".")]
+    pub output_dir: String,
+}
+
 //----------------------------------------------------------
 // EAT
 //----------------------------------------------------------

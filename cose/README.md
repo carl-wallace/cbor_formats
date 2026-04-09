@@ -3,7 +3,34 @@
 ![Apache2/MIT licensed][license-image]
 ![Rust Version][rustc-image]
 
-Encoders and decoders for structures defined in COSE specifications.
+CBOR and JSON encoders and decoders for CBOR Object Signing and Encryption (COSE)
+data structures as defined in [RFC 9052](https://www.rfc-editor.org/rfc/rfc9052).
+
+This crate handles the structural representation of COSE messages — it does not
+perform cryptographic operations. For signing, verification, MAC, and AEAD see the
+companion [`cose_crypto`](../cose_crypto/index.html) crate.
+
+Supported structures:
+
+- **Signing** — `CoseSign1`/`CoseSign1Cbor`, `CoseSign`/`CoseSignCbor`, `CoseSignature`/`CoseSignatureCbor`
+- **Encryption** — `CoseEncrypt0`/`CoseEncrypt0Cbor`, `CoseEncrypt`/`CoseEncryptCbor`
+- **MAC** — `CoseMac0`/`CoseMac0Cbor`, `CoseMac`/`CoseMacCbor`
+- **Headers** — `HeaderMap`/`HeaderMapCbor`
+- **Keys** — `CoseKey`/`CoseKeyCbor`, `CoseKeySet`
+
+```rust,no_run
+use ciborium::de::from_reader;
+use ciborium::ser::into_writer;
+use cose::arrays::CoseSign1Cbor;
+
+// Decode a CBOR-encoded COSE_Sign1 message
+let cbor_bytes: &[u8] = &[/* ... */];
+let sign1: CoseSign1Cbor = from_reader(cbor_bytes).unwrap();
+
+// Re-encode
+let mut buf = vec![];
+into_writer(&sign1, &mut buf).unwrap();
+```
 
 ## Status
 

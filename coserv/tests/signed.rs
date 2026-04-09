@@ -6,6 +6,9 @@ use common::{BinaryOrNil, BytesType, TextOrInt};
 use cose::arrays::CoseSign1Cbor;
 use cose::choices::EmptyOrSerializedMap;
 use cose::maps::{HeaderMap, HeaderMapCbor};
+use cose_crypto::algorithm::CoseAlgorithm;
+use cose_crypto::crypto::ecdsa::{Es256Signer, Es256Verifier};
+use cose_crypto::sign::{CoseSign1Builder, verify_sign1};
 use coserv::maps::CoservMapCbor;
 use coserv::signed::*;
 
@@ -160,4 +163,141 @@ fn signed_coserv_invalid_payload_rejected() {
     sign1.payload = BinaryOrNil::Binary(vec![0xFF, 0xFF]);
     let err = SignedCoserv::new(sign1).unwrap_err();
     assert!(matches!(err, SignedCoservError::InvalidPayload(_)));
+}
+
+// ── Crypto sign/verify round-trip tests ──
+
+/// Generate a P-256 key pair and return (signer, verifier).
+fn make_es256_key_pair() -> (Es256Signer, Es256Verifier) {
+    let signing_key = p256::ecdsa::SigningKey::random(&mut rand::thread_rng());
+    let d = signing_key.to_bytes();
+    let verifying_key = signing_key.verifying_key();
+    let point = verifying_key.to_encoded_point(false);
+    let x = point.x().unwrap().to_vec();
+    let y = point.y().unwrap().to_vec();
+
+    let signer = Es256Signer::from_bytes(&d).unwrap();
+    let verifier = Es256Verifier::from_xy(&x, &y).unwrap();
+    (signer, verifier)
+}
+
+#[test]
+fn signed_coserv_sign_verify_round_trip() {
+    let (signer, verifier) = make_es256_key_pair();
+    let payload_bytes = make_coserv_payload_bytes();
+
+    let hdr = HeaderMap {
+        alg_id: Some(TextOrInt::Int(CoseAlgorithm::Es256.to_i64())),
+        criticality: None,
+        content_type: Some(TextOrInt::Text(COSERV_CBOR_CONTENT_TYPE.to_string())),
+        key_id: None,
+        iv: None,
+        partial_iv: None,
+        other: None,
+    };
+
+    let sign1 = CoseSign1Builder::new()
+        .payload(&payload_bytes)
+        .protected(hdr)
+        .sign(&signer)
+        .unwrap();
+
+    // Verify the signature
+    verify_sign1(&sign1, &verifier, &[]).unwrap();
+
+    // Validate as a SignedCoserv
+    let signed = SignedCoserv::new(sign1).expect("should validate as signed-coserv");
+    let decoded_payload = signed.payload().expect("should decode payload");
+
+    // Verify the decoded payload matches what we encoded
+    let mut expected_buf = vec![];
+    into_writer(&decoded_payload, &mut expected_buf).unwrap();
+    assert_eq!(payload_bytes, expected_buf);
+}
+
+#[test]
+fn signed_coserv_wrong_key_fails() {
+    let (signer, _verifier) = make_es256_key_pair();
+    let (_wrong_signer, wrong_verifier) = make_es256_key_pair();
+    let payload_bytes = make_coserv_payload_bytes();
+
+    let hdr = HeaderMap {
+        alg_id: Some(TextOrInt::Int(CoseAlgorithm::Es256.to_i64())),
+        criticality: None,
+        content_type: Some(TextOrInt::Text(COSERV_CBOR_CONTENT_TYPE.to_string())),
+        key_id: None,
+        iv: None,
+        partial_iv: None,
+        other: None,
+    };
+
+    let sign1 = CoseSign1Builder::new()
+        .payload(&payload_bytes)
+        .protected(hdr)
+        .sign(&signer)
+        .unwrap();
+
+    // Verification with wrong key should fail
+    assert!(verify_sign1(&sign1, &wrong_verifier, &[]).is_err());
+}
+
+#[test]
+fn signed_coserv_cbor_serialization_round_trip() {
+    let (signer, verifier) = make_es256_key_pair();
+    let payload_bytes = make_coserv_payload_bytes();
+
+    let hdr = HeaderMap {
+        alg_id: Some(TextOrInt::Int(CoseAlgorithm::Es256.to_i64())),
+        criticality: None,
+        content_type: Some(TextOrInt::Text(COSERV_CBOR_CONTENT_TYPE.to_string())),
+        key_id: None,
+        iv: None,
+        partial_iv: None,
+        other: None,
+    };
+
+    let sign1 = CoseSign1Builder::new()
+        .payload(&payload_bytes)
+        .protected(hdr)
+        .sign(&signer)
+        .unwrap();
+
+    // Serialize to CBOR and back
+    let mut cbor_bytes = Vec::new();
+    into_writer(&sign1, &mut cbor_bytes).unwrap();
+    let sign1_rt: CoseSign1Cbor = from_reader(cbor_bytes.as_slice()).unwrap();
+
+    // Verify the deserialized message still validates
+    verify_sign1(&sign1_rt, &verifier, &[]).unwrap();
+
+    // And it's still a valid SignedCoserv
+    SignedCoserv::new(sign1_rt).expect("deserialized should validate");
+}
+
+#[cfg(feature = "crypto")]
+#[test]
+fn signed_coserv_builder_round_trip() {
+    let (signer, verifier) = make_es256_key_pair();
+
+    // Decode the test payload into a CoservMapCbor
+    let payload_bytes = make_coserv_payload_bytes();
+    let coserv_map: CoservMapCbor = from_reader(payload_bytes.as_slice()).unwrap();
+
+    let hdr = cose_crypto::helpers::header_with_algorithm(CoseAlgorithm::Es256);
+
+    let signed = coserv::signed::SignedCoservBuilder::new()
+        .payload(&coserv_map)
+        .unwrap()
+        .protected(hdr)
+        .sign(&signer)
+        .unwrap();
+
+    // Verify the signature on the inner CoseSign1
+    verify_sign1(signed.as_inner(), &verifier, &[]).unwrap();
+
+    // Verify payload decodes correctly
+    let decoded_payload = signed.payload().unwrap();
+    let mut rt_buf = vec![];
+    into_writer(&decoded_payload, &mut rt_buf).unwrap();
+    assert_eq!(payload_bytes, rt_buf);
 }
