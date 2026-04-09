@@ -1,3 +1,5 @@
+//! CoTS (Concise Trust Anchor Store) create and display operations.
+
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
 use cots::arrays::*;
@@ -9,9 +11,8 @@ use std::path::Path;
 use crate::utils::find_files;
 use crate::{CotsCommand, CotsCreateSubcommand, CotsSubCommands, DisplaySubcommand};
 
+/// Dispatch CoTS subcommands.
 pub fn cots_main(args: &CotsCommand) {
-    //todo cfcli support
-    println!("{:?}", args);
     match &args.command {
         CotsSubCommands::Create(c) => cots_create(c),
         CotsSubCommands::Display(c) => cots_display(c),
@@ -24,6 +25,7 @@ pub fn cots_main(args: &CotsCommand) {
     }
 }
 
+/// Create CBOR-encoded CoTS files from JSON templates.
 fn cots_create(args: &CotsCreateSubcommand) {
     if args.template.is_none() && args.template_dir.as_ref().is_none_or(|d| d.is_empty()) {
         println!("No templates supplied");
@@ -46,6 +48,7 @@ fn cots_create(args: &CotsCreateSubcommand) {
     }
 }
 
+/// Decode and display a CBOR-encoded CoTS as JSON.
 fn cots_display(args: &DisplaySubcommand) {
     let data = match fs::read(&args.file_to_display) {
         Ok(b) => b,
@@ -91,6 +94,7 @@ fn cots_display(args: &DisplaySubcommand) {
     println!("{}", json);
 }
 
+/// Convert a single CoTS JSON template to a CBOR-encoded file.
 fn cots_template_to_cbor(template_file: &String, output_dir: &Path) {
     let data = match fs::read_to_string(template_file) {
         Ok(s) => s,

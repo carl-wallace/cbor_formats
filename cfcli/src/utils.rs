@@ -1,7 +1,10 @@
+//! File discovery utilities for template and input directories.
+
 use std::ffi::OsStr;
 use std::path::Path;
 use walkdir::WalkDir;
 
+/// Recursively find files with the given extension in `dir` and append their paths to `list`.
 pub(crate) fn find_files(dir: &String, ext: &str, list: &mut Vec<String>) {
     if !Path::is_dir(Path::new(dir)) {
         return;

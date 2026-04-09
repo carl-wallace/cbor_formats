@@ -4,10 +4,15 @@ use clap::{Args, Parser, Subcommand};
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
+    /// Create and display CoMID (Concise Module Identifier) objects
     Comid(ComidCommand),
+    /// Create, display, sign, verify, and extract CoRIM (Concise Reference Integrity Manifest) objects
     Corim(CorimCommand),
+    /// Create and display CoSWID (Concise Software Identifier) objects
     Coswid(CoswidCommand),
+    /// Create and display CoTS (Concise Trust Anchor Store) objects
     Cots(CotsCommand),
+    /// Create and display EAT (Entity Attestation Token) objects
     Eat(EatCommand),
 }
 
@@ -15,6 +20,7 @@ pub enum Commands {
 //----------------------------------------------------------
 #[derive(Args, Debug)]
 pub struct DisplaySubcommand {
+    /// a CBOR-encoded file to decode and display
     #[clap(short, long)]
     pub file_to_display: String,
 }
@@ -22,6 +28,7 @@ pub struct DisplaySubcommand {
 //----------------------------------------------------------
 // CoMID
 //----------------------------------------------------------
+/// CoMID operations
 #[derive(Args, Debug)]
 pub struct ComidCommand {
     #[clap(subcommand)]
@@ -29,7 +36,9 @@ pub struct ComidCommand {
 }
 #[derive(Subcommand, Debug)]
 pub enum ComidSubCommands {
+    /// Create a CBOR-encoded CoMID from a JSON template
     Create(ComidCreateSubcommand),
+    /// Decode and display a CBOR-encoded CoMID
     Display(DisplaySubcommand),
 }
 #[derive(Args, Debug)]
@@ -50,6 +59,7 @@ pub struct ComidCreateSubcommand {
 //----------------------------------------------------------
 // CoRIM
 //----------------------------------------------------------
+/// CoRIM operations
 #[derive(Args, Debug)]
 pub struct CorimCommand {
     #[clap(subcommand)]
@@ -57,10 +67,15 @@ pub struct CorimCommand {
 }
 #[derive(Subcommand, Debug)]
 pub enum CorimSubCommands {
+    /// Create an unsigned CoRIM from CoMID/CoSWID tags and a JSON template
     Create(CorimCreateSubcommand),
+    /// Decode and display a CBOR-encoded CoRIM
     Display(DisplaySubcommand),
+    /// Sign a CoRIM using a COSE Sign1 structure with a JWK key
     Sign(CorimSignSubcommand),
+    /// Verify the signature on a signed CoRIM using a JWK key
     Verify(CorimVerifySubcommand),
+    /// Extract the payload and tags from a signed CoRIM
     Extract(CorimExtractSubcommand),
 }
 #[derive(Args, Debug)]
@@ -135,6 +150,7 @@ pub struct CorimExtractSubcommand {
 //----------------------------------------------------------
 // CoSWID
 //----------------------------------------------------------
+/// CoSWID operations
 #[derive(Args, Debug)]
 pub struct CoswidCommand {
     #[clap(subcommand)]
@@ -143,7 +159,9 @@ pub struct CoswidCommand {
 
 #[derive(Subcommand, Debug)]
 pub enum CoswidSubCommands {
+    /// Create a CBOR-encoded CoSWID from a JSON template
     Create(CoswidCreateSubcommand),
+    /// Decode and display a CBOR-encoded CoSWID
     Display(DisplaySubcommand),
 }
 #[derive(Args, Debug)]
@@ -163,6 +181,7 @@ pub struct CoswidCreateSubcommand {
 //----------------------------------------------------------
 // CoTS
 //----------------------------------------------------------
+/// CoTS operations
 #[derive(Args, Debug)]
 pub struct CotsCommand {
     #[clap(subcommand)]
@@ -171,9 +190,13 @@ pub struct CotsCommand {
 #[allow(clippy::large_enum_variant)]
 #[derive(Subcommand, Debug)]
 pub enum CotsSubCommands {
+    /// Create a CBOR-encoded CoTS from concise-ta-store-map files and/or a JSON template
     Create(CotsCreateSubcommand),
+    /// Decode and display a CBOR-encoded CoTS
     Display(DisplaySubcommand),
+    /// Create a concise-ta-store-map from certificates and environment templates
     CreateStore(CotsCreateStoreSubcommand),
+    /// Create a CoRIM containing a CoTS payload
     CreateCorim(CotsCreateCorimSubcommand),
 }
 #[derive(Args, Debug)]
@@ -273,6 +296,7 @@ pub struct CotsCreateCorimSubcommand {
 //----------------------------------------------------------
 // EAT
 //----------------------------------------------------------
+/// EAT operations
 #[derive(Args, Debug)]
 pub struct EatCommand {
     #[clap(subcommand)]
@@ -280,7 +304,9 @@ pub struct EatCommand {
 }
 #[derive(Subcommand, Debug)]
 pub enum EatSubCommands {
+    /// Create a CBOR-encoded EAT from a JSON template
     Create(EatCreateSubcommand),
+    /// Decode and display a CBOR-encoded EAT
     Display(DisplaySubcommand),
 }
 #[derive(Args, Debug)]
@@ -298,9 +324,9 @@ pub struct EatCreateSubcommand {
     pub output_dir: String,
 }
 
-/// cfcli
+/// CLI utility for creating, displaying, signing, and verifying CBOR-encoded RATS and SCITT objects
 #[derive(Parser, Debug)]
-#[clap(author, version, about)]
+#[clap(author, version, about, long_about = None)]
 #[clap(propagate_version = true)]
 pub struct CfcliArgs {
     #[clap(subcommand)]

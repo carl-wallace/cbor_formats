@@ -1,3 +1,5 @@
+//! EAT (Entity Attestation Token) create and display operations.
+
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
 use eat::maps::*;
@@ -9,15 +11,15 @@ use std::path::Path;
 use crate::utils::find_files;
 use crate::{DisplaySubcommand, EatCommand, EatCreateSubcommand, EatSubCommands};
 
+/// Dispatch EAT subcommands.
 pub fn eat_main(args: &EatCommand) {
-    //todo cfcli support
-    println!("{:?}", args);
     match &args.command {
         EatSubCommands::Create(c) => eat_create(c),
         EatSubCommands::Display(c) => eat_display(c),
     }
 }
 
+/// Create CBOR-encoded EAT files from JSON templates.
 fn eat_create(args: &EatCreateSubcommand) {
     if args.template.is_none() && args.template_dir.as_ref().is_none_or(|d| d.is_empty()) {
         println!("No templates supplied");
@@ -40,6 +42,7 @@ fn eat_create(args: &EatCreateSubcommand) {
     }
 }
 
+/// Decode and display a CBOR-encoded EAT as JSON.
 fn eat_display(args: &DisplaySubcommand) {
     let data = match fs::read(&args.file_to_display) {
         Ok(b) => b,
@@ -85,6 +88,7 @@ fn eat_display(args: &DisplaySubcommand) {
     println!("{}", json);
 }
 
+/// Convert a single EAT JSON template to a CBOR-encoded file.
 fn eat_template_to_cbor(template_file: &String, output_dir: &Path) {
     let data = match fs::read_to_string(template_file) {
         Ok(s) => s,

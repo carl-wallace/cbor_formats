@@ -1,3 +1,5 @@
+//! CoRIM (Concise Reference Integrity Manifest) create, display, sign, verify, and extract operations.
+
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
 use ciborium::value::Value;
@@ -19,6 +21,7 @@ use crate::{
     CorimSubCommands, CorimVerifySubcommand, DisplaySubcommand,
 };
 
+/// Dispatch CoRIM subcommands.
 pub fn corim_main(args: &CorimCommand) {
     match &args.command {
         CorimSubCommands::Create(c) => corim_create(c),
@@ -29,6 +32,7 @@ pub fn corim_main(args: &CorimCommand) {
     }
 }
 
+/// Create unsigned CoRIM files from JSON templates and optional CoMID/CoSWID inputs.
 fn corim_create(args: &CorimCreateSubcommand) {
     if args.template.is_none() && args.template_dir.as_ref().is_none_or(|d| d.is_empty()) {
         println!("No templates supplied");
@@ -51,6 +55,7 @@ fn corim_create(args: &CorimCreateSubcommand) {
     }
 }
 
+/// Decode and display a CBOR-encoded CoRIM as JSON.
 fn corim_display(args: &DisplaySubcommand) {
     let data = match fs::read(&args.file_to_display) {
         Ok(b) => b,
@@ -96,6 +101,7 @@ fn corim_display(args: &DisplaySubcommand) {
     println!("{}", json);
 }
 
+/// Convert a single CoRIM JSON template to a CBOR-encoded file.
 fn corim_template_to_cbor(template_file: &String, output_dir: &Path) {
     let data = match fs::read_to_string(template_file) {
         Ok(s) => s,
@@ -178,24 +184,33 @@ fn corim_template_to_cbor(template_file: &String, output_dir: &Path) {
 /// Intermediate struct for parsing cocli-compatible meta JSON.
 #[derive(Debug, Deserialize)]
 struct MetaJson {
+    /// Signer information (name and optional URI).
     signer: MetaSignerJson,
+    /// Optional validity period (not-before / not-after timestamps).
     validity: Option<MetaValidityJson>,
 }
 
+/// Signer identity for the CoRIM meta header.
 #[derive(Debug, Deserialize)]
 struct MetaSignerJson {
+    /// Display name of the signer entity.
     name: String,
+    /// Optional registration URI for the signer entity.
     uri: Option<String>,
 }
 
+/// Validity period with ISO 8601 timestamps.
 #[derive(Debug, Deserialize)]
 struct MetaValidityJson {
+    /// Optional earliest validity time (ISO 8601, e.g. `2025-01-01T00:00:00Z`).
     #[serde(rename = "not-before")]
     not_before: Option<String>,
+    /// Optional latest validity time (ISO 8601, e.g. `2026-01-01T00:00:00Z`).
     #[serde(rename = "not-after")]
     not_after: Option<String>,
 }
 
+/// Parse an ISO 8601 datetime string (`YYYY-MM-DDTHH:MM:SSZ`) to a Unix timestamp.
 fn parse_time(s: &str) -> Result<i64, String> {
     // Parse ISO 8601 datetime to Unix timestamp.
     // Supports format: YYYY-MM-DDTHH:MM:SSZ
@@ -241,10 +256,12 @@ fn parse_time(s: &str) -> Result<i64, String> {
     Ok(days * 86400 + hour * 3600 + min * 60 + sec)
 }
 
+/// Returns true if the given year is a leap year.
 fn is_leap_year(y: i64) -> bool {
     (y % 4 == 0 && y % 100 != 0) || y % 400 == 0
 }
 
+/// Convert a [`MetaJson`] into a CBOR-encoded [`CorimMetaMapCbor`] for the protected header.
 fn meta_json_to_cbor(meta: &MetaJson) -> Result<CorimMetaMapCbor, String> {
     use corim::choices::EntityNameTypeChoice;
 
@@ -347,6 +364,7 @@ fn write_tagged_sign1(sign1: &CoseSign1Cbor, path: &Path) -> Result<(), String> 
 
 // ── Sign ──
 
+/// Sign an unsigned CoRIM with a JWK key, producing a COSE Sign1 wrapped in CBOR tag #18.
 fn corim_sign(args: &CorimSignSubcommand) {
     // Read unsigned CoRIM
     let corim_file_bytes = match fs::read(&args.corim_file) {
@@ -475,6 +493,7 @@ fn corim_sign(args: &CorimSignSubcommand) {
 
 // ── Verify ──
 
+/// Verify the COSE Sign1 signature on a signed CoRIM using a JWK key.
 fn corim_verify(args: &CorimVerifySubcommand) {
     // Read signed CoRIM
     let sign1 = match read_signed_corim(&args.signed_corim_file) {
@@ -512,6 +531,7 @@ fn corim_verify(args: &CorimVerifySubcommand) {
 
 // ── Extract ──
 
+/// Extract the payload and individual tags (CoMID/CoSWID) from a signed CoRIM.
 fn corim_extract(args: &CorimExtractSubcommand) {
     // Read signed CoRIM
     let sign1 = match read_signed_corim(&args.signed_corim_file) {

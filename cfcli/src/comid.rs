@@ -1,3 +1,5 @@
+//! CoMID (Concise Module Identifier) create and display operations.
+
 use crate::utils::find_files;
 use crate::{ComidCommand, ComidCreateSubcommand, ComidSubCommands, DisplaySubcommand};
 use ciborium::de::from_reader;
@@ -8,14 +10,15 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
+/// Dispatch CoMID subcommands.
 pub fn comid_main(args: &ComidCommand) {
-    //todo cfcli support
     match &args.command {
         ComidSubCommands::Create(c) => comid_create(c),
         ComidSubCommands::Display(c) => comid_display(c),
     }
 }
 
+/// Create CBOR-encoded CoMID files from JSON templates.
 fn comid_create(args: &ComidCreateSubcommand) {
     if args.template.is_none() && args.template_dir.as_ref().is_none_or(|d| d.is_empty()) {
         println!("No templates supplied");
@@ -38,6 +41,7 @@ fn comid_create(args: &ComidCreateSubcommand) {
     }
 }
 
+/// Decode and display a CBOR-encoded CoMID as JSON.
 fn comid_display(args: &DisplaySubcommand) {
     let data = match fs::read(&args.file_to_display) {
         Ok(b) => b,
@@ -83,6 +87,7 @@ fn comid_display(args: &DisplaySubcommand) {
     println!("{}", json);
 }
 
+/// Convert a single CoMID JSON template to a CBOR-encoded file.
 fn comid_template_to_cbor(template_file: &String, output_dir: &Path) {
     let data = match fs::read_to_string(template_file) {
         Ok(s) => s,
