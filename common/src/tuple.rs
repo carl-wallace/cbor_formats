@@ -130,7 +130,7 @@ impl TryFrom<Vec<Value>> for TupleCbor {
         })
     }
 }
-impl serde::Serialize for TupleCbor {
+impl Serialize for TupleCbor {
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
@@ -178,13 +178,10 @@ impl<'de> Deserialize<'de> for TupleCbor {
             fn visit_enum<A: de::EnumAccess<'de>>(self, acc: A) -> Result<Self::Value, A::Error> {
                 struct Inner;
 
-                impl<'de> serde::de::Visitor<'de> for Inner {
+                impl<'de> Visitor<'de> for Inner {
                     type Value = Value;
 
-                    fn expecting(
-                        &self,
-                        formatter: &mut core::fmt::Formatter<'_>,
-                    ) -> core::fmt::Result {
+                    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                         write!(formatter, "a valid CBOR item")
                     }
 
@@ -195,10 +192,10 @@ impl<'de> Deserialize<'de> for TupleCbor {
                     ) -> Result<Self::Value, A::Error> {
                         let tag: u64 = acc
                             .next_element()?
-                            .ok_or_else(|| de::Error::custom("expected tag"))?;
+                            .ok_or_else(|| Error::custom("expected tag"))?;
                         let val = acc
                             .next_element()?
-                            .ok_or_else(|| de::Error::custom("expected val"))?;
+                            .ok_or_else(|| Error::custom("expected val"))?;
                         Ok(Value::Tag(tag, Box::new(val)))
                     }
                 }

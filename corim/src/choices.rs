@@ -289,7 +289,7 @@ impl TryFrom<ClassIdTypeChoiceCbor> for ClassIdTypeChoice {
         match value {
             ClassIdTypeChoiceCbor::Oid(b) => Ok(Self::oid(b.0)),
             ClassIdTypeChoiceCbor::Uuid(b) => Ok(Self::uuid(match &b.0 {
-                UuidType::Uuid(v) => common::UuidType::Uuid(v.clone()),
+                UuidType::Uuid(v) => UuidType::Uuid(v.clone()),
             })),
             ClassIdTypeChoiceCbor::Bytes(b) => Ok(Self::bytes(b.0)),
         }
@@ -301,7 +301,7 @@ impl TryFrom<&ClassIdTypeChoiceCbor> for ClassIdTypeChoice {
         match value {
             ClassIdTypeChoiceCbor::Oid(b) => Ok(Self::oid(b.0.clone())),
             ClassIdTypeChoiceCbor::Uuid(b) => Ok(Self::uuid(match &b.0 {
-                UuidType::Uuid(v) => common::UuidType::Uuid(v.clone()),
+                UuidType::Uuid(v) => UuidType::Uuid(v.clone()),
             })),
             ClassIdTypeChoiceCbor::Bytes(b) => Ok(Self::bytes(b.0.clone())),
         }
@@ -477,7 +477,7 @@ impl TryFrom<&Value> for CorimIdTypeChoice {
 
 // Serde parses untagged enums as the first type that happens to parse. This implementation inspects
 // the content type. Proc macro generated code from serde is in the comment above.
-impl<'de> serde::Deserialize<'de> for CorimIdTypeChoice {
+impl<'de> Deserialize<'de> for CorimIdTypeChoice {
     fn deserialize<__D>(__deserializer: __D) -> Result<Self, __D::Error>
     where
         __D: serde::Deserializer<'de>,
@@ -693,7 +693,7 @@ impl TryFrom<&CryptoKeyTypeChoice> for CryptoKeyTypeChoice {
     }
 }
 
-fn parse_tagged_hash_entry(b: &Value) -> Result<common::arrays::HashEntry, String> {
+fn parse_tagged_hash_entry(b: &Value) -> Result<arrays::HashEntry, String> {
     match b.as_array() {
         Some(arr) if arr.len() == 2 => {
             let alg = match arr[0].as_integer() {
@@ -707,7 +707,7 @@ fn parse_tagged_hash_entry(b: &Value) -> Result<common::arrays::HashEntry, Strin
                 Some(b) => b.clone(),
                 None => return Err("Failed to parse hash value as bytes".to_string()),
             };
-            Ok(common::arrays::HashEntry {
+            Ok(arrays::HashEntry {
                 hash_alg_id: alg,
                 hash_value: val,
             })
@@ -1485,7 +1485,7 @@ impl TryFrom<&Value> for TagIdTypeChoiceCbor {
     }
 }
 // Serde does not parse untagged enums properly (it just parses as the first type)
-impl<'de> serde::Deserialize<'de> for TagIdTypeChoiceCbor {
+impl<'de> Deserialize<'de> for TagIdTypeChoiceCbor {
     fn deserialize<__D>(__deserializer: __D) -> Result<Self, __D::Error>
     where
         __D: serde::Deserializer<'de>,
@@ -1689,9 +1689,10 @@ impl TryFrom<&Value> for RawValueTypeChoice {
                     .as_bytes()
                     .ok_or("Failed to parse mask value")?
                     .clone();
-                Ok(Self::MaskedRawValue(Required(
-                    common::arrays::MaskedRawValueCbor { value: v, mask: m },
-                )))
+                Ok(Self::MaskedRawValue(Required(arrays::MaskedRawValueCbor {
+                    value: v,
+                    mask: m,
+                })))
             }
             _ => Err("Failed to parse value as RawValueTypeChoice".to_string()),
         }
@@ -1751,10 +1752,7 @@ impl TryFrom<&Value> for IntRangeTypeChoice {
                     .ok_or("Failed to parse max")?
                     .try_into()
                     .map_err(|e| format!("Failed to parse max: {}", e))?;
-                Ok(Self::Range(Required(common::arrays::IntRangeCbor {
-                    min,
-                    max,
-                })))
+                Ok(Self::Range(Required(arrays::IntRangeCbor { min, max })))
             }
             _ => Err("Failed to parse value as IntRangeTypeChoice".to_string()),
         }

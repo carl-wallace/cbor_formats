@@ -151,6 +151,7 @@ pub fn verifier_from_jwk(json: &[u8]) -> Result<Box<dyn CoseVerifier>, CoseCrypt
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 

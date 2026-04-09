@@ -96,7 +96,7 @@ pub enum JsonSelectorValue {
     DetachedEatBundle(DetachedEatBundle),
     DetachedSubmoduleDigest(DetachedSubmoduleDigest),
 }
-impl<'de> serde::Deserialize<'de> for JsonSelectorValue {
+impl<'de> Deserialize<'de> for JsonSelectorValue {
     fn deserialize<__D>(__deserializer: __D) -> Result<Self, __D::Error>
     where
         __D: serde::Deserializer<'de>,
@@ -163,7 +163,7 @@ pub enum JsonSelectorForDebValue {
     CborTokenInsideJsonToken(String),
     DetachedSubmoduleDigest(DetachedSubmoduleDigest),
 }
-impl<'de> serde::Deserialize<'de> for JsonSelectorForDebValue {
+impl<'de> Deserialize<'de> for JsonSelectorForDebValue {
     fn deserialize<__D>(__deserializer: __D) -> Result<Self, __D::Error>
     where
         __D: serde::Deserializer<'de>,

@@ -1,3 +1,15 @@
+#![forbid(unsafe_code)]
+#![warn(
+    clippy::alloc_instead_of_core,
+    clippy::mod_module_files,
+    clippy::std_instead_of_alloc,
+    clippy::std_instead_of_core,
+    clippy::unwrap_used,
+    missing_docs,
+    rust_2018_idioms,
+    unused_lifetimes,
+    unused_qualifications
+)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
 //!
@@ -33,8 +45,6 @@
 //! | `header_map` / `Generic_Headers` | [`maps::HeaderMap`] / [`maps::HeaderMapCbor`] |
 //! | `COSE_Key` | [`maps::CoseKey`] / [`maps::CoseKeyCbor`] |
 //! | `COSE_KeySet` | [`maps::CoseKeySet`] |
-#![forbid(unsafe_code)]
-#![warn(missing_docs, rust_2018_idioms)]
 #![allow(clippy::derive_partial_eq_without_eq)]
 #![allow(unexpected_cfgs)]
 #![cfg_attr(not(feature = "std"), no_std)]

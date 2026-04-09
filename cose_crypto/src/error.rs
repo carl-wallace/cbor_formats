@@ -45,4 +45,4 @@ impl fmt::Display for CoseCryptoError {
     }
 }
 
-impl std::error::Error for CoseCryptoError {}
+impl core::error::Error for CoseCryptoError {}

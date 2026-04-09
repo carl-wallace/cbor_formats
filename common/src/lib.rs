@@ -1,3 +1,15 @@
+#![forbid(unsafe_code)]
+#![warn(
+    clippy::alloc_instead_of_core,
+    clippy::mod_module_files,
+    clippy::std_instead_of_alloc,
+    clippy::std_instead_of_core,
+    clippy::unwrap_used,
+    missing_docs,
+    rust_2018_idioms,
+    unused_lifetimes,
+    unused_qualifications
+)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
 //!
@@ -65,8 +77,6 @@
 //! | `digests-type = [ + hash-entry ]` | [`DigestsType`] | CoRIM §7.7 |
 //! | `integrity-registers` | [`IntegrityRegisters`] | CoRIM §5.1.4.7 |
 //! | `coap-content-format = uint .le 65535` | [`CoapContentFormat`] | RFC 7252 |
-#![forbid(unsafe_code)]
-#![warn(missing_docs, rust_2018_idioms)]
 #![allow(unexpected_cfgs)]
 #![cfg_attr(not(feature = "std"), no_std)]
 

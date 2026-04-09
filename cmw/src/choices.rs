@@ -280,7 +280,7 @@ pub fn is_cmw_tag(tag: u64) -> bool {
 }
 
 /// Helper: serialize a ciborium::Value to bytes, then deserialize as T.
-fn value_to_type<T: serde::de::DeserializeOwned>(val: &Value) -> Result<T, String> {
+fn value_to_type<T: de::DeserializeOwned>(val: &Value) -> Result<T, String> {
     let mut buf = vec![];
     ciborium::ser::into_writer(val, &mut buf).map_err(|e| format!("re-serialize: {e}"))?;
     ciborium::de::from_reader(buf.as_slice()).map_err(|e| format!("re-deserialize: {e}"))

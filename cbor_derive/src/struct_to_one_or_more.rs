@@ -61,14 +61,14 @@ impl DeriveStructToOneOrMore {
 
     fn derive_alt_struct(&mut self) {
         self.alt_struct_name = format!("OneOrMore{}Cbor", self.ident);
-        let sname = syn::Ident::new(&self.alt_struct_name, self.ident.span());
+        let sname = Ident::new(&self.alt_struct_name, self.ident.span());
         let sname_base_str = format!("{}Cbor", self.ident);
-        let sname_base = syn::Ident::new(&sname_base_str, self.ident.span());
+        let sname_base = Ident::new(&sname_base_str, self.ident.span());
 
         let name_str = format!("OneOrMore{}", self.ident);
-        let name = syn::Ident::new(&name_str, self.ident.span());
+        let name = Ident::new(&name_str, self.ident.span());
         let name_base_str = format!("{}", self.ident);
-        let name_base = syn::Ident::new(&name_base_str, self.ident.span());
+        let name_base = Ident::new(&name_base_str, self.ident.span());
 
         let struct_def = quote! {
             #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -92,12 +92,12 @@ impl DeriveStructToOneOrMore {
 
     /// Lower the derived output into a [`TokenStream`].
     pub fn to_tokens(&self) -> TokenStream {
-        let sname = syn::Ident::new(&self.alt_struct_name, self.ident.span());
+        let sname = Ident::new(&self.alt_struct_name, self.ident.span());
         let sname_base_str = format!("{}Cbor", self.ident);
-        let sname_base = syn::Ident::new(&sname_base_str, self.ident.span());
+        let sname_base = Ident::new(&sname_base_str, self.ident.span());
 
         let name_str = format!("OneOrMore{}", self.ident);
-        let name = syn::Ident::new(&name_str, self.ident.span());
+        let name = Ident::new(&name_str, self.ident.span());
 
         let lifetime = match self.lifetime {
             Some(ref lifetime) => quote!(#lifetime),

@@ -114,7 +114,7 @@ impl StructField {
 
         // get the type for use in constructing a <type>::try_from statement. This may be the inner
         // type of an Option<>, Vec<> or Option<Vec<>>.
-        let mut try_from_type = syn::Ident::new(&field_type_str, field_ident.span());
+        let mut try_from_type = Ident::new(&field_type_str, field_ident.span());
 
         if to_cbor {
             // if we are generating a try_from into CBOR types and the field is a CBOR type (i.e.,
@@ -124,7 +124,7 @@ impl StructField {
                     Some(t) => format!("{}Cbor", t),
                     None => panic!("Failed to determine type for field {}", field_ident),
                 };
-                try_from_type = syn::Ident::new(&x, field_ident.span())
+                try_from_type = Ident::new(&x, field_ident.span())
             };
         }
 
@@ -197,9 +197,9 @@ impl StructField {
         let field_adjusted_nested_type = if let Some(ttt) = field_nested_type {
             if self.attrs.cbor.is_some() {
                 let x = format!("{}Cbor", ttt);
-                Some(syn::Ident::new(&x, field_ident.span()))
+                Some(Ident::new(&x, field_ident.span()))
             } else {
-                Some(syn::Ident::new(&ttt, field_ident.span()))
+                Some(Ident::new(&ttt, field_ident.span()))
             }
         } else {
             None
@@ -211,13 +211,13 @@ impl StructField {
                 None => panic!("Failed to determine type for field {}", field_ident),
             };
 
-            syn::Ident::new(&x, field_ident.span())
+            Ident::new(&x, field_ident.span())
         } else {
             let ty_str = match extract_type(field_type) {
                 Some(t) => t,
                 None => panic!("Failed to determine type for field {}", field_ident),
             };
-            syn::Ident::new(&ty_str, field_ident.span())
+            Ident::new(&ty_str, field_ident.span())
         };
 
         let is_tuple_cbor = "TupleCbor" == format!("{}", f2);
@@ -468,9 +468,9 @@ impl StructField {
         let field_adjusted_nested_type = if let Some(ttt) = field_nested_type {
             if self.attrs.cbor.is_some() {
                 let x = format!("{}Cbor", ttt);
-                Some(syn::Ident::new(&x, field_ident.span()))
+                Some(Ident::new(&x, field_ident.span()))
             } else {
-                Some(syn::Ident::new(&ttt, field_ident.span()))
+                Some(Ident::new(&ttt, field_ident.span()))
             }
         } else {
             None
@@ -481,13 +481,13 @@ impl StructField {
                 Some(t) => format!("{}Cbor", t),
                 None => panic!("Failed to determine type for field {}", field_ident),
             };
-            syn::Ident::new(&x, field_ident.span())
+            Ident::new(&x, field_ident.span())
         } else {
             let ty_str = match extract_type(field_type) {
                 Some(t) => t,
                 None => panic!("Failed to determine type for field {}", field_ident),
             };
-            syn::Ident::new(&ty_str, field_ident.span())
+            Ident::new(&ty_str, field_ident.span())
         };
 
         if "Bytes" == self.attrs.value {

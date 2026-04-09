@@ -67,7 +67,7 @@ impl DeriveStructToArray {
 
     fn derive_alt_struct(&mut self) {
         self.alt_struct_name = format!("{}Cbor", self.ident);
-        let sname = syn::Ident::new(&self.alt_struct_name, self.ident.span());
+        let sname = Ident::new(&self.alt_struct_name, self.ident.span());
 
         let mut fields = TokenStream::new();
 
@@ -84,7 +84,7 @@ impl DeriveStructToArray {
                     None => panic!("Failed to determine type for field {}", name),
                 };
 
-                let ty2 = syn::Ident::new(&alt_ty, self.ident.span());
+                let ty2 = Ident::new(&alt_ty, self.ident.span());
                 if is_option_vec(&ty) {
                     quote! {
                          /// Defer decoded field
@@ -130,7 +130,7 @@ impl DeriveStructToArray {
     pub fn to_tokens(&self) -> TokenStream {
         let orig_ident = &self.ident;
         let alt_struct_name = format!("{}Cbor", self.ident);
-        let alt_ident = syn::Ident::new(&alt_struct_name, self.ident.span());
+        let alt_ident = Ident::new(&alt_struct_name, self.ident.span());
         let alt_ident_name = format!("{}", alt_ident);
 
         let lifetime = match self.lifetime {

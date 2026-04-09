@@ -109,7 +109,7 @@ impl TryFrom<Vec<Value>> for TupleMapCbor {
         Ok(TupleMapCbor { tuples: tuples? })
     }
 }
-impl serde::Serialize for TupleMapCbor {
+impl Serialize for TupleMapCbor {
     fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
