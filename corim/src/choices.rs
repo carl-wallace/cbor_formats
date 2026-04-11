@@ -943,14 +943,18 @@ impl TryFrom<&Value> for InstanceIdTypeChoice {
 
 /// The `measured-element-type-choice` socket is defined in [CoRIM Section 5.1.4.5.1].
 ///
-/// [CoRIM Section 5.1.4.5.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5.1
-///
 /// ```text
 /// $measured-element-type-choice /= tagged-oid-type
 /// $measured-element-type-choice /= tagged-uuid-type
 /// $measured-element-type-choice /= uint
 /// $measured-element-type-choice /= text
 /// ```
+///
+/// The `Other` variant accepts any CBOR tagged value as a [`Tuple`] with `key` set to
+/// `Value::Integer(Integer::from(tag))` and `value` set to the tag content. This supports
+/// spec-defined extensibility via the CDDL socket (`$measured-element-type-choice /=`).
+///
+/// [CoRIM Section 5.1.4.5.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5.1
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
