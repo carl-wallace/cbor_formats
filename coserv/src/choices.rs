@@ -45,7 +45,7 @@ impl TryFrom<Value> for CoservProfile {
     type Error = String;
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Bytes(b) => Ok(Self::Oid(OidType::Oid(b))),
+            Value::Bytes(b) => Ok(Self::Oid(OidType(b))),
             Value::Text(s) => Ok(Self::Uri(s)),
             _ => Err("Expected bytes or text for CoservProfile".to_string()),
         }
@@ -56,7 +56,7 @@ impl TryFrom<&Value> for CoservProfile {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Bytes(b) => Ok(Self::Oid(OidType::Oid(b.clone()))),
+            Value::Bytes(b) => Ok(Self::Oid(OidType(b.clone()))),
             Value::Text(s) => Ok(Self::Uri(s.clone())),
             _ => Err("Expected bytes or text for CoservProfile".to_string()),
         }
@@ -67,7 +67,7 @@ impl TryFrom<&CoservProfile> for Value {
     type Error = String;
     fn try_from(value: &CoservProfile) -> Result<Self, Self::Error> {
         match value {
-            CoservProfile::Oid(OidType::Oid(b)) => Ok(Value::Bytes(b.clone())),
+            CoservProfile::Oid(OidType(b)) => Ok(Value::Bytes(b.clone())),
             CoservProfile::Uri(s) => Ok(Value::Text(s.clone())),
         }
     }

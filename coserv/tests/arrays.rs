@@ -12,7 +12,7 @@ use coserv::arrays::*;
 fn stateful_class_roundtrip() {
     let sc = StatefulClass {
         class: ClassMap {
-            id: Some(ClassIdTypeChoice::uuid(common::UuidType::Uuid(vec![
+            id: Some(ClassIdTypeChoice::uuid(common::UuidType(vec![
                 0x31, 0xfb, 0x5a, 0xbf, 0x02, 0x3e, 0x49, 0x92, 0xaa, 0x4e, 0x95, 0xf9, 0xc1, 0x50,
                 0x3b, 0xfa,
             ]))),
@@ -39,7 +39,7 @@ fn stateful_class_roundtrip() {
 fn stateful_class_with_measurements_roundtrip() {
     let sc = StatefulClass {
         class: ClassMap {
-            id: Some(ClassIdTypeChoice::uuid(common::UuidType::Uuid(vec![
+            id: Some(ClassIdTypeChoice::uuid(common::UuidType(vec![
                 0x31, 0xfb, 0x5a, 0xbf, 0x02, 0x3e, 0x49, 0x92, 0xaa, 0x4e, 0x95, 0xf9, 0xc1, 0x50,
                 0x3b, 0xfa,
             ]))),
@@ -109,7 +109,7 @@ fn stateful_instance_roundtrip() {
 #[test]
 fn stateful_group_roundtrip() {
     let sg = StatefulGroup {
-        group: GroupIdTypeChoice::Uuid(Required(common::UuidType::Uuid(vec![
+        group: GroupIdTypeChoice::Uuid(Required(common::UuidType(vec![
             0x31, 0xfb, 0x5a, 0xbf, 0x02, 0x3e, 0x49, 0x92, 0xaa, 0x4e, 0x95, 0xf9, 0xc1, 0x50,
             0x3b, 0xfa,
         ]))),

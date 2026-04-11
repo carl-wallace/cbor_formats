@@ -28,7 +28,7 @@ fn simple() {
     let oid_bytes = hex!("2a03");
     let tagged_oid_bytes = hex!("d86f422a03");
     let to: TaggedOidTypeCbor = TaggedOidTypeCbor {
-        0: OidType::Oid(oid_bytes.to_vec()),
+        0: OidType(oid_bytes.to_vec()),
     }; //(111, Box::new(Value::Bytes(oid_bytes.to_vec())));
     let to_e = into_writer(&to, &mut encoded_token2105);
     println!(

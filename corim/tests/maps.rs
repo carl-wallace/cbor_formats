@@ -31,7 +31,7 @@ fn class_map_uuid_full_test() {
         "a500d8255031fb5abf023e4992aa4e95f9c1503bfa016841434d45204c7464026a526f616472756e6e657203010402"
     );
     let e = ClassMapCbor {
-        id: Some(ClassIdTypeChoiceCbor::Uuid(Required(UuidType::Uuid(
+        id: Some(ClassIdTypeChoiceCbor::Uuid(Required(UuidType(
             TEST_UUID.as_bytes().to_vec(),
         )))),
         vendor: Some("ACME Ltd".to_string()),
@@ -68,7 +68,7 @@ fn class_map_class_id_only_test() {
     // {0: 37(h'31FB5ABF023E4992AA4E95F9C1503BFA')}
     let expected = hex!("a100d8255031fb5abf023e4992aa4e95f9c1503bfa");
     let e = ClassMapCbor {
-        id: Some(ClassIdTypeChoiceCbor::Uuid(Required(UuidType::Uuid(
+        id: Some(ClassIdTypeChoiceCbor::Uuid(Required(UuidType(
             TEST_UUID.as_bytes().to_vec(),
         )))),
         vendor: None,
@@ -362,7 +362,7 @@ fn environment_map_to_cbor_class_only_test() {
     // {0: {0: 37(h'31FB5ABF023E4992AA4E95F9C1503BFA')}}
     let expected = hex!("a100a100d8255031fb5abf023e4992aa4e95f9c1503bfa");
     let c = ClassMapCbor {
-        id: Some(ClassIdTypeChoiceCbor::Uuid(Required(UuidType::Uuid(
+        id: Some(ClassIdTypeChoiceCbor::Uuid(Required(UuidType(
             TEST_UUID.as_bytes().to_vec(),
         )))),
         vendor: None,
@@ -385,7 +385,7 @@ fn environment_map_to_cbor_class_and_instance_test() {
     // {0: {0: 37(h'31FB5ABF023E4992AA4E95F9C1503BFA')}, 1: 550(h'02DEADBEEFDEAD')}
     let expected = hex!("a200a100d8255031fb5abf023e4992aa4e95f9c1503bfa01d902264702deadbeefdead");
     let c = ClassMapCbor {
-        id: Some(ClassIdTypeChoiceCbor::Uuid(Required(UuidType::Uuid(
+        id: Some(ClassIdTypeChoiceCbor::Uuid(Required(UuidType(
             TEST_UUID.as_bytes().to_vec(),
         )))),
         vendor: None,
@@ -428,7 +428,7 @@ fn environment_map_to_cbor_group_only_test() {
     let e = EnvironmentMapCbor {
         class: None,
         instance: None,
-        group: Some(GroupIdTypeChoice::Uuid(Required(UuidType::Uuid(
+        group: Some(GroupIdTypeChoice::Uuid(Required(UuidType(
             TEST_UUID.as_bytes().to_vec(),
         )))),
     };
@@ -596,7 +596,7 @@ fn tag_identity_map_test() {
 fn triples_map_test() {
     let env = EnvironmentMapCbor {
         class: Some(ClassMapCbor {
-            id: Some(ClassIdTypeChoiceCbor::Uuid(Required(UuidType::Uuid(
+            id: Some(ClassIdTypeChoiceCbor::Uuid(Required(UuidType(
                 TEST_UUID.as_bytes().to_vec(),
             )))),
             vendor: None,

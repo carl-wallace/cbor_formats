@@ -288,9 +288,7 @@ impl TryFrom<ClassIdTypeChoiceCbor> for ClassIdTypeChoice {
     fn try_from(value: ClassIdTypeChoiceCbor) -> Result<Self, Self::Error> {
         match value {
             ClassIdTypeChoiceCbor::Oid(b) => Ok(Self::oid(b.0)),
-            ClassIdTypeChoiceCbor::Uuid(b) => Ok(Self::uuid(match &b.0 {
-                UuidType::Uuid(v) => UuidType::Uuid(v.clone()),
-            })),
+            ClassIdTypeChoiceCbor::Uuid(b) => Ok(Self::uuid(b.0.clone())),
             ClassIdTypeChoiceCbor::Bytes(b) => Ok(Self::bytes(b.0)),
         }
     }
@@ -300,9 +298,7 @@ impl TryFrom<&ClassIdTypeChoiceCbor> for ClassIdTypeChoice {
     fn try_from(value: &ClassIdTypeChoiceCbor) -> Result<Self, Self::Error> {
         match value {
             ClassIdTypeChoiceCbor::Oid(b) => Ok(Self::oid(b.0.clone())),
-            ClassIdTypeChoiceCbor::Uuid(b) => Ok(Self::uuid(match &b.0 {
-                UuidType::Uuid(v) => UuidType::Uuid(v.clone()),
-            })),
+            ClassIdTypeChoiceCbor::Uuid(b) => Ok(Self::uuid(b.0.clone())),
             ClassIdTypeChoiceCbor::Bytes(b) => Ok(Self::bytes(b.0.clone())),
         }
     }
@@ -321,11 +317,7 @@ impl TryFrom<ClassIdTypeChoice> for ClassIdTypeChoiceCbor {
     type Error = String;
     fn try_from(value: ClassIdTypeChoice) -> Result<Self, Self::Error> {
         match value {
-            ClassIdTypeChoice::oid(b) => Ok(Self::Oid(TaggedOidTypeCbor {
-                0: OidType::Oid(match b {
-                    TaggedOidType::Oid(v) => v,
-                }),
-            })),
+            ClassIdTypeChoice::oid(b) => Ok(Self::Oid(TaggedOidTypeCbor { 0: b })),
             ClassIdTypeChoice::uuid(b) => Ok(Self::Uuid(TaggedUuidType { 0: b })),
             ClassIdTypeChoice::bytes(b) => Ok(Self::Bytes(TaggedBytes { 0: b })),
         }
@@ -335,11 +327,7 @@ impl TryFrom<&ClassIdTypeChoice> for ClassIdTypeChoiceCbor {
     type Error = String;
     fn try_from(value: &ClassIdTypeChoice) -> Result<Self, Self::Error> {
         match value {
-            ClassIdTypeChoice::oid(b) => Ok(Self::Oid(TaggedOidTypeCbor {
-                0: OidType::Oid(match b {
-                    TaggedOidType::Oid(v) => v.clone(),
-                }),
-            })),
+            ClassIdTypeChoice::oid(b) => Ok(Self::Oid(TaggedOidTypeCbor { 0: b.clone() })),
             ClassIdTypeChoice::uuid(b) => Ok(Self::Uuid(TaggedUuidType { 0: b.clone() })),
             ClassIdTypeChoice::bytes(b) => Ok(Self::Bytes(TaggedBytes { 0: b.clone() })),
         }
@@ -350,13 +338,13 @@ impl TryFrom<Value> for ClassIdTypeChoiceCbor {
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
             Value::Tag(111, b) => Ok(Self::Oid(TaggedOidTypeCbor {
-                0: OidType::Oid(match b.as_bytes() {
+                0: OidType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => return Err("Failed to parse OID value as bytes".to_string()),
                 }),
             })),
             Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType::Uuid(match b.as_bytes() {
+                0: UuidType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => return Err("Failed to parse UUID value as bytes".to_string()),
                 }),
@@ -376,13 +364,13 @@ impl TryFrom<&Value> for ClassIdTypeChoiceCbor {
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
             Value::Tag(111, b) => Ok(Self::Oid(TaggedOidTypeCbor {
-                0: OidType::Oid(match b.as_bytes() {
+                0: OidType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => return Err("Failed to parse OID value as bytes".to_string()),
                 }),
             })),
             Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType::Uuid(match b.as_bytes() {
+                0: UuidType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => return Err("Failed to parse UUID value as bytes".to_string()),
                 }),
@@ -424,7 +412,7 @@ impl TryFrom<&Value> for CorimIdTypeChoice {
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
             Value::Text(s) => Ok(Self::Str(s.clone())),
-            Value::Bytes(b) => Ok(Self::Uuid(UuidType::Uuid(b.clone()))),
+            Value::Bytes(b) => Ok(Self::Uuid(UuidType(b.clone()))),
             _ => Err("Failed to parse value as a CorimIdTypeChoice".to_string()),
         }
     }
@@ -495,10 +483,10 @@ impl<'de> Deserialize<'de> for CorimIdTypeChoice {
                 Ok(CorimIdTypeChoice::Str(v))
             }
             fn visit_bytes<E: serde::de::Error>(self, v: &[u8]) -> Result<Self::Value, E> {
-                Ok(CorimIdTypeChoice::Uuid(UuidType::Uuid(v.to_vec())))
+                Ok(CorimIdTypeChoice::Uuid(UuidType(v.to_vec())))
             }
             fn visit_byte_buf<E: serde::de::Error>(self, v: Vec<u8>) -> Result<Self::Value, E> {
-                Ok(CorimIdTypeChoice::Uuid(UuidType::Uuid(v)))
+                Ok(CorimIdTypeChoice::Uuid(UuidType(v)))
             }
         }
         __deserializer.deserialize_any(CorimIdVisitor)
@@ -811,7 +799,7 @@ impl TryFrom<Value> for DomainTypeChoice {
             })),
             Value::Text(s) => Ok(Self::Text(s)),
             Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType::Uuid(match b.as_bytes() {
+                0: UuidType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => {
                         return Err("Failed to parse UUID value as a DomainTypeChoice".to_string());
@@ -832,7 +820,7 @@ impl TryFrom<&Value> for DomainTypeChoice {
             })),
             Value::Text(s) => Ok(Self::Text(s.clone())),
             Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType::Uuid(match b.as_bytes() {
+                0: UuidType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => return Err("Failed to parse UUID as a DomainTypeChoice".to_string()),
                 }),
@@ -863,7 +851,7 @@ impl TryFrom<&Value> for EntityNameTypeChoice {
         match value {
             Value::Text(s) => Ok(EntityNameTypeChoice::Text(s.to_string())),
             Value::Tag(111, b) => Ok(EntityNameTypeChoice::Oid(TaggedOidTypeCbor {
-                0: OidType::Oid(match b.as_bytes() {
+                0: OidType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => return Err("Failed to parse OID in EntityNameTypeChoice".to_string()),
                 }),
@@ -892,7 +880,7 @@ impl TryFrom<&Value> for GroupIdTypeChoice {
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
             Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType::Uuid(match b.as_bytes() {
+                0: UuidType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => {
                         return Err("Failed to parse UUID value as a GroupIdTypeChoice".to_string());
@@ -938,7 +926,7 @@ impl TryFrom<&Value> for InstanceIdTypeChoice {
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
             Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType::Uuid(match b.as_bytes() {
+                0: UuidType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => {
                         return Err(
@@ -1026,7 +1014,7 @@ impl TryFrom<&Value> for MeasuredElementTypeChoice {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Tag(111, b) => Ok(Self::Oid(OidType::Oid(match b.as_bytes() {
+            Value::Tag(111, b) => Ok(Self::Oid(OidType(match b.as_bytes() {
                 Some(b) => b.clone(),
                 None => {
                     return Err(
@@ -1035,7 +1023,7 @@ impl TryFrom<&Value> for MeasuredElementTypeChoice {
                 }
             }))),
             Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType::Uuid(match b.as_bytes() {
+                0: UuidType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => {
                         return Err(
@@ -1077,9 +1065,7 @@ impl TryFrom<MeasuredElementTypeChoice> for MeasuredElementTypeChoiceCbor {
     type Error = String;
     fn try_from(value: MeasuredElementTypeChoice) -> Result<Self, Self::Error> {
         match value {
-            MeasuredElementTypeChoice::Oid(b) => match b {
-                TaggedOidType::Oid(o) => Ok(Self::Oid(Required(OidType::Oid(o)))),
-            },
+            MeasuredElementTypeChoice::Oid(b) => Ok(Self::Oid(Required(b))),
             MeasuredElementTypeChoice::Uuid(b) => Ok(Self::Uuid(Required(b.0))),
             MeasuredElementTypeChoice::Uint(v) => Ok(Self::Uint(v)),
             MeasuredElementTypeChoice::Text(s) => Ok(Self::Text(s)),
@@ -1094,9 +1080,7 @@ impl TryFrom<&MeasuredElementTypeChoice> for MeasuredElementTypeChoiceCbor {
     type Error = String;
     fn try_from(value: &MeasuredElementTypeChoice) -> Result<Self, Self::Error> {
         match value {
-            MeasuredElementTypeChoice::Oid(b) => match b {
-                TaggedOidType::Oid(o) => Ok(Self::Oid(Required(OidType::Oid(o.to_vec())))),
-            },
+            MeasuredElementTypeChoice::Oid(b) => Ok(Self::Oid(Required(b.clone()))),
             MeasuredElementTypeChoice::Uuid(b) => Ok(Self::Uuid(Required(b.0.clone()))),
             MeasuredElementTypeChoice::Uint(v) => Ok(Self::Uint(*v)),
             MeasuredElementTypeChoice::Text(s) => Ok(Self::Text(s.clone())),
@@ -1118,7 +1102,7 @@ impl TryFrom<&Value> for MeasuredElementTypeChoiceCbor {
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
             Value::Tag(111, b) => Ok(Self::Oid(TaggedOidTypeCbor {
-                0: OidType::Oid(match b.as_bytes() {
+                0: OidType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => {
                         return Err("Failed to parse OID value as MeasuredElementTypeChoiceCbor"
@@ -1127,7 +1111,7 @@ impl TryFrom<&Value> for MeasuredElementTypeChoiceCbor {
                 }),
             })),
             Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType::Uuid(match b.as_bytes() {
+                0: UuidType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => {
                         return Err(
@@ -1204,8 +1188,8 @@ impl TryFrom<Value> for ProfileTypeChoice {
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
             Value::Text(s) => Ok(Self::Uri(s)),
-            Value::Bytes(s) => Ok(Self::Oid2(OidType::Oid(s))),
-            Value::Tag(111, b) => Ok(Self::Oid(OidType::Oid(match b.as_bytes() {
+            Value::Bytes(s) => Ok(Self::Oid2(OidType(s))),
+            Value::Tag(111, b) => Ok(Self::Oid(OidType(match b.as_bytes() {
                 Some(b) => b.clone(),
                 None => return Err("Failed to parse OID value as an ProfileTypeChoice".to_string()),
             }))),
@@ -1218,8 +1202,8 @@ impl TryFrom<&Value> for ProfileTypeChoice {
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
             Value::Text(s) => Ok(Self::Uri(s.clone())),
-            Value::Bytes(s) => Ok(Self::Oid2(OidType::Oid(s.clone()))),
-            Value::Tag(111, b) => Ok(Self::Oid(OidType::Oid(match b.as_bytes() {
+            Value::Bytes(s) => Ok(Self::Oid2(OidType(s.clone()))),
+            Value::Tag(111, b) => Ok(Self::Oid(OidType(match b.as_bytes() {
                 Some(b) => b.clone(),
                 None => return Err("Failed to parse OID value as an ProfileTypeChoice".to_string()),
             }))),
@@ -1244,11 +1228,7 @@ impl TryFrom<ProfileTypeChoice> for ProfileTypeChoiceCbor {
     fn try_from(value: ProfileTypeChoice) -> Result<Self, Self::Error> {
         match value {
             ProfileTypeChoice::Uri(s) => Ok(Self::Uri(s)),
-            ProfileTypeChoice::Oid(b) => Ok(Self::Oid(TaggedOidTypeCbor {
-                0: OidType::Oid(match b {
-                    TaggedOidType::Oid(b) => b,
-                }),
-            })),
+            ProfileTypeChoice::Oid(b) => Ok(Self::Oid(TaggedOidTypeCbor { 0: b })),
             ProfileTypeChoice::Oid2(b) => Ok(Self::Oid2(b)),
             ProfileTypeChoice::Other(b) => match TupleCbor::try_from(b) {
                 Ok(v) => Ok(Self::Other(v)),
@@ -1262,11 +1242,7 @@ impl TryFrom<&ProfileTypeChoice> for ProfileTypeChoiceCbor {
     fn try_from(value: &ProfileTypeChoice) -> Result<Self, Self::Error> {
         match value {
             ProfileTypeChoice::Uri(s) => Ok(Self::Uri(s.clone())),
-            ProfileTypeChoice::Oid(b) => Ok(Self::Oid(TaggedOidTypeCbor {
-                0: OidType::Oid(match b {
-                    TaggedOidType::Oid(b) => b.clone(),
-                }),
-            })),
+            ProfileTypeChoice::Oid(b) => Ok(Self::Oid(TaggedOidTypeCbor { 0: b.clone() })),
             ProfileTypeChoice::Oid2(b) => Ok(Self::Oid2(b.clone())),
             ProfileTypeChoice::Other(b) => match TupleCbor::try_from(b) {
                 Ok(v) => Ok(Self::Other(v)),
@@ -1280,9 +1256,9 @@ impl TryFrom<Value> for ProfileTypeChoiceCbor {
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
             Value::Text(s) => Ok(Self::Uri(s)),
-            Value::Bytes(s) => Ok(Self::Oid2(OidType::Oid(s))),
+            Value::Bytes(s) => Ok(Self::Oid2(OidType(s))),
             Value::Tag(111, b) => Ok(Self::Oid(TaggedOidTypeCbor {
-                0: OidType::Oid(match b.as_bytes() {
+                0: OidType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => {
                         return Err(
@@ -1304,9 +1280,9 @@ impl TryFrom<&Value> for ProfileTypeChoiceCbor {
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
             Value::Text(s) => Ok(Self::Uri(s.clone())),
-            Value::Bytes(s) => Ok(Self::Oid2(OidType::Oid(s.clone()))),
+            Value::Bytes(s) => Ok(Self::Oid2(OidType(s.clone()))),
             Value::Tag(111, b) => Ok(Self::Oid(TaggedOidTypeCbor {
-                0: OidType::Oid(match b.as_bytes() {
+                0: OidType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => {
                         return Err(
@@ -1479,7 +1455,7 @@ impl TryFrom<&Value> for TagIdTypeChoiceCbor {
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
             Value::Text(s) => Ok(Self::Str(s.clone())),
-            Value::Bytes(b) => Ok(Self::Uuid(UuidType::Uuid(b.clone()))),
+            Value::Bytes(b) => Ok(Self::Uuid(UuidType(b.clone()))),
             _ => Err("Failed to parse value as a TagIdTypeChoiceCbor".to_string()),
         }
     }
@@ -1503,10 +1479,10 @@ impl<'de> Deserialize<'de> for TagIdTypeChoiceCbor {
                 Ok(TagIdTypeChoiceCbor::Str(v))
             }
             fn visit_bytes<E: serde::de::Error>(self, v: &[u8]) -> Result<Self::Value, E> {
-                Ok(TagIdTypeChoiceCbor::Uuid(UuidType::Uuid(v.to_vec())))
+                Ok(TagIdTypeChoiceCbor::Uuid(UuidType(v.to_vec())))
             }
             fn visit_byte_buf<E: serde::de::Error>(self, v: Vec<u8>) -> Result<Self::Value, E> {
-                Ok(TagIdTypeChoiceCbor::Uuid(UuidType::Uuid(v)))
+                Ok(TagIdTypeChoiceCbor::Uuid(UuidType(v)))
             }
         }
         __deserializer.deserialize_any(TagIdVisitor)

@@ -159,7 +159,7 @@ fn ueid_type_roundtrip() {
 fn uuid_type_valid() {
     let v = Value::Bytes(vec![0u8; 16]);
     let ut = UuidType::try_from(&v).unwrap();
-    assert_eq!(ut, UuidType::Uuid(vec![0u8; 16]));
+    assert_eq!(ut, UuidType(vec![0u8; 16]));
 }
 
 #[test]
@@ -178,7 +178,7 @@ fn uuid_type_non_bytes_fails() {
 
 #[test]
 fn uuid_type_roundtrip() {
-    let ut = UuidType::Uuid(vec![0xAB; 16]);
+    let ut = UuidType(vec![0xAB; 16]);
     let mut buf = vec![];
     into_writer(&ut, &mut buf).unwrap();
     let decoded: UuidType = from_reader(buf.as_slice()).unwrap();
@@ -189,7 +189,7 @@ fn uuid_type_roundtrip() {
 
 #[test]
 fn oid_type_roundtrip() {
-    let ot = OidType::Oid(vec![0x2B, 0x06, 0x01]); // 1.3.6.1 prefix
+    let ot = OidType(vec![0x2B, 0x06, 0x01]); // 1.3.6.1 prefix
     let mut buf = vec![];
     into_writer(&ot, &mut buf).unwrap();
     let decoded: OidType = from_reader(buf.as_slice()).unwrap();
@@ -452,7 +452,7 @@ fn oid_or_uri_uri_from_value() {
 fn oid_or_uri_oid_from_value() {
     let v = Value::Tag(111, Box::new(Value::Bytes(vec![0x2B, 0x06])));
     let ou = OidOrUri::try_from(&v).unwrap();
-    assert_eq!(ou, OidOrUri::O(OidType::Oid(vec![0x2B, 0x06])));
+    assert_eq!(ou, OidOrUri::O(OidType(vec![0x2B, 0x06])));
 }
 
 #[test]
@@ -515,7 +515,7 @@ fn oid_or_uri_cbor_roundtrip_uri() {
 
 #[test]
 fn oid_or_uri_cbor_roundtrip_oid() {
-    let ou = OidOrUriCbor::O(Required(OidType::Oid(vec![0x2B, 0x06, 0x01])));
+    let ou = OidOrUriCbor::O(Required(OidType(vec![0x2B, 0x06, 0x01])));
     let mut buf = vec![];
     into_writer(&ou, &mut buf).unwrap();
     let value: Value = from_reader(buf.as_slice()).unwrap();
@@ -545,7 +545,7 @@ fn tagged_min_svn_roundtrip() {
 
 #[test]
 fn tagged_uuid_roundtrip() {
-    let uuid: TaggedUuidType = Required(UuidType::Uuid(vec![0xAB; 16]));
+    let uuid: TaggedUuidType = Required(UuidType(vec![0xAB; 16]));
     let mut buf = vec![];
     into_writer(&uuid, &mut buf).unwrap();
     let decoded: TaggedUuidType = from_reader(buf.as_slice()).unwrap();

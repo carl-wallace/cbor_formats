@@ -326,12 +326,7 @@ pub type TaggedUeidType = Required<UeidType, 550>;
 
 /// oid-type = bytes
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-#[allow(missing_docs)]
-pub enum OidType {
-    #[serde(with = "serde_bytes")]
-    Oid(Vec<u8>),
-}
+pub struct OidType(#[serde(with = "serde_bytes")] pub Vec<u8>);
 /// The `tagged-oid-type` is defined in [CoRIM Section 7.6].
 ///
 /// ```text
@@ -347,12 +342,7 @@ pub type TaggedOidType = OidType;
 
 /// uuid-type = bytes .size 16
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-#[allow(missing_docs)]
-pub enum UuidType {
-    #[serde(with = "serde_bytes")]
-    Uuid(Vec<u8>),
-}
+pub struct UuidType(#[serde(with = "serde_bytes")] pub Vec<u8>);
 impl TryFrom<&Value> for UuidType {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
@@ -364,7 +354,7 @@ impl TryFrom<&Value> for UuidType {
                         k.len()
                     ));
                 }
-                Ok(Self::Uuid(k.clone()))
+                Ok(Self(k.clone()))
             }
             _ => Err("Failed to parse value as a UuidType".to_string()),
         }
@@ -450,7 +440,7 @@ impl TryFrom<&Value> for OidOrUri {
                 None => Err("Expected text value inside tag 32 for OidOrUri".to_string()),
             },
             Value::Tag(111, k) => match k.as_bytes() {
-                Some(b) => Ok(Self::O(OidType::Oid(b.clone()))),
+                Some(b) => Ok(Self::O(OidType(b.clone()))),
                 None => Err("Expected bytes value inside tag 111 for OidOrUri".to_string()),
             },
             _ => Err("Failed to parse value as a OidOrUri".to_string()),
@@ -476,7 +466,7 @@ impl TryFrom<&Value> for OidOrUriCbor {
             },
             Value::Tag(111, k) => match k.as_bytes() {
                 Some(b) => Ok(Self::O(TaggedOidTypeCbor {
-                    0: OidType::Oid(b.clone()),
+                    0: OidType(b.clone()),
                 })),
                 None => Err("Expected bytes value inside tag 111 for OidOrUriCbor".to_string()),
             },
