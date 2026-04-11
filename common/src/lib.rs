@@ -95,19 +95,14 @@ use ciborium::tag::Required;
 use ciborium::value::{Integer, Value};
 use serde::{Deserialize, Serialize};
 
-/// Wrapper enum for a CBOR byte string value.
+/// Wrapper for a CBOR byte string value.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-#[allow(missing_docs)]
-pub enum BytesType {
-    #[serde(with = "serde_bytes")]
-    Bytes(Vec<u8>),
-}
+pub struct BytesType(#[serde(with = "serde_bytes")] pub Vec<u8>);
 impl TryFrom<&Value> for BytesType {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Bytes(k) => Ok(Self::Bytes(k.clone())),
+            Value::Bytes(k) => Ok(Self(k.clone())),
             _ => Err("Failed to parse value as a BytesType".to_string()),
         }
     }
@@ -116,7 +111,7 @@ impl TryFrom<Value> for BytesType {
     type Error = String;
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Bytes(k) => Ok(Self::Bytes(k)),
+            Value::Bytes(k) => Ok(Self(k)),
             _ => Err("Failed to parse value as a BytesType".to_string()),
         }
     }
@@ -238,7 +233,7 @@ impl TryFrom<&Value> for NonceType {
         match value {
             Value::Bytes(k) => {
                 validate_nonce_size(k)?;
-                Ok(Self::One(BytesType::Bytes(k.clone())))
+                Ok(Self::One(BytesType(k.clone())))
             }
             Value::Array(k) => {
                 let mut items = Vec::new();
@@ -246,7 +241,7 @@ impl TryFrom<&Value> for NonceType {
                     match m.as_bytes() {
                         Some(b) => {
                             validate_nonce_size(b)?;
-                            items.push(BytesType::Bytes(b.clone()));
+                            items.push(BytesType(b.clone()));
                         }
                         None => {
                             return Err(
@@ -291,12 +286,7 @@ pub type TaggedPkixBase64CertPathType = Required<String, 556>;
 
 /// ueid-type = bstr .size (7..33)
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-#[allow(missing_docs)]
-pub enum UeidType {
-    #[serde(with = "serde_bytes")]
-    Ueid(Vec<u8>),
-}
+pub struct UeidType(#[serde(with = "serde_bytes")] pub Vec<u8>);
 impl TryFrom<&Value> for UeidType {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
@@ -308,7 +298,7 @@ impl TryFrom<&Value> for UeidType {
                         k.len()
                     ));
                 }
-                Ok(Self::Ueid(k.clone()))
+                Ok(Self(k.clone()))
             }
             _ => Err("Failed to parse value as a UeidType".to_string()),
         }

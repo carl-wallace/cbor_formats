@@ -46,15 +46,16 @@ fn cbor_cmw_record_roundtrip() {
 
 #[test]
 fn cbor_cmw_tag_cmw_json_collection_data_roundtrip() {
-    let cmw = CborCmw::TagCmwJsonCollectionData(Required::<BytesType, 1668547093>(
-        BytesType::Bytes(vec![0x01, 0x02, 0x03]),
-    ));
+    let cmw =
+        CborCmw::TagCmwJsonCollectionData(Required::<BytesType, 1668547093>(BytesType(vec![
+            0x01, 0x02, 0x03,
+        ])));
     roundtrip_cbor(&cmw);
 }
 
 #[test]
 fn cbor_cmw_tag_cmw_jws_data_roundtrip() {
-    let cmw = CborCmw::TagCmwJwsData(Required::<BytesType, 1668547094>(BytesType::Bytes(vec![
+    let cmw = CborCmw::TagCmwJwsData(Required::<BytesType, 1668547094>(BytesType(vec![
         0xAA, 0xBB,
     ])));
     roundtrip_cbor(&cmw);
@@ -82,9 +83,8 @@ fn cbor_cmw_tag_signed_roundtrip() {
 
 #[test]
 fn cbor_collection_roundtrip() {
-    let inner = CborCmw::TagCmwJsonCollectionData(Required::<BytesType, 1668547093>(
-        BytesType::Bytes(vec![0x01]),
-    ));
+    let inner =
+        CborCmw::TagCmwJsonCollectionData(Required::<BytesType, 1668547093>(BytesType(vec![0x01])));
 
     let mut entries = BTreeMap::new();
     entries.insert(CborCollectionKey::Int(1), inner.clone());
@@ -99,9 +99,8 @@ fn cbor_collection_roundtrip() {
 
 #[test]
 fn cbor_collection_with_type_roundtrip() {
-    let inner = CborCmw::TagCmwJsonCollectionData(Required::<BytesType, 1668547093>(
-        BytesType::Bytes(vec![0xFF]),
-    ));
+    let inner =
+        CborCmw::TagCmwJsonCollectionData(Required::<BytesType, 1668547093>(BytesType(vec![0xFF])));
 
     let mut entries = BTreeMap::new();
     entries.insert(CborCollectionKey::Int(0), inner);
@@ -115,7 +114,7 @@ fn cbor_collection_with_type_roundtrip() {
 
 #[test]
 fn cbor_cmw_tag_collection_roundtrip() {
-    let inner = CborCmw::TagCmwJwsData(Required::<BytesType, 1668547094>(BytesType::Bytes(vec![
+    let inner = CborCmw::TagCmwJwsData(Required::<BytesType, 1668547094>(BytesType(vec![
         0xDE, 0xAD,
     ])));
 
@@ -195,7 +194,7 @@ fn cbor_cmw_tag_data_roundtrip() {
     let tag = choices::CMW_TAG_MIN + 100;
     let cmw = CborCmw::TagData {
         tag,
-        value: BytesType::Bytes(vec![0xCA, 0xFE, 0xBA, 0xBE]),
+        value: BytesType(vec![0xCA, 0xFE, 0xBA, 0xBE]),
     };
     let buf = roundtrip_cbor(&cmw);
 
@@ -215,7 +214,7 @@ fn cbor_cmw_tag_data_at_range_boundaries() {
     for tag in [choices::CMW_TAG_MIN, choices::CMW_TAG_MAX] {
         let cmw = CborCmw::TagData {
             tag,
-            value: BytesType::Bytes(vec![0x00]),
+            value: BytesType(vec![0x00]),
         };
         roundtrip_cbor(&cmw);
     }
@@ -248,7 +247,7 @@ fn cbor_cmw_tag_outside_range_rejected() {
 fn cbor_cmw_tag_data_in_collection() {
     let tag_data = CborCmw::TagData {
         tag: choices::CMW_TAG_MIN + 500,
-        value: BytesType::Bytes(vec![0x01, 0x02]),
+        value: BytesType(vec![0x01, 0x02]),
     };
 
     let mut entries = BTreeMap::new();
@@ -300,7 +299,7 @@ fn make_valid_signed_cmw() -> CoseSign1Cbor {
             other: None,
         },
         payload: BinaryOrNil::Binary(payload_buf),
-        signature: BytesType::Bytes(vec![0x00; 64]),
+        signature: BytesType(vec![0x00; 64]),
     }
 }
 

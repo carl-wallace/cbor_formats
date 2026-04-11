@@ -131,8 +131,8 @@ fn ml_dsa_44_sig_structure_matches_spec() {
         context: SignatureOrSignature1::Signature1,
         body_protected: sign1.protected.clone(),
         sign_protected: None,
-        external_aad: BytesType::Bytes(vec![]),
-        payload: BytesType::Bytes(payload),
+        external_aad: BytesType(vec![]),
+        payload: BytesType(payload),
     };
 
     let sig_structure_cbor = SigStructureCbor::try_from(sig_structure).unwrap();

@@ -48,7 +48,7 @@ fn class_map_uuid_full_test() {
 fn class_map_impl_full_test() {
     // {0: 560(h'61636D652D696D706C656D656E746174696F6E2D69642D303030303030303031'), 1: "EMCA Ltd", 2: "Rennurdaor", 3: 2, 4: 1}
     let e = ClassMapCbor {
-        id: Some(ClassIdTypeChoiceCbor::Bytes(Required(BytesType::Bytes(
+        id: Some(ClassIdTypeChoiceCbor::Bytes(Required(BytesType(
             TEST_IMPL_ID.to_vec(),
         )))),
         vendor: Some("EMCA Ltd".to_string()),
@@ -173,7 +173,7 @@ fn corim_map_test() {
     //parse the tags now
     for t in comid_d.tags {
         match t {
-            BytesType::Bytes(b) => {
+            BytesType(b) => {
                 let x: Result<Value, _> = from_reader(b.as_slice());
                 match &x {
                     Ok(Value::Tag(505, v)) => {
@@ -395,7 +395,7 @@ fn environment_map_to_cbor_class_and_instance_test() {
     };
     let e = EnvironmentMapCbor {
         class: Some(c),
-        instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType::Ueid(
+        instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType(
             TEST_UEID.to_vec(),
         )))),
         group: None,
@@ -411,7 +411,7 @@ fn environment_map_to_cbor_instance_only_test() {
     let expected = hex!("a101d902264702deadbeefdead");
     let e = EnvironmentMapCbor {
         class: None,
-        instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType::Ueid(
+        instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType(
             TEST_UEID.to_vec(),
         )))),
         group: None,

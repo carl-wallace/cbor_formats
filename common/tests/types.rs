@@ -11,14 +11,14 @@ use common::*;
 fn bytes_type_from_value_ref() {
     let v = Value::Bytes(vec![1, 2, 3]);
     let bt = BytesType::try_from(&v).unwrap();
-    assert_eq!(bt, BytesType::Bytes(vec![1, 2, 3]));
+    assert_eq!(bt, BytesType(vec![1, 2, 3]));
 }
 
 #[test]
 fn bytes_type_from_value_owned() {
     let v = Value::Bytes(vec![4, 5, 6]);
     let bt = BytesType::try_from(v).unwrap();
-    assert_eq!(bt, BytesType::Bytes(vec![4, 5, 6]));
+    assert_eq!(bt, BytesType(vec![4, 5, 6]));
 }
 
 #[test]
@@ -30,7 +30,7 @@ fn bytes_type_from_non_bytes_fails() {
 
 #[test]
 fn bytes_type_roundtrip() {
-    let bt = BytesType::Bytes(vec![0xDE, 0xAD]);
+    let bt = BytesType(vec![0xDE, 0xAD]);
     let mut buf = vec![];
     into_writer(&bt, &mut buf).unwrap();
     let decoded: BytesType = from_reader(buf.as_slice()).unwrap();
@@ -44,7 +44,7 @@ fn nonce_type_single_valid() {
     let nonce_bytes = vec![0u8; 8]; // minimum valid size
     let v = Value::Bytes(nonce_bytes.clone());
     let nt = NonceType::try_from(&v).unwrap();
-    assert_eq!(nt, NonceType::One(BytesType::Bytes(nonce_bytes)));
+    assert_eq!(nt, NonceType::One(BytesType(nonce_bytes)));
 }
 
 #[test]
@@ -52,7 +52,7 @@ fn nonce_type_single_max_valid() {
     let nonce_bytes = vec![0u8; 64]; // maximum valid size
     let v = Value::Bytes(nonce_bytes.clone());
     let nt = NonceType::try_from(&v).unwrap();
-    assert_eq!(nt, NonceType::One(BytesType::Bytes(nonce_bytes)));
+    assert_eq!(nt, NonceType::One(BytesType(nonce_bytes)));
 }
 
 #[test]
@@ -103,7 +103,7 @@ fn nonce_type_from_non_bytes_non_array() {
 
 #[test]
 fn nonce_type_roundtrip() {
-    let nt = NonceType::One(BytesType::Bytes(vec![0xAA; 16]));
+    let nt = NonceType::One(BytesType(vec![0xAA; 16]));
     let mut buf = vec![];
     into_writer(&nt, &mut buf).unwrap();
     let decoded: NonceType = from_reader(buf.as_slice()).unwrap();
@@ -116,14 +116,14 @@ fn nonce_type_roundtrip() {
 fn ueid_type_valid_min() {
     let v = Value::Bytes(vec![0u8; 7]);
     let ut = UeidType::try_from(&v).unwrap();
-    assert_eq!(ut, UeidType::Ueid(vec![0u8; 7]));
+    assert_eq!(ut, UeidType(vec![0u8; 7]));
 }
 
 #[test]
 fn ueid_type_valid_max() {
     let v = Value::Bytes(vec![0u8; 33]);
     let ut = UeidType::try_from(&v).unwrap();
-    assert_eq!(ut, UeidType::Ueid(vec![0u8; 33]));
+    assert_eq!(ut, UeidType(vec![0u8; 33]));
 }
 
 #[test]
@@ -146,7 +146,7 @@ fn ueid_type_non_bytes_fails() {
 
 #[test]
 fn ueid_type_roundtrip() {
-    let ut = UeidType::Ueid(vec![0x01; 16]);
+    let ut = UeidType(vec![0x01; 16]);
     let mut buf = vec![];
     into_writer(&ut, &mut buf).unwrap();
     let decoded: UeidType = from_reader(buf.as_slice()).unwrap();
@@ -554,7 +554,7 @@ fn tagged_uuid_roundtrip() {
 
 #[test]
 fn tagged_ueid_roundtrip() {
-    let ueid: TaggedUeidType = Required(UeidType::Ueid(vec![0x01; 16]));
+    let ueid: TaggedUeidType = Required(UeidType(vec![0x01; 16]));
     let mut buf = vec![];
     into_writer(&ueid, &mut buf).unwrap();
     let decoded: TaggedUeidType = from_reader(buf.as_slice()).unwrap();
@@ -563,7 +563,7 @@ fn tagged_ueid_roundtrip() {
 
 #[test]
 fn tagged_bytes_roundtrip() {
-    let tb: TaggedBytes = Required(BytesType::Bytes(vec![0xDE, 0xAD]));
+    let tb: TaggedBytes = Required(BytesType(vec![0xDE, 0xAD]));
     let mut buf = vec![];
     into_writer(&tb, &mut buf).unwrap();
     let decoded: TaggedBytes = from_reader(buf.as_slice()).unwrap();
@@ -572,7 +572,7 @@ fn tagged_bytes_roundtrip() {
 
 #[test]
 fn tagged_cose_key_type_roundtrip() {
-    let tk: TaggedCoseKeyType = Required(BytesType::Bytes(vec![0x01, 0x02]));
+    let tk: TaggedCoseKeyType = Required(BytesType(vec![0x01, 0x02]));
     let mut buf = vec![];
     into_writer(&tk, &mut buf).unwrap();
     let decoded: TaggedCoseKeyType = from_reader(buf.as_slice()).unwrap();
@@ -581,7 +581,7 @@ fn tagged_cose_key_type_roundtrip() {
 
 #[test]
 fn tagged_pkix_asn1_der_cert_type_roundtrip() {
-    let tp: TaggedPkixAsn1DerCertType = Required(BytesType::Bytes(vec![0x30, 0x82]));
+    let tp: TaggedPkixAsn1DerCertType = Required(BytesType(vec![0x30, 0x82]));
     let mut buf = vec![];
     into_writer(&tp, &mut buf).unwrap();
     let decoded: TaggedPkixAsn1DerCertType = from_reader(buf.as_slice()).unwrap();

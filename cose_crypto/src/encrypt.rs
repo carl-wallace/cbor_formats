@@ -75,7 +75,7 @@ impl CoseEncrypt0Builder {
         let enc_structure = EncStructure {
             context: EncStructureContext::Encrypt0,
             protected: protected_serialized.clone(),
-            external_aad: BytesType::Bytes(self.external_aad),
+            external_aad: BytesType(self.external_aad),
         };
 
         let enc_structure_cbor = EncStructureCbor::try_from(enc_structure)
@@ -115,7 +115,7 @@ pub fn decrypt_encrypt0(
     let enc_structure = EncStructure {
         context: EncStructureContext::Encrypt0,
         protected: msg.protected.clone(),
-        external_aad: BytesType::Bytes(external_aad.to_vec()),
+        external_aad: BytesType(external_aad.to_vec()),
     };
 
     let enc_structure_cbor = EncStructureCbor::try_from(enc_structure)

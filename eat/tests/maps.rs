@@ -832,7 +832,7 @@ fn ueid_test() {
         oem_boot: None,
         sw_name: None,
         sw_version: None,
-        ueid: Some(UeidType::Ueid(hex!("02deadbeefdead").to_vec())),
+        ueid: Some(UeidType(hex!("02deadbeefdead").to_vec())),
         uptime: None,
         manifests: None,
         measurements: None,

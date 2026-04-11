@@ -296,7 +296,7 @@ impl Serialize for CborCmw {
             CborCmw::Record(v) => v.serialize(serializer),
             CborCmw::Collection(v) => v.serialize(serializer),
             CborCmw::TagData { tag, value } => {
-                let BytesType::Bytes(bytes) = value;
+                let BytesType(bytes) = value;
                 Value::Tag(*tag, Box::new(Value::Bytes(bytes.clone()))).serialize(serializer)
             }
         }

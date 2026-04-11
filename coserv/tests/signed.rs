@@ -73,7 +73,7 @@ fn make_valid_signed_coserv() -> CoseSign1Cbor {
             other: None,
         },
         payload: BinaryOrNil::Binary(payload_bytes),
-        signature: BytesType::Bytes(vec![0x00; 64]),
+        signature: BytesType(vec![0x00; 64]),
     }
 }
 

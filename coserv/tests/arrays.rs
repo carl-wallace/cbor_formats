@@ -87,7 +87,7 @@ fn stateful_class_with_measurements_roundtrip() {
 #[test]
 fn stateful_instance_roundtrip() {
     let si = StatefulInstance {
-        instance: InstanceIdTypeChoice::Ueid(Required(common::UeidType::Ueid(vec![
+        instance: InstanceIdTypeChoice::Ueid(Required(common::UeidType(vec![
             0x02, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad,
         ]))),
         measurements: None,

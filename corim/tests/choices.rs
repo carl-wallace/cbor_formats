@@ -32,7 +32,7 @@ fn class_id_type_choice_test() {
     let fab2_c: ClassIdTypeChoiceCbor = fab2_j.try_into().unwrap();
     assert_eq!(fab2, fab2_c);
 
-    let fab3 = ClassIdTypeChoiceCbor::Bytes(Required(common::BytesType::Bytes([0x01].to_vec())));
+    let fab3 = ClassIdTypeChoiceCbor::Bytes(Required(common::BytesType([0x01].to_vec())));
     let mut encoded_token3 = vec![];
     into_writer(&fab3, &mut encoded_token3).unwrap();
 
@@ -206,7 +206,7 @@ fn instance_id_type_choice_test() {
     let fab_c: InstanceIdTypeChoice = fab_j;
     assert_eq!(fab, fab_c);
 
-    let fab2 = InstanceIdTypeChoice::Ueid(Required(UeidType::Ueid(vec![
+    let fab2 = InstanceIdTypeChoice::Ueid(Required(UeidType(vec![
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ])));
     let mut encoded_token2 = vec![];

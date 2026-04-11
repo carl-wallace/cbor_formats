@@ -83,7 +83,7 @@ fn raw_value_type_choice_test() {
     use corim::choices::RawValueTypeChoice;
 
     // Test Bytes variant (tag 560)
-    let rv = RawValueTypeChoice::Bytes(Required(BytesType::Bytes(vec![0xDE, 0xAD])));
+    let rv = RawValueTypeChoice::Bytes(Required(BytesType(vec![0xDE, 0xAD])));
     let mut buf = vec![];
     let _ = into_writer(&rv, &mut buf);
     println!(

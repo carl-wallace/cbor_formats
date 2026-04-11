@@ -350,7 +350,7 @@ impl TryFrom<Value> for ClassIdTypeChoiceCbor {
                 }),
             })),
             Value::Tag(560, b) => Ok(Self::Bytes(TaggedBytes {
-                0: BytesType::Bytes(match b.as_bytes() {
+                0: BytesType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => return Err("Failed to parse tagged bytes value".to_string()),
                 }),
@@ -376,7 +376,7 @@ impl TryFrom<&Value> for ClassIdTypeChoiceCbor {
                 }),
             })),
             Value::Tag(560, b) => Ok(Self::Bytes(TaggedBytes {
-                0: BytesType::Bytes(match b.as_bytes() {
+                0: BytesType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => return Err("Failed to parse tagged bytes value".to_string()),
                 }),
@@ -733,40 +733,28 @@ impl TryFrom<&Value> for CryptoKeyTypeChoice {
                 }
             }))),
             Value::Tag(557, b) => Ok(Self::KeyThumbprint(Required(parse_tagged_hash_entry(b)?))),
-            Value::Tag(558, b) => Ok(Self::CoseKey(Required(BytesType::Bytes(
-                match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => {
-                        return Err(
-                            "Failed to parse CryptoKeyTypeChoice tag 558 as bytes".to_string()
-                        );
-                    }
-                },
-            )))),
+            Value::Tag(558, b) => Ok(Self::CoseKey(Required(BytesType(match b.as_bytes() {
+                Some(b) => b.clone(),
+                None => {
+                    return Err("Failed to parse CryptoKeyTypeChoice tag 558 as bytes".to_string());
+                }
+            })))),
             Value::Tag(559, b) => Ok(Self::CertThumbprint(Required(parse_tagged_hash_entry(b)?))),
-            Value::Tag(560, b) => Ok(Self::Bytes(Required(BytesType::Bytes(
-                match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => {
-                        return Err(
-                            "Failed to parse CryptoKeyTypeChoice tag 560 as bytes".to_string()
-                        );
-                    }
-                },
-            )))),
+            Value::Tag(560, b) => Ok(Self::Bytes(Required(BytesType(match b.as_bytes() {
+                Some(b) => b.clone(),
+                None => {
+                    return Err("Failed to parse CryptoKeyTypeChoice tag 560 as bytes".to_string());
+                }
+            })))),
             Value::Tag(561, b) => Ok(Self::CertPathThumbprint(Required(parse_tagged_hash_entry(
                 b,
             )?))),
-            Value::Tag(562, b) => Ok(Self::DerCert(Required(BytesType::Bytes(
-                match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => {
-                        return Err(
-                            "Failed to parse CryptoKeyTypeChoice tag 562 as bytes".to_string()
-                        );
-                    }
-                },
-            )))),
+            Value::Tag(562, b) => Ok(Self::DerCert(Required(BytesType(match b.as_bytes() {
+                Some(b) => b.clone(),
+                None => {
+                    return Err("Failed to parse CryptoKeyTypeChoice tag 562 as bytes".to_string());
+                }
+            })))),
             _ => Err("Failed to parse value as a CryptoKeyTypeChoice".to_string()),
         }
     }
@@ -888,7 +876,7 @@ impl TryFrom<&Value> for GroupIdTypeChoice {
                 }),
             })),
             Value::Tag(560, b) => Ok(Self::Bytes(TaggedBytes {
-                0: BytesType::Bytes(match b.as_bytes() {
+                0: BytesType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => {
                         return Err(
@@ -936,7 +924,7 @@ impl TryFrom<&Value> for InstanceIdTypeChoice {
                 }),
             })),
             Value::Tag(550, b) => Ok(Self::Ueid(TaggedUeidType {
-                0: UeidType::Ueid(match b.as_bytes() {
+                0: UeidType(match b.as_bytes() {
                     Some(b) => b.clone(),
                     None => {
                         return Err(
@@ -1646,12 +1634,10 @@ impl TryFrom<&Value> for RawValueTypeChoice {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Tag(560, b) => Ok(Self::Bytes(Required(BytesType::Bytes(
-                match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => return Err("Failed to parse tag 560 as bytes".to_string()),
-                },
-            )))),
+            Value::Tag(560, b) => Ok(Self::Bytes(Required(BytesType(match b.as_bytes() {
+                Some(b) => b.clone(),
+                None => return Err("Failed to parse tag 560 as bytes".to_string()),
+            })))),
             Value::Tag(563, b) => {
                 let arr = b.as_array().ok_or("Failed to parse tag 563 as array")?;
                 if arr.len() != 2 {

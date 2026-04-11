@@ -71,8 +71,8 @@ impl CoseSign1Builder {
             context: SignatureOrSignature1::Signature1,
             body_protected: protected_serialized.clone(),
             sign_protected: None,
-            external_aad: BytesType::Bytes(self.external_aad),
-            payload: BytesType::Bytes(self.payload.clone()),
+            external_aad: BytesType(self.external_aad),
+            payload: BytesType(self.payload.clone()),
         };
 
         let sig_structure_cbor = SigStructureCbor::try_from(sig_structure)
@@ -88,7 +88,7 @@ impl CoseSign1Builder {
             protected: protected_serialized,
             unprotected: self.unprotected,
             payload: BinaryOrNil::Binary(self.payload),
-            signature: BytesType::Bytes(signature),
+            signature: BytesType(signature),
         };
 
         CoseSign1Cbor::try_from(cose_sign1).map_err(|e| CoseCryptoError::CborError(e.to_string()))
@@ -112,8 +112,8 @@ pub fn verify_sign1(
         context: SignatureOrSignature1::Signature1,
         body_protected: msg.protected.clone(),
         sign_protected: None,
-        external_aad: BytesType::Bytes(external_aad.to_vec()),
-        payload: BytesType::Bytes(payload),
+        external_aad: BytesType(external_aad.to_vec()),
+        payload: BytesType(payload),
     };
 
     let sig_structure_cbor = SigStructureCbor::try_from(sig_structure)
@@ -123,7 +123,7 @@ pub fn verify_sign1(
     ciborium::ser::into_writer(&sig_structure_cbor, &mut tbs)
         .map_err(|e| CoseCryptoError::CborError(e.to_string()))?;
 
-    let BytesType::Bytes(signature) = &msg.signature;
+    let BytesType(signature) = &msg.signature;
 
     verifier.verify(&tbs, signature)
 }
@@ -139,8 +139,8 @@ pub fn verify_sign1_detached(
         context: SignatureOrSignature1::Signature1,
         body_protected: msg.protected.clone(),
         sign_protected: None,
-        external_aad: BytesType::Bytes(external_aad.to_vec()),
-        payload: BytesType::Bytes(payload.to_vec()),
+        external_aad: BytesType(external_aad.to_vec()),
+        payload: BytesType(payload.to_vec()),
     };
 
     let sig_structure_cbor = SigStructureCbor::try_from(sig_structure)
@@ -150,7 +150,7 @@ pub fn verify_sign1_detached(
     ciborium::ser::into_writer(&sig_structure_cbor, &mut tbs)
         .map_err(|e| CoseCryptoError::CborError(e.to_string()))?;
 
-    let BytesType::Bytes(signature) = &msg.signature;
+    let BytesType(signature) = &msg.signature;
 
     verifier.verify(&tbs, signature)
 }
@@ -239,8 +239,8 @@ impl CoseSignBuilder {
                 context: SignatureOrSignature1::Signature,
                 body_protected: body_protected.clone(),
                 sign_protected: Some(sign_protected.clone()),
-                external_aad: BytesType::Bytes(self.external_aad.clone()),
-                payload: BytesType::Bytes(self.payload.clone()),
+                external_aad: BytesType(self.external_aad.clone()),
+                payload: BytesType(self.payload.clone()),
             };
 
             let sig_structure_cbor = SigStructureCbor::try_from(sig_structure)
@@ -255,7 +255,7 @@ impl CoseSignBuilder {
             signatures.push(CoseSignature {
                 protected: sign_protected,
                 unprotected: entry.unprotected.clone(),
-                signature: BytesType::Bytes(sig),
+                signature: BytesType(sig),
             });
         }
 
@@ -293,8 +293,8 @@ pub fn verify_sign(
         context: SignatureOrSignature1::Signature,
         body_protected: msg.protected.clone(),
         sign_protected: Some(sig_entry.protected.clone()),
-        external_aad: BytesType::Bytes(external_aad.to_vec()),
-        payload: BytesType::Bytes(payload),
+        external_aad: BytesType(external_aad.to_vec()),
+        payload: BytesType(payload),
     };
 
     let sig_structure_cbor = SigStructureCbor::try_from(sig_structure)
@@ -304,7 +304,7 @@ pub fn verify_sign(
     ciborium::ser::into_writer(&sig_structure_cbor, &mut tbs)
         .map_err(|e| CoseCryptoError::CborError(e.to_string()))?;
 
-    let BytesType::Bytes(signature) = &sig_entry.signature;
+    let BytesType(signature) = &sig_entry.signature;
 
     verifier.verify(&tbs, signature)
 }

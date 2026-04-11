@@ -35,7 +35,7 @@ fn serialize_header(hdr: &HeaderMap) -> EmptyOrSerializedMap {
 fn make_corim_map() -> CorimMapCbor {
     CorimMapCbor {
         id: CorimIdTypeChoice::Str("test-corim-id".into()),
-        tags: vec![BytesType::Bytes(vec![0xA0])], // empty map as placeholder
+        tags: vec![BytesType(vec![0xA0])], // empty map as placeholder
         dependent_rims: None,
         profile: None,
         rim_validity: None,
@@ -87,7 +87,7 @@ fn make_valid_signed_corim() -> CoseSign1Cbor {
             other: None,
         },
         payload: BinaryOrNil::Binary(payload_bytes),
-        signature: BytesType::Bytes(vec![0x00; 64]),
+        signature: BytesType(vec![0x00; 64]),
     }
 }
 

@@ -15,7 +15,7 @@ fn attest_key_triple_record_test() {
     let fab = AttestKeyTripleRecordCbor {
         environment: EnvironmentMapCbor {
             class: None,
-            instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType::Ueid(
+            instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType(
                 TEST_UEID.to_vec(),
             )))),
             group: None,
@@ -35,7 +35,7 @@ fn attest_key_triple_record_test() {
     assert_eq!(
         TEST_UEID.to_vec(),
         match &dec.environment.instance {
-            Some(InstanceIdTypeChoice::Ueid(ciborium::tag::Required(UeidType::Ueid(v)))) => {
+            Some(InstanceIdTypeChoice::Ueid(ciborium::tag::Required(UeidType(v)))) => {
                 v.clone()
             }
             _ => panic!(),
@@ -64,7 +64,7 @@ fn coswid_triple_record_test() {
     };
     let environment_map = EnvironmentMapCbor {
         class: Some(c),
-        instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType::Ueid(
+        instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType(
             TEST_UEID.to_vec(),
         )))),
         group: None,
@@ -87,7 +87,7 @@ fn coswid_triple_record_test() {
     assert_eq!(
         TEST_UEID.to_vec(),
         match &dec.environment_map.instance {
-            Some(InstanceIdTypeChoice::Ueid(ciborium::tag::Required(UeidType::Ueid(v)))) => {
+            Some(InstanceIdTypeChoice::Ueid(ciborium::tag::Required(UeidType(v)))) => {
                 v.clone()
             }
             _ => panic!(),
@@ -132,7 +132,7 @@ fn endorsed_triple_record_test() {
     let fab = EndorsedTripleRecordCbor {
         environment_map: EnvironmentMapCbor {
             class: None,
-            instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType::Ueid(
+            instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType(
                 TEST_UEID.to_vec(),
             )))),
             group: None,
@@ -172,7 +172,7 @@ fn endorsed_triple_record_test() {
     assert_eq!(
         TEST_UEID.to_vec(),
         match &dec.environment_map.instance {
-            Some(InstanceIdTypeChoice::Ueid(ciborium::tag::Required(UeidType::Ueid(v)))) => {
+            Some(InstanceIdTypeChoice::Ueid(ciborium::tag::Required(UeidType(v)))) => {
                 v.clone()
             }
             _ => panic!(),
@@ -202,7 +202,7 @@ fn identity_triple_record_test() {
     let fab = IdentityTripleRecordCbor {
         environment: EnvironmentMapCbor {
             class: None,
-            instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType::Ueid(
+            instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType(
                 TEST_UEID.to_vec(),
             )))),
             group: None,
@@ -222,7 +222,7 @@ fn identity_triple_record_test() {
     assert_eq!(
         TEST_UEID.to_vec(),
         match &dec.environment.instance {
-            Some(InstanceIdTypeChoice::Ueid(ciborium::tag::Required(UeidType::Ueid(v)))) => {
+            Some(InstanceIdTypeChoice::Ueid(ciborium::tag::Required(UeidType(v)))) => {
                 v.clone()
             }
             _ => panic!(),
@@ -243,7 +243,7 @@ fn reference_triple_record_test() {
     let fab = ReferenceTripleRecordCbor {
         environment_map: EnvironmentMapCbor {
             class: None,
-            instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType::Ueid(
+            instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType(
                 TEST_UEID.to_vec(),
             )))),
             group: None,
@@ -283,7 +283,7 @@ fn reference_triple_record_test() {
     assert_eq!(
         TEST_UEID.to_vec(),
         match &dec.environment_map.instance {
-            Some(InstanceIdTypeChoice::Ueid(ciborium::tag::Required(UeidType::Ueid(v)))) => {
+            Some(InstanceIdTypeChoice::Ueid(ciborium::tag::Required(UeidType(v)))) => {
                 v.clone()
             }
             _ => panic!(),

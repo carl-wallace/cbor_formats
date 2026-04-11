@@ -68,8 +68,8 @@ impl CoseMac0Builder {
         let mac_structure = MacStructure {
             context: MacStructureContext::Mac0,
             protected: protected_serialized.clone(),
-            external_aad: BytesType::Bytes(self.external_aad),
-            payload: BytesType::Bytes(self.payload.clone()),
+            external_aad: BytesType(self.external_aad),
+            payload: BytesType(self.payload.clone()),
         };
 
         let mac_structure_cbor = MacStructureCbor::try_from(mac_structure)
@@ -85,7 +85,7 @@ impl CoseMac0Builder {
             protected: protected_serialized,
             unprotected: self.unprotected,
             payload: BinaryOrNil::Binary(self.payload),
-            tag: BytesType::Bytes(tag_bytes),
+            tag: BytesType(tag_bytes),
         };
 
         CoseMac0Cbor::try_from(cose_mac0).map_err(|e| CoseCryptoError::CborError(e.to_string()))
@@ -108,8 +108,8 @@ pub fn verify_mac0(
     let mac_structure = MacStructure {
         context: MacStructureContext::Mac0,
         protected: msg.protected.clone(),
-        external_aad: BytesType::Bytes(external_aad.to_vec()),
-        payload: BytesType::Bytes(payload),
+        external_aad: BytesType(external_aad.to_vec()),
+        payload: BytesType(payload),
     };
 
     let mac_structure_cbor = MacStructureCbor::try_from(mac_structure)
@@ -119,7 +119,7 @@ pub fn verify_mac0(
     ciborium::ser::into_writer(&mac_structure_cbor, &mut to_mac)
         .map_err(|e| CoseCryptoError::CborError(e.to_string()))?;
 
-    let BytesType::Bytes(tag) = &msg.tag;
+    let BytesType(tag) = &msg.tag;
 
     mac.verify(&to_mac, tag)
 }
@@ -180,8 +180,8 @@ impl CoseMacBuilder {
         let mac_structure = MacStructure {
             context: MacStructureContext::Mac,
             protected: protected_serialized.clone(),
-            external_aad: BytesType::Bytes(self.external_aad),
-            payload: BytesType::Bytes(self.payload.clone()),
+            external_aad: BytesType(self.external_aad),
+            payload: BytesType(self.payload.clone()),
         };
 
         let mac_structure_cbor = MacStructureCbor::try_from(mac_structure)
@@ -197,7 +197,7 @@ impl CoseMacBuilder {
             protected: protected_serialized,
             unprotected: self.unprotected,
             payload: BinaryOrNil::Binary(self.payload),
-            tag: BytesType::Bytes(tag_bytes),
+            tag: BytesType(tag_bytes),
             recipients: Vec::new(),
         };
 
@@ -221,8 +221,8 @@ pub fn verify_mac(
     let mac_structure = MacStructure {
         context: MacStructureContext::Mac,
         protected: msg.protected.clone(),
-        external_aad: BytesType::Bytes(external_aad.to_vec()),
-        payload: BytesType::Bytes(payload),
+        external_aad: BytesType(external_aad.to_vec()),
+        payload: BytesType(payload),
     };
 
     let mac_structure_cbor = MacStructureCbor::try_from(mac_structure)
@@ -232,7 +232,7 @@ pub fn verify_mac(
     ciborium::ser::into_writer(&mac_structure_cbor, &mut to_mac)
         .map_err(|e| CoseCryptoError::CborError(e.to_string()))?;
 
-    let BytesType::Bytes(tag) = &msg.tag;
+    let BytesType(tag) = &msg.tag;
 
     mac.verify(&to_mac, tag)
 }

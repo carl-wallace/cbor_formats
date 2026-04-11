@@ -52,8 +52,8 @@ fn attestation_object_test() {
 fn apple_attestation_object_roundtrip() {
     let apple = AppleAttestationObject {
         x5c: vec![
-            BytesType::Bytes(vec![0x30, 0x82, 0x01]),
-            BytesType::Bytes(vec![0x30, 0x82, 0x02]),
+            BytesType(vec![0x30, 0x82, 0x01]),
+            BytesType(vec![0x30, 0x82, 0x02]),
         ],
         receipt: vec![0xAA, 0xBB, 0xCC],
     };
