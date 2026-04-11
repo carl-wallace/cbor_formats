@@ -17,63 +17,58 @@
 //!
 //! The following table maps CDDL productions from
 //! [RFC 9711 Section 7.3](https://datatracker.ietf.org/doc/html/rfc9711#section-7.3)
-//! to their Rust implementations.
+//! to their Rust implementations, organized by specification section.
 //!
-//! ### Array types ([`arrays`] module)
+//! ### Claims-Set ([Section 4.2](https://datatracker.ietf.org/doc/html/rfc9711#section-4.2))
 //!
 //! | CDDL | Rust |
 //! |------|------|
-//! | `Detached-Submodule-Digest` | [`arrays::DetachedSubmoduleDigest`] / [`arrays::DetachedSubmoduleDigestCbor`] |
-//! | `dloa-type` | [`arrays::DloaType`] / [`arrays::DloaTypeCbor`] |
+//! | `Claims-Set` | [`maps::ClaimsSetClaims`] / [`maps::ClaimsSetClaimsCbor`] |
+//! | `sueids-type` | [`maps::SueidsType`] / [`maps::SueidsTypeCbor`] |
+//! | `oemid` | [`choices::Oemid`] |
 //! | `hardware-version-type` | [`arrays::HardwareVersionType`] / [`arrays::HardwareVersionTypeCbor`] |
 //! | `sw-version-type` | [`arrays::SwVersionType`] / [`arrays::SwVersionTypeCbor`] |
-//! | `individual-result` | [`arrays::IndividualResult`] / [`arrays::IndividualResultCbor`] |
+//! | `debug-status-type` | [`choices::DebugStatusType`] |
+//! | `location-type` | [`maps::LocationType`] / [`maps::LocationTypeCbor`] |
+//! | `dloa-type` | [`arrays::DloaType`] / [`arrays::DloaTypeCbor`] |
+//!
+//! ### Manifests and Measurements ([Section 4.2.15–4.2.17](https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.15))
+//!
+//! | CDDL | Rust |
+//! |------|------|
 //! | `manifests-type` | [`arrays::ManifestsType`] / [`arrays::ManifestsTypeCbor`] |
 //! | `manifest-format` | [`arrays::ManifestFormat`] / [`arrays::ManifestFormatCbor`] |
 //! | `measurements-type` | [`arrays::MeasurementsType`] / [`arrays::MeasurementsTypeCbor`] |
 //! | `measurements-format` | [`arrays::MeasurementsFormat`] / [`arrays::MeasurementsFormatCbor`] |
 //! | `measurement-results-group` | [`arrays::MeasurementResultsGroup`] / [`arrays::MeasurementResultsGroupCbor`] |
 //! | `[ + measurement-results-group ]` | [`arrays::MeasurementResultsGroupArray`] / [`arrays::MeasurementResultsGroupArrayCbor`] |
+//! | `individual-result` | [`arrays::IndividualResult`] / [`arrays::IndividualResultCbor`] |
+//! | `result-type` | [`choices::ResultType`] |
+//! | `intended-use-type` | [`choices::IntendedUseType`] |
+//!
+//! ### Submodules and Nested Tokens ([Section 4.2.18](https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.18))
+//!
+//! | CDDL | Rust |
+//! |------|------|
 //! | `Nested-Token` (JSON) | [`arrays::NestedToken`] |
 //! | `Nested-Token` (CBOR) | [`arrays::NestedTokenCbor`] |
-//! | `Wrapped-Claims-Set` (JSON) | [`arrays::WrappedClaimsSet`] |
-//! | `Wrapped-Claims-Set` (CBOR) | [`arrays::WrappedClaimsSetCbor`] |
-//! | `Detached-EAT-Bundle` | [`arrays::DetachedEatBundle`] / [`arrays::DetachedEatBundleCbor`] |
-//!
-//! ### Choice types ([`choices`] module)
-//!
-//! | CDDL | Rust |
-//! |------|------|
-//! | `debug-status-type` | [`choices::DebugStatusType`] |
-//! | `intended-use-type` | [`choices::IntendedUseType`] |
-//! | `oemid` | [`choices::Oemid`] |
-//! | `result-type` | [`choices::ResultType`] |
-//!
-//! ### Map types ([`maps`] module)
-//!
-//! | CDDL | Rust |
-//! |------|------|
-//! | `Claims-Set` | [`maps::ClaimsSetClaims`] / [`maps::ClaimsSetClaimsCbor`] |
-//! | `location-type` | [`maps::LocationType`] / [`maps::LocationTypeCbor`] |
-//! | `sueids-type` | [`maps::SueidsType`] / [`maps::SueidsTypeCbor`] |
-//!
-//! ### CBOR-specific types ([`cbor_specific`] module)
-//!
-//! | CDDL | Rust |
-//! |------|------|
+//! | `Detached-Submodule-Digest` | [`arrays::DetachedSubmoduleDigest`] / [`arrays::DetachedSubmoduleDigestCbor`] |
 //! | `CBOR-Selector` | [`cbor_specific::SelectorCbor`] |
 //! | `Submodule` (CBOR) | [`cbor_specific::SubmoduleCbor`] |
-//!
-//! ### JSON-specific types ([`json_specific`] module)
-//!
-//! | CDDL | Rust |
-//! |------|------|
 //! | `$JSON-Selector-Type` | [`json_specific::JsonSelectorType`] |
 //! | `$JSON-Selector-Value` | [`json_specific::JsonSelectorValue`] |
 //! | `JSON-Selector` | [`json_specific::JsonSelector`] |
 //! | `$JSON-Selector-Value` (for-deb variant) | [`json_specific::JsonSelectorForDebValue`] |
 //! | `Selector-For-Deb` | [`json_specific::SelectorForDeb`] |
 //! | `Submodule` (JSON) | [`json_specific::Submodule`] |
+//!
+//! ### Wrapped Claims Sets and Bundles ([Section 5](https://datatracker.ietf.org/doc/html/rfc9711#section-5))
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `Wrapped-Claims-Set` (JSON) | [`arrays::WrappedClaimsSet`] |
+//! | `Wrapped-Claims-Set` (CBOR) | [`arrays::WrappedClaimsSetCbor`] |
+//! | `Detached-EAT-Bundle` | [`arrays::DetachedEatBundle`] / [`arrays::DetachedEatBundleCbor`] |
 #![allow(clippy::derive_partial_eq_without_eq)]
 #![allow(unexpected_cfgs)]
 #![cfg_attr(not(feature = "std"), no_std)]

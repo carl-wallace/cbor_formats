@@ -19,29 +19,19 @@
 //! [draft-ietf-rats-concise-ta-stores Section 4](https://datatracker.ietf.org/doc/html/draft-ietf-rats-concise-ta-stores#section-4)
 //! to their Rust implementations.
 //!
-//! ### Array types ([`arrays`] module)
+//! ### Concise TA Stores ([Section 4](https://datatracker.ietf.org/doc/html/draft-ietf-rats-concise-ta-stores#section-4))
 //!
 //! | CDDL | Rust |
 //! |------|------|
 //! | `concise-ta-stores = [+ concise-ta-store-map]` | [`arrays::ConciseTaStores`] / [`arrays::ConciseTaStoresCbor`] |
-//! | `environment-group-list` | [`arrays::EnvironmentGroupList`] / [`arrays::EnvironmentGroupListCbor`] |
-//! | `trust-anchor` | [`arrays::TrustAnchor`] / [`arrays::TrustAnchorCbor`] |
-//!
-//! ### Choice types ([`choices`] module)
-//!
-//! | CDDL | Rust |
-//! |------|------|
-//! | `$pkix-ta-type` | [`choices::PkixTaType`] / [`choices::PkixTaTypeKnown`] |
+//! | `concise-ta-store-map` | [`maps::ConciseTaStoreMap`] / [`maps::ConciseTaStoreMapCbor`] |
 //! | `tas-list-purpose` | [`choices::TasListPurpose`] |
-//!
-//! ### Map types ([`maps`] module)
-//!
-//! | CDDL | Rust |
-//! |------|------|
+//! | `environment-group-list` | [`arrays::EnvironmentGroupList`] / [`arrays::EnvironmentGroupListCbor`] |
+//! | `environment-group-list-map` | [`maps::EnvironmentGroupListMap`] / [`maps::EnvironmentGroupListMapCbor`] |
 //! | `abbreviated-swid-tag` | [`maps::AbbreviatedSwidTag`] / [`maps::AbbreviatedSwidTagCbor`] |
 //! | `cas-and-tas-map` | [`maps::CasAndTasMap`] / [`maps::CasAndTasMapCbor`] |
-//! | `concise-ta-store-map` | [`maps::ConciseTaStoreMap`] / [`maps::ConciseTaStoreMapCbor`] |
-//! | `environment-group-list-map` | [`maps::EnvironmentGroupListMap`] / [`maps::EnvironmentGroupListMapCbor`] |
+//! | `trust-anchor` | [`arrays::TrustAnchor`] / [`arrays::TrustAnchorCbor`] |
+//! | `$pkix-ta-type` | [`choices::PkixTaType`] / [`choices::PkixTaTypeKnown`] |
 #![allow(clippy::derive_partial_eq_without_eq)]
 #![allow(unexpected_cfgs)]
 #![cfg_attr(not(feature = "std"), no_std)]

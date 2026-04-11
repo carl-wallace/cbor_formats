@@ -17,92 +17,102 @@
 //!
 //! The following table maps CDDL productions from
 //! [draft-ietf-rats-corim-10 Appendix A](https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#appendix-A)
-//! to their Rust implementations.
+//! to their Rust implementations, organized by specification section.
 //!
-//! ### Array types ([`arrays`] module)
+//! ### CoRIM Map ([Section 4.1](https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-4.1))
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `tagged-unsigned-corim-map` (`#6.501`) | [`TaggedUnsignedCorimMap`] |
+//! | `unsigned-corim-map` | [`maps::CorimMap`] / [`maps::CorimMapCbor`] |
+//! | `$corim-id-type-choice` | [`choices::CorimIdTypeChoice`] |
+//! | `$concise-tag-type-choice` | [`choices::ConciseTagTypeChoice`] |
+//! | `tagged-coswid-type = #6.505(concise-swid-tag)` | [`choices::TaggedCoswid`] / [`choices::TaggedCoswidCbor`] |
+//! | `tagged-concise-mid-tag = #6.506(concise-mid-tag)` | [`choices::TaggedComid`] / [`choices::TaggedComidCbor`] |
+//! | `corim-locator-map` | [`maps::CorimLocatorMap`] / [`maps::CorimLocatorMapCbor`] |
+//! | `$profile-type-choice` | [`choices::ProfileTypeChoice`] / [`choices::ProfileTypeChoiceCbor`] |
+//! | `$corim-role-type-choice` | [`choices::CorimRoleTypeChoice`] / [`choices::CorimRoleTypeChoiceCbor`] |
+//!
+//! ### Signed CoRIM ([Section 4.2](https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-4.2))
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `COSE-Sign1-corim` | [`signed::SignedCorim`] |
+//! | `protected-corim-header-map` | [`maps::ProtectedCorimHeaderMap`] / [`maps::ProtectedCorimHeaderMapCbor`] |
+//! | `corim-meta-map` | [`maps::CorimMetaMap`] / [`maps::CorimMetaMapCbor`] |
+//! | `corim-signer-map` | [`maps::CorimSignerMap`] / [`maps::CorimSignerMapCbor`] |
+//!
+//! ### Concise Module Identifier (CoMID) Tag ([Section 5.1](https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1))
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `concise-mid-tag` | [`maps::ConciseMidTag`] / [`maps::ConciseMidTagCbor`] |
+//! | `tag-identity-map` | [`maps::TagIdentityMap`] / [`maps::TagIdentityMapCbor`] |
+//! | `$tag-id-type-choice` | [`choices::TagIdTypeChoice`] / [`choices::TagIdTypeChoiceCbor`] |
+//! | `$tag-version-type` | [`choices::TagVersionType`] |
+//! | `linked-tag-map` | [`maps::LinkedTagMap`] / [`maps::LinkedTagMapCbor`] |
+//! | `$tag-rel-type-choice` | [`choices::TagRelTypeChoice`] |
+//!
+//! ### Environments and Measurements ([Section 5.1.4](https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4))
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `triples-map` | [`maps::TriplesMap`] / [`maps::TriplesMapCbor`] |
+//! | `environment-map` | [`maps::EnvironmentMap`] / [`maps::EnvironmentMapCbor`] |
+//! | `class-map` | [`maps::ClassMap`] / [`maps::ClassMapCbor`] |
+//! | `$class-id-type-choice` | [`choices::ClassIdTypeChoice`] / [`choices::ClassIdTypeChoiceCbor`] |
+//! | `$instance-id-type-choice` | [`choices::InstanceIdTypeChoice`] |
+//! | `$group-id-type-choice` | [`choices::GroupIdTypeChoice`] |
+//! | `measurement-map` | [`maps::MeasurementMap`] / [`maps::MeasurementMapCbor`] |
+//! | `$measured-element-type-choice` | [`choices::MeasuredElementTypeChoice`] / [`choices::MeasuredElementTypeChoiceCbor`] |
+//! | `measurement-values-map` | [`maps::MeasurementValuesMap`] / [`maps::MeasurementValuesMapCbor`] |
+//! | `version-map` | [`maps::VersionMap`] / [`maps::VersionMapCbor`] |
+//! | `$svn-type-choice` | [`choices::SvnTypeChoice`] |
+//! | `flags-map` | [`maps::FlagsMap`] / [`maps::FlagsMapCbor`] |
+//! | `$raw-value-type-choice` | [`choices::RawValueTypeChoice`] / [`choices::RawValueTypeChoiceCbor`] |
+//! | `raw-value-mask-type` | [`RawValueMaskType`] |
+//! | `$crypto-key-type-choice` | [`choices::CryptoKeyTypeChoice`] / [`choices::CryptoKeyTypeChoiceCbor`] |
+//! | `$int-range-type-choice` | [`choices::IntRangeTypeChoice`] / [`choices::IntRangeTypeChoiceCbor`] |
+//!
+//! ### Triple Records ([Section 5.1.5–5.1.12](https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.5))
 //!
 //! | CDDL | Rust |
 //! |------|------|
 //! | `reference-triple-record` | [`arrays::ReferenceTripleRecord`] / [`arrays::ReferenceTripleRecordCbor`] |
 //! | `endorsed-triple-record` | [`arrays::EndorsedTripleRecord`] / [`arrays::EndorsedTripleRecordCbor`] |
-//! | `identity-triple-record` | [`arrays::IdentityTripleRecord`] / [`arrays::IdentityTripleRecordCbor`] |
-//! | `attest-key-triple-record` | [`arrays::AttestKeyTripleRecord`] / [`arrays::AttestKeyTripleRecordCbor`] |
-//! | `coswid-triple-record` | [`arrays::CoswidTripleRecord`] / [`arrays::CoswidTripleRecordCbor`] |
-//! | `domain-dependency-triple-record` | [`arrays::DomainDependencyTripleRecord`] / [`arrays::DomainDependencyTripleRecordCbor`] |
-//! | `domain-membership-triple-record` | [`arrays::DomainMembershipTripleRecord`] / [`arrays::DomainMembershipTripleRecordCbor`] |
 //! | `conditional-endorsement-triple-record` | [`arrays::ConditionalEndorsementTripleRecord`] / [`arrays::ConditionalEndorsementTripleRecordCbor`] |
 //! | `stateful-environment-record` | [`arrays::StatefulEnvironmentRecord`] / [`arrays::StatefulEnvironmentRecordCbor`] |
 //! | `conditional-series-record` | [`arrays::ConditionalSeriesRecord`] / [`arrays::ConditionalSeriesRecordCbor`] |
 //! | `conditional-endorsement-series-triple-record` | [`arrays::ConditionalEndorsementSeriesTripleRecord`] / [`arrays::ConditionalEndorsementSeriesTripleRecordCbor`] |
 //! | `conditional-endorsement-series-condition` | [`arrays::ConditionalEndorsementSeriesCondition`] / [`arrays::ConditionalEndorsementSeriesConditionCbor`] |
-//!
-//! ### Choice types ([`choices`] module)
-//!
-//! | CDDL | Rust |
-//! |------|------|
-//! | `tagged-coswid-type = #6.505(concise-swid-tag)` | [`choices::TaggedCoswid`] / [`choices::TaggedCoswidCbor`] |
-//! | `tagged-concise-mid-tag = #6.506(concise-mid-tag)` | [`choices::TaggedComid`] / [`choices::TaggedComidCbor`] |
-//! | `$concise-tag-type-choice` | [`choices::ConciseTagTypeChoice`] |
-//! | `$class-id-type-choice` | [`choices::ClassIdTypeChoice`] / [`choices::ClassIdTypeChoiceCbor`] |
-//! | `$corim-id-type-choice` | [`choices::CorimIdTypeChoice`] |
-//! | `$corim-role-type-choice` | [`choices::CorimRoleTypeChoice`] / [`choices::CorimRoleTypeChoiceCbor`] |
-//! | `$crypto-key-type-choice` | [`choices::CryptoKeyTypeChoice`] / [`choices::CryptoKeyTypeChoiceCbor`] |
+//! | `identity-triple-record` | [`arrays::IdentityTripleRecord`] / [`arrays::IdentityTripleRecordCbor`] |
+//! | `attest-key-triple-record` | [`arrays::AttestKeyTripleRecord`] / [`arrays::AttestKeyTripleRecordCbor`] |
+//! | `attest-key-conditions-map` | [`maps::AttestKeyConditionsMap`] / [`maps::AttestKeyConditionsMapCbor`] |
 //! | `$domain-type-choice` | [`choices::DomainTypeChoice`] |
-//! | `$entity-name-type-choice` | [`choices::EntityNameTypeChoice`] |
-//! | `$group-id-type-choice` | [`choices::GroupIdTypeChoice`] |
-//! | `$instance-id-type-choice` | [`choices::InstanceIdTypeChoice`] |
-//! | `$measured-element-type-choice` | [`choices::MeasuredElementTypeChoice`] / [`choices::MeasuredElementTypeChoiceCbor`] |
-//! | `$profile-type-choice` | [`choices::ProfileTypeChoice`] / [`choices::ProfileTypeChoiceCbor`] |
-//! | `$svn-type-choice` | [`choices::SvnTypeChoice`] |
-//! | `$tag-id-type-choice` | [`choices::TagIdTypeChoice`] / [`choices::TagIdTypeChoiceCbor`] |
-//! | `$tag-rel-type-choice` | [`choices::TagRelTypeChoice`] |
-//! | `$tag-version-type` | [`choices::TagVersionType`] |
-//! | `$raw-value-type-choice` | [`choices::RawValueTypeChoice`] / [`choices::RawValueTypeChoiceCbor`] |
-//! | `$int-range-type-choice` | [`choices::IntRangeTypeChoice`] / [`choices::IntRangeTypeChoiceCbor`] |
+//! | `domain-membership-triple-record` | [`arrays::DomainMembershipTripleRecord`] / [`arrays::DomainMembershipTripleRecordCbor`] |
+//! | `domain-dependency-triple-record` | [`arrays::DomainDependencyTripleRecord`] / [`arrays::DomainDependencyTripleRecordCbor`] |
+//! | `coswid-triple-record` | [`arrays::CoswidTripleRecord`] / [`arrays::CoswidTripleRecordCbor`] |
 //!
-//! ### Map types ([`maps`] module)
+//! ### Trustworthiness Labels ([Section 6.1](https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-6.1))
 //!
 //! | CDDL | Rust |
 //! |------|------|
-//! | `unsigned-corim-map` | [`maps::CorimMap`] / [`maps::CorimMapCbor`] |
-//! | `corim-meta-map` | [`maps::CorimMetaMap`] / [`maps::CorimMetaMapCbor`] |
-//! | `corim-signer-map` | [`maps::CorimSignerMap`] / [`maps::CorimSignerMapCbor`] |
-//! | `corim-locator-map` | [`maps::CorimLocatorMap`] / [`maps::CorimLocatorMapCbor`] |
-//! | `concise-mid-tag` | [`maps::ConciseMidTag`] / [`maps::ConciseMidTagCbor`] |
-//! | `class-map` | [`maps::ClassMap`] / [`maps::ClassMapCbor`] |
-//! | `environment-map` | [`maps::EnvironmentMap`] / [`maps::EnvironmentMapCbor`] |
-//! | `measurement-map` | [`maps::MeasurementMap`] / [`maps::MeasurementMapCbor`] |
-//! | `measurement-values-map` | [`maps::MeasurementValuesMap`] / [`maps::MeasurementValuesMapCbor`] |
-//! | `flags-map` | [`maps::FlagsMap`] / [`maps::FlagsMapCbor`] |
+//! | `concise-tl-tag` | [`maps::ConciseTlTag`] / [`maps::ConciseTlTagCbor`] |
+//!
+//! ### Entities and Validity ([Section 7.2–7.3](https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-7.2))
+//!
+//! | CDDL | Rust |
+//! |------|------|
 //! | `entity-map` | [`maps::EntityMap`] / [`maps::EntityMapCbor`] |
 //! | `corim-entity-map` | [`maps::CorimEntityMap`] / [`maps::CorimEntityMapCbor`] |
 //! | `comid-entity-map` | [`maps::ComidEntityMap`] / [`maps::ComidEntityMapCbor`] |
-//! | `tag-identity-map` | [`maps::TagIdentityMap`] / [`maps::TagIdentityMapCbor`] |
-//! | `linked-tag-map` | [`maps::LinkedTagMap`] / [`maps::LinkedTagMapCbor`] |
-//! | `triples-map` | [`maps::TriplesMap`] / [`maps::TriplesMapCbor`] |
+//! | `$entity-name-type-choice` | [`choices::EntityNameTypeChoice`] |
 //! | `validity-map` | [`maps::ValidityMap`] / [`maps::ValidityMapCbor`] |
-//! | `version-map` | [`maps::VersionMap`] / [`maps::VersionMapCbor`] |
-//! | `protected-corim-header-map` | [`maps::ProtectedCorimHeaderMap`] / [`maps::ProtectedCorimHeaderMapCbor`] |
-//! | `attest-key-conditions-map` | [`maps::AttestKeyConditionsMap`] / [`maps::AttestKeyConditionsMapCbor`] |
-//! | `concise-tl-tag` | [`maps::ConciseTlTag`] / [`maps::ConciseTlTagCbor`] |
-//!
-//! ### Type aliases ([root module])
-//!
-//! | CDDL | Rust |
-//! |------|------|
-//! | `tagged-unsigned-corim-map` (`#6.501`) | [`TaggedUnsignedCorimMap`] |
-//! | `raw-value-mask-type` | [`RawValueMaskType`] |
 //!
 //! Additional CoRIM-defined types are in the [`common`] crate:
 //! `digests-type`, `integrity-registers`, `tagged-masked-raw-value`,
 //! and the various `tagged-*` key/cert types. See the
 //! [`common` crate docs](common) for the full list.
-//!
-//! ### Signed types ([`signed`] module)
-//!
-//! | CDDL | Rust |
-//! |------|------|
-//! | `COSE-Sign1-corim` | [`signed::SignedCorim`] |
 #![allow(clippy::derive_partial_eq_without_eq)]
 #![allow(unexpected_cfgs)]
 #![cfg_attr(not(feature = "std"), no_std)]

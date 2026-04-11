@@ -17,39 +17,39 @@
 //!
 //! The following table maps CDDL productions from
 //! [draft-ietf-rats-coserv-05 Appendix A](https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#appendix-A)
-//! to their Rust implementations.
+//! to their Rust implementations, organized by specification section.
 //!
-//! ### Array types ([`arrays`] module)
-//!
-//! | CDDL | Rust |
-//! |------|------|
-//! | `stateful-class` | [`arrays::StatefulClass`] / [`arrays::StatefulClassCbor`] |
-//! | `stateful-instance` | [`arrays::StatefulInstance`] / [`arrays::StatefulInstanceCbor`] |
-//! | `stateful-group` | [`arrays::StatefulGroup`] / [`arrays::StatefulGroupCbor`] |
-//!
-//! ### Choice types ([`choices`] module)
-//!
-//! | CDDL | Rust |
-//! |------|------|
-//! | `$artifact-type` | [`choices::ArtifactType`] |
-//! | `$result-type` | [`choices::ResultType`] |
-//!
-//! ### Map types ([`maps`] module)
+//! ### CoSERV Message ([Section 4](https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4))
 //!
 //! | CDDL | Rust |
 //! |------|------|
 //! | `coserv` | [`maps::CoservMap`] / [`maps::CoservMapCbor`] |
+//! | `tdate` | [`maps::Tdate`] / [`maps::TdateCbor`] |
+//!
+//! ### Queries ([Section 4.3](https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.3))
+//!
+//! | CDDL | Rust |
+//! |------|------|
 //! | `query` | [`maps::QueryMap`] / [`maps::QueryMapCbor`] |
+//! | `$artifact-type` | [`choices::ArtifactType`] |
 //! | `environment-selector-map` | [`maps::EnvironmentSelectorMap`] / [`maps::EnvironmentSelectorMapCbor`] |
+//! | `stateful-class` | [`arrays::StatefulClass`] / [`arrays::StatefulClassCbor`] |
+//! | `stateful-instance` | [`arrays::StatefulInstance`] / [`arrays::StatefulInstanceCbor`] |
+//! | `stateful-group` | [`arrays::StatefulGroup`] / [`arrays::StatefulGroupCbor`] |
+//!
+//! ### Results ([Section 4.4](https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.4))
+//!
+//! | CDDL | Rust |
+//! |------|------|
 //! | `results` | [`maps::ResultsMap`] / [`maps::ResultsMapCbor`] |
+//! | `$result-type` | [`choices::ResultType`] |
 //! | `refval-quad` | [`maps::RefvalQuadMap`] / [`maps::RefvalQuadMapCbor`] |
 //! | `endval-quad` | [`maps::EndvalQuadMap`] / [`maps::EndvalQuadMapCbor`] |
 //! | `cond-endval-quad` | [`maps::CondEndvalQuadMap`] / [`maps::CondEndvalQuadMapCbor`] |
 //! | `ak-quad` | [`maps::AkQuadMap`] / [`maps::AkQuadMapCbor`] |
 //! | `cots-stmt` | [`maps::CotsStmtMap`] / [`maps::CotsStmtMapCbor`] |
-//! | `tdate` | [`maps::Tdate`] / [`maps::TdateCbor`] |
 //!
-//! ### Signed types ([`signed`] module)
+//! ### Signed CoSERV ([Section 4.6](https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.6))
 //!
 //! | CDDL | Rust |
 //! |------|------|
