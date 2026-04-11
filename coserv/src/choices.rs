@@ -4,6 +4,7 @@
 //!
 //! | CDDL | Rust |
 //! |------|------|
+//! | `comid.oid-type / ~uri` | [`CoservProfile`] / [`CoservProfileCbor`] |
 //! | `$artifact-type` | [`ArtifactType`] |
 //! | `$result-type` | [`ResultType`] |
 //!
@@ -12,10 +13,65 @@
 use ciborium::value::Value;
 
 use alloc::string::{String, ToString};
+use common::OidType;
+use serde::{Deserialize, Serialize};
 
 use num_enum::TryFromPrimitive;
 use serde_repr::Deserialize_repr;
 use serde_repr::Serialize_repr;
+
+// profile = comid.oid-type / ~uri
+//
+// where oid-type = bytes and ~uri means the content of #6.32(tstr), i.e. tstr.
+
+/// The CoSERV `profile` choice: `comid.oid-type / ~uri`.
+///
+/// - `Oid` — an OID encoded as raw bytes (`oid-type = bytes`)
+/// - `Uri` — a URI as a plain text string (`~uri`, i.e. unwrapped `#6.32(tstr)`)
+///
+/// See [CoSERV Section 4](https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4).
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+#[allow(missing_docs)]
+pub enum CoservProfile {
+    Uri(String),
+    Oid(OidType),
+}
+
+/// CBOR-encoded form of [`CoservProfile`].
+pub type CoservProfileCbor = CoservProfile;
+
+impl TryFrom<Value> for CoservProfile {
+    type Error = String;
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Bytes(b) => Ok(Self::Oid(OidType::Oid(b))),
+            Value::Text(s) => Ok(Self::Uri(s)),
+            _ => Err("Expected bytes or text for CoservProfile".to_string()),
+        }
+    }
+}
+
+impl TryFrom<&Value> for CoservProfile {
+    type Error = String;
+    fn try_from(value: &Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Bytes(b) => Ok(Self::Oid(OidType::Oid(b.clone()))),
+            Value::Text(s) => Ok(Self::Uri(s.clone())),
+            _ => Err("Expected bytes or text for CoservProfile".to_string()),
+        }
+    }
+}
+
+impl TryFrom<&CoservProfile> for Value {
+    type Error = String;
+    fn try_from(value: &CoservProfile) -> Result<Self, Self::Error> {
+        match value {
+            CoservProfile::Oid(OidType::Oid(b)) => Ok(Value::Bytes(b.clone())),
+            CoservProfile::Uri(s) => Ok(Value::Text(s.clone())),
+        }
+    }
+}
 
 // artifact-type = &(
 //   endorsed-values: 0

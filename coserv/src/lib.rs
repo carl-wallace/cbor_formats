@@ -24,6 +24,7 @@
 //! | CDDL | Rust |
 //! |------|------|
 //! | `coserv` | [`maps::CoservMap`] / [`maps::CoservMapCbor`] |
+//! | `comid.oid-type / ~uri` | [`choices::CoservProfile`] / [`choices::CoservProfileCbor`] |
 //! | `tdate` | [`maps::Tdate`] / [`maps::TdateCbor`] |
 //!
 //! ### Queries ([Section 4.3](https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.3))

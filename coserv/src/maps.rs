@@ -36,7 +36,7 @@ use corim::arrays::{
     ConditionalEndorsementTripleRecordCbor, EndorsedTripleRecord, EndorsedTripleRecordCbor,
     ReferenceTripleRecord, ReferenceTripleRecordCbor,
 };
-use corim::choices::{CryptoKeyTypeChoice, ProfileTypeChoice};
+use corim::choices::CryptoKeyTypeChoice;
 use cots::maps::{ConciseTaStoreMap, ConciseTaStoreMapCbor};
 use serde::ser::Error as OtherError;
 
@@ -107,7 +107,7 @@ impl TryFrom<&Tdate> for TdateCbor {
 #[allow(missing_docs)]
 pub struct CoservMap {
     #[cbor(tag = "0")]
-    pub profile: ProfileTypeChoice,
+    pub profile: CoservProfile,
     #[cbor(tag = "1", value = "Map", cbor = "true")]
     pub query: QueryMap,
     #[cbor(tag = "2", value = "Map", cbor = "true")]
