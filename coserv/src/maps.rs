@@ -142,21 +142,26 @@ pub struct QueryMap {
     pub result_type: ResultType,
 }
 
-// environment-selector-map = {
-//   ? class: [+ stateful-class]
-//   ? instance: [+ stateful-instance]
-//   ? group: [+ stateful-group]
-// }
+// environment-selector-map = { selector }
+//
+// selector //= ( &(class: 0) => [+ stateful-class] )
+// selector //= ( &(instance: 1) => [+ stateful-instance] )
+// selector //= ( &(group: 2) => [+ stateful-group] )
 
 /// The `environment-selector-map` from [CoSERV Section 4.3.2].
 ///
 /// ```text
-/// environment-selector-map = {
-///   ? class: [+ stateful-class]
-///   ? instance: [+ stateful-instance]
-///   ? group: [+ stateful-group]
-/// }
+/// environment-selector-map = { selector }
+///
+/// selector //= ( &(class: 0) => [+ stateful-class] )
+/// selector //= ( &(instance: 1) => [+ stateful-instance] )
+/// selector //= ( &(group: 2) => [+ stateful-group] )
 /// ```
+///
+/// The three selector types are mutually exclusive per the spec: "these three
+/// environment definitions are mutually-exclusive". The struct uses `Option`
+/// fields for decode flexibility; call [`validate`](Self::validate) to enforce
+/// mutual exclusivity and the `[+ ...]` non-empty constraint.
 ///
 /// [CoSERV Section 4.3.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.3.2
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
@@ -170,48 +175,400 @@ pub struct EnvironmentSelectorMap {
     pub group: Option<Vec<StatefulGroup>>,
 }
 
+impl EnvironmentSelectorMap {
+    /// Validates that exactly one selector type is present and that its array
+    /// is non-empty, per the CDDL `selector` group choice with `[+ ...]`.
+    pub fn validate(&self) -> Result<(), String> {
+        let count =
+            self.class.is_some() as u8 + self.instance.is_some() as u8 + self.group.is_some() as u8;
+        if count == 0 {
+            return Err("environment-selector-map must contain exactly one selector".to_string());
+        }
+        if count > 1 {
+            return Err(
+                "environment-selector-map must contain exactly one selector type, not a mixture"
+                    .to_string(),
+            );
+        }
+        if self.class.as_ref().is_some_and(|v| v.is_empty())
+            || self.instance.as_ref().is_some_and(|v| v.is_empty())
+            || self.group.as_ref().is_some_and(|v| v.is_empty())
+        {
+            return Err("selector array must be non-empty".to_string());
+        }
+        Ok(())
+    }
+}
+
 // results = {
-//   ? rvq: [+ refval-quad]
-//   ? evq: [+ endval-quad]
-//   ? ceq: [+ cond-endval-quad]
-//   ? akq: [+ ak-quad]
-//   ? tas: [+ cots-stmt]
-//   expiry: tdate
-//   ? source-artifacts: [+ cmw.cbor-record]
+//   result-set
+//   &(expiry: 10) => tdate
+//   ? &(source-artifacts: 11) => [+ cmw.cbor-record]
 // }
+//
+// result-set //= reference-values
+// result-set //= endorsed-values
+// result-set //= trust-anchors
+//
+// reference-values = ( &(rvq: 0) => [* refval-quad] )
+// endorsed-values  = ( &(evq: 1) => [* endval-quad],  &(ceq: 2) => [* cond-endval-quad] )
+// trust-anchors    = ( &(akq: 3) => [* ak-quad],      &(tas: 4) => [* cots-stmt] )
+
+/// The `result-set` group choice from [CoSERV Section 4.4].
+///
+/// ```text
+/// result-set //= reference-values
+/// result-set //= endorsed-values
+/// result-set //= trust-anchors
+///
+/// reference-values = ( &(rvq: 0) => [* refval-quad] )
+/// endorsed-values  = ( &(evq: 1) => [* endval-quad],  &(ceq: 2) => [* cond-endval-quad] )
+/// trust-anchors    = ( &(akq: 3) => [* ak-quad],      &(tas: 4) => [* cots-stmt] )
+/// ```
+///
+/// [CoSERV Section 4.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.4
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+#[allow(missing_docs)]
+pub enum ResultSet {
+    ReferenceValues {
+        rvq: Vec<RefvalQuadMap>,
+    },
+    EndorsedValues {
+        evq: Vec<EndvalQuadMap>,
+        ceq: Vec<CondEndvalQuadMap>,
+    },
+    TrustAnchors {
+        akq: Vec<AkQuadMap>,
+        tas: Vec<CotsStmtMap>,
+    },
+}
+
+/// CBOR-encoded form of [`ResultSet`].
+#[derive(Clone, Debug, PartialEq)]
+#[allow(missing_docs)]
+pub enum ResultSetCbor {
+    ReferenceValues {
+        rvq: Vec<RefvalQuadMapCbor>,
+    },
+    EndorsedValues {
+        evq: Vec<EndvalQuadMapCbor>,
+        ceq: Vec<CondEndvalQuadMapCbor>,
+    },
+    TrustAnchors {
+        akq: Vec<AkQuadMapCbor>,
+        tas: Vec<CotsStmtMapCbor>,
+    },
+}
+
+impl TryFrom<&ResultSetCbor> for ResultSet {
+    type Error = String;
+    fn try_from(value: &ResultSetCbor) -> Result<Self, Self::Error> {
+        match value {
+            ResultSetCbor::ReferenceValues { rvq } => Ok(ResultSet::ReferenceValues {
+                rvq: rvq
+                    .iter()
+                    .map(RefvalQuadMap::try_from)
+                    .collect::<Result<_, _>>()?,
+            }),
+            ResultSetCbor::EndorsedValues { evq, ceq } => Ok(ResultSet::EndorsedValues {
+                evq: evq
+                    .iter()
+                    .map(EndvalQuadMap::try_from)
+                    .collect::<Result<_, _>>()?,
+                ceq: ceq
+                    .iter()
+                    .map(CondEndvalQuadMap::try_from)
+                    .collect::<Result<_, _>>()?,
+            }),
+            ResultSetCbor::TrustAnchors { akq, tas } => Ok(ResultSet::TrustAnchors {
+                akq: akq
+                    .iter()
+                    .map(AkQuadMap::try_from)
+                    .collect::<Result<_, _>>()?,
+                tas: tas
+                    .iter()
+                    .map(CotsStmtMap::try_from)
+                    .collect::<Result<_, _>>()?,
+            }),
+        }
+    }
+}
+
+impl TryFrom<&ResultSet> for ResultSetCbor {
+    type Error = String;
+    fn try_from(value: &ResultSet) -> Result<Self, Self::Error> {
+        match value {
+            ResultSet::ReferenceValues { rvq } => Ok(ResultSetCbor::ReferenceValues {
+                rvq: rvq
+                    .iter()
+                    .map(RefvalQuadMapCbor::try_from)
+                    .collect::<Result<_, _>>()?,
+            }),
+            ResultSet::EndorsedValues { evq, ceq } => Ok(ResultSetCbor::EndorsedValues {
+                evq: evq
+                    .iter()
+                    .map(EndvalQuadMapCbor::try_from)
+                    .collect::<Result<_, _>>()?,
+                ceq: ceq
+                    .iter()
+                    .map(CondEndvalQuadMapCbor::try_from)
+                    .collect::<Result<_, _>>()?,
+            }),
+            ResultSet::TrustAnchors { akq, tas } => Ok(ResultSetCbor::TrustAnchors {
+                akq: akq
+                    .iter()
+                    .map(AkQuadMapCbor::try_from)
+                    .collect::<Result<_, _>>()?,
+                tas: tas
+                    .iter()
+                    .map(CotsStmtMapCbor::try_from)
+                    .collect::<Result<_, _>>()?,
+            }),
+        }
+    }
+}
 
 /// The `results` from [CoSERV Section 4.4].
 ///
 /// ```text
 /// results = {
-///   ? rvq: [+ refval-quad]
-///   ? evq: [+ endval-quad]
-///   ? ceq: [+ cond-endval-quad]
-///   ? akq: [+ ak-quad]
-///   ? tas: [+ cots-stmt]
-///   expiry: tdate
-///   ? source-artifacts: [+ cmw.cbor-record]
+///   result-set
+///   &(expiry: 10) => tdate
+///   ? &(source-artifacts: 11) => [+ cmw.cbor-record]
 /// }
 /// ```
 ///
 /// [CoSERV Section 4.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-4.4
-#[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ResultsMap {
-    #[cbor(tag = "0", value = "Array", cbor = "true")]
-    pub rvq: Option<Vec<RefvalQuadMap>>,
-    #[cbor(tag = "1", value = "Array", cbor = "true")]
-    pub evq: Option<Vec<EndvalQuadMap>>,
-    #[cbor(tag = "2", value = "Array", cbor = "true")]
-    pub ceq: Option<Vec<CondEndvalQuadMap>>,
-    #[cbor(tag = "3", value = "Array", cbor = "true")]
-    pub akq: Option<Vec<AkQuadMap>>,
-    #[cbor(tag = "4", value = "Array", cbor = "true")]
-    pub tas: Option<Vec<CotsStmtMap>>,
-    #[cbor(tag = "10", cbor = "true")]
+    pub result_set: ResultSet,
     pub expiry: Tdate,
-    #[cbor(tag = "11", value = "Array", cbor = "true")]
     pub source_artifacts: Option<Vec<CborRecord>>,
+}
+
+/// CBOR-encoded form of [`ResultsMap`].
+///
+/// The `result-set` group is flattened into the map alongside `expiry` and
+/// `source-artifacts` on the wire.
+#[derive(Clone, Debug, PartialEq)]
+#[allow(missing_docs)]
+pub struct ResultsMapCbor {
+    pub result_set: ResultSetCbor,
+    pub expiry: TdateCbor,
+    pub source_artifacts: Option<Vec<CborRecordCbor>>,
+}
+
+impl TryFrom<&ResultsMapCbor> for ResultsMap {
+    type Error = String;
+    fn try_from(value: &ResultsMapCbor) -> Result<Self, Self::Error> {
+        Ok(ResultsMap {
+            result_set: ResultSet::try_from(&value.result_set)?,
+            expiry: Tdate::try_from(&value.expiry)?,
+            source_artifacts: match &value.source_artifacts {
+                Some(v) => Some(
+                    v.iter()
+                        .map(CborRecord::try_from)
+                        .collect::<Result<_, _>>()?,
+                ),
+                None => None,
+            },
+        })
+    }
+}
+
+impl TryFrom<ResultsMapCbor> for ResultsMap {
+    type Error = String;
+    fn try_from(value: ResultsMapCbor) -> Result<Self, Self::Error> {
+        ResultsMap::try_from(&value)
+    }
+}
+
+impl TryFrom<&ResultsMap> for ResultsMapCbor {
+    type Error = String;
+    fn try_from(value: &ResultsMap) -> Result<Self, Self::Error> {
+        Ok(ResultsMapCbor {
+            result_set: ResultSetCbor::try_from(&value.result_set)?,
+            expiry: TdateCbor::try_from(&value.expiry)?,
+            source_artifacts: match &value.source_artifacts {
+                Some(v) => Some(
+                    v.iter()
+                        .map(CborRecordCbor::try_from)
+                        .collect::<Result<_, _>>()?,
+                ),
+                None => None,
+            },
+        })
+    }
+}
+
+impl TryFrom<Vec<(Value, Value)>> for ResultsMapCbor {
+    type Error = String;
+    fn try_from(value: Vec<(Value, Value)>) -> Result<Self, Self::Error> {
+        let mut m: BTreeMap<i32, Value> = BTreeMap::new();
+        for (k, v) in value {
+            let index: i32 = k
+                .as_integer()
+                .and_then(|i| i.try_into().ok())
+                .ok_or_else(|| "Expected integer key in results map".to_string())?;
+            m.insert(index, v);
+        }
+
+        let expiry = m
+            .get(&10)
+            .ok_or_else(|| "Missing required expiry (label 10)".to_string())
+            .and_then(TdateCbor::try_from)?;
+
+        let source_artifacts = match m.get(&11) {
+            Some(v) => match v.as_array() {
+                Some(a) => Some(
+                    a.iter()
+                        .map(|v| CborRecordCbor::try_from(v.clone()))
+                        .collect::<Result<_, _>>()?,
+                ),
+                None => return Err("source-artifacts (label 11) must be an array".to_string()),
+            },
+            None => None,
+        };
+
+        // Determine which result-set variant is present based on labels
+        let has_rvq = m.contains_key(&0);
+        let has_evq = m.contains_key(&1);
+        let has_ceq = m.contains_key(&2);
+        let has_akq = m.contains_key(&3);
+        let has_tas = m.contains_key(&4);
+
+        let result_set = if has_rvq && !has_evq && !has_ceq && !has_akq && !has_tas {
+            let rvq = parse_quad_array(&m, 0, "rvq")?;
+            ResultSetCbor::ReferenceValues { rvq }
+        } else if has_evq && has_ceq && !has_rvq && !has_akq && !has_tas {
+            let evq = parse_quad_array(&m, 1, "evq")?;
+            let ceq = parse_quad_array(&m, 2, "ceq")?;
+            ResultSetCbor::EndorsedValues { evq, ceq }
+        } else if has_akq && has_tas && !has_rvq && !has_evq && !has_ceq {
+            let akq = parse_quad_array(&m, 3, "akq")?;
+            let tas = parse_quad_array(&m, 4, "tas")?;
+            ResultSetCbor::TrustAnchors { akq, tas }
+        } else {
+            return Err(
+                "Invalid result-set: must be exactly one of reference-values (0), \
+                 endorsed-values (1,2), or trust-anchors (3,4)"
+                    .to_string(),
+            );
+        };
+
+        Ok(ResultsMapCbor {
+            result_set,
+            expiry,
+            source_artifacts,
+        })
+    }
+}
+
+/// Helper to parse an array of CBOR map values from a label in the results map.
+fn parse_quad_array<T>(m: &BTreeMap<i32, Value>, label: i32, name: &str) -> Result<Vec<T>, String>
+where
+    T: TryFrom<Value, Error = String>,
+{
+    match m.get(&label) {
+        Some(v) => match v.as_array() {
+            Some(a) => a.iter().map(|v| T::try_from(v.clone())).collect(),
+            None => Err(format!("{name} (label {label}) must be an array")),
+        },
+        None => Ok(Vec::new()),
+    }
+}
+
+impl TryFrom<&ResultsMapCbor> for Vec<(Value, Value)> {
+    type Error = String;
+    fn try_from(value: &ResultsMapCbor) -> Result<Self, Self::Error> {
+        let mut v: Vec<(Value, Value)> = Vec::new();
+
+        // Serialize the result-set fields
+        match &value.result_set {
+            ResultSetCbor::ReferenceValues { rvq } => {
+                v.push((
+                    cbor!(0).map_err(|e| format!("{e:?}"))?,
+                    Value::serialized(rvq).map_err(|e| format!("{e:?}"))?,
+                ));
+            }
+            ResultSetCbor::EndorsedValues { evq, ceq } => {
+                v.push((
+                    cbor!(1).map_err(|e| format!("{e:?}"))?,
+                    Value::serialized(evq).map_err(|e| format!("{e:?}"))?,
+                ));
+                v.push((
+                    cbor!(2).map_err(|e| format!("{e:?}"))?,
+                    Value::serialized(ceq).map_err(|e| format!("{e:?}"))?,
+                ));
+            }
+            ResultSetCbor::TrustAnchors { akq, tas } => {
+                v.push((
+                    cbor!(3).map_err(|e| format!("{e:?}"))?,
+                    Value::serialized(akq).map_err(|e| format!("{e:?}"))?,
+                ));
+                v.push((
+                    cbor!(4).map_err(|e| format!("{e:?}"))?,
+                    Value::serialized(tas).map_err(|e| format!("{e:?}"))?,
+                ));
+            }
+        }
+
+        // expiry (label 10)
+        v.push((
+            cbor!(10).map_err(|e| format!("{e:?}"))?,
+            Value::serialized(&value.expiry).map_err(|e| format!("{e:?}"))?,
+        ));
+
+        // source-artifacts (label 11, optional)
+        if let Some(sa) = &value.source_artifacts {
+            v.push((
+                cbor!(11).map_err(|e| format!("{e:?}"))?,
+                Value::serialized(sa).map_err(|e| format!("{e:?}"))?,
+            ));
+        }
+
+        Ok(v)
+    }
+}
+
+impl Serialize for ResultsMapCbor {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let v: Vec<(Value, Value)> = self.try_into().map_err(S::Error::custom)?;
+        Value::Map(v).serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for ResultsMapCbor {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct MapVisitor;
+        impl<'de> Visitor<'de> for MapVisitor {
+            type Value = Vec<(Value, Value)>;
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a map")
+            }
+            fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+            where
+                A: MapAccess<'de>,
+            {
+                let mut values = Vec::with_capacity(map.size_hint().unwrap_or(0).min(4096));
+                while let Some(value) = map.next_entry()? {
+                    values.push(value);
+                }
+                values.retain(|(_, v)| *v != Value::Null);
+                Ok(values)
+            }
+        }
+        let pairs = deserializer.deserialize_map(MapVisitor)?;
+        ResultsMapCbor::try_from(pairs).map_err(D::Error::custom)
+    }
 }
 
 // refval-quad = {

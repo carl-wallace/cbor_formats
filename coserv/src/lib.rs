@@ -43,6 +43,7 @@
 //! | CDDL | Rust |
 //! |------|------|
 //! | `results` | [`maps::ResultsMap`] / [`maps::ResultsMapCbor`] |
+//! | `result-set` | [`maps::ResultSet`] / [`maps::ResultSetCbor`] |
 //! | `$result-type` | [`choices::ResultType`] |
 //! | `refval-quad` | [`maps::RefvalQuadMap`] / [`maps::RefvalQuadMapCbor`] |
 //! | `endval-quad` | [`maps::EndvalQuadMap`] / [`maps::EndvalQuadMapCbor`] |
