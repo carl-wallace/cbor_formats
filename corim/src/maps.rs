@@ -487,10 +487,20 @@ pub struct TagIdentityMap {
     #[cbor(tag = "0", cbor = "true")]
     #[serde(rename = "id")]
     pub tag_id: TagIdTypeChoice,
-    //todo defaults to zero
     #[cbor(tag = "1")]
-    #[serde(rename = "version")]
+    #[serde(rename = "version", default)]
     pub tag_version: Option<TagVersionType>,
+}
+
+impl TagIdentityMap {
+    /// Returns the tag version, defaulting to 0 when absent per the CDDL
+    /// `.default 0` constraint.
+    pub fn tag_version_or_default(&self) -> u64 {
+        match &self.tag_version {
+            Some(TagVersionType::U64(v)) => *v,
+            None => 0,
+        }
+    }
 }
 
 /// The `triples-map` type is defined in [CoRIM Section 5.1.4].
