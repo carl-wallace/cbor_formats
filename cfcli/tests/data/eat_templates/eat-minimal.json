@@ -1,0 +1,5 @@
+{
+  "iss": "https://attestation.example",
+  "iat": 1700000000,
+  "nonce": "AQIDBA=="
+}

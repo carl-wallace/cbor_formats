@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "capabilities": [
+    {
+      "media-type": "application/coserv+cbor; profile=\"tag:example.com,2025:cc-platform#1.0.0\"",
+      "artifact-support": [
+        "source",
+        "collected"
+      ]
+    }
+  ],
+  "api-endpoints": {
+    "CoSERVRequestResponse": "/api/v1/coserv/{query}"
+  }
+}

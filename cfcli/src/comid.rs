@@ -113,10 +113,10 @@ fn comid_template_to_cbor(template_file: &String, output_dir: &Path) {
 
     let comid_cbor: ConciseMidTagCbor = match comid_json.try_into() {
         Ok(s) => s,
-        Err(_) => {
+        Err(e) => {
             println!(
-                "Unable to convert JSON CoMID object to CBOR CoMID object for template {}",
-                template_file
+                "Unable to convert JSON CoMID object to CBOR CoMID object for template {} with error: {}",
+                template_file, e
             );
             return;
         }

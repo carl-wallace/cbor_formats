@@ -501,6 +501,15 @@ impl<'de> Deserialize<'de> for CorimIdTypeChoice {
 /// $corim-role-type-choice /= &(manifest-creator: 1)
 /// $corim-role-type-choice /= &(manifest-signer: 2)
 /// ```
+///
+/// Also includes `$comid-role-type-choice` variants because [`EntityMap`]
+/// is shared between CoRIM and CoMID entity maps:
+///
+/// ```text
+/// $comid-role-type-choice /= &(tag-creator: 0)
+/// $comid-role-type-choice /= &(creator: 1)
+/// $comid-role-type-choice /= &(maintainer: 2)
+/// ```
 #[derive(
     Clone,
     Debug,
@@ -516,6 +525,12 @@ pub enum CorimRoleTypeChoice {
     ManifestCreator,
     #[serde(rename = "manifestSigner")]
     ManifestSigner,
+    #[serde(rename = "tagCreator")]
+    TagCreator,
+    #[serde(rename = "creator")]
+    Creator,
+    #[serde(rename = "maintainer")]
+    Maintainer,
     #[serde(other)]
     other(String),
 }
@@ -528,6 +543,15 @@ impl TryFrom<CorimRoleTypeChoice> for CorimRoleTypeChoiceCbor {
                 Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
             }
             CorimRoleTypeChoice::ManifestSigner => {
+                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
+            }
+            CorimRoleTypeChoice::TagCreator => {
+                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::TagCreator))
+            }
+            CorimRoleTypeChoice::Creator => {
+                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
+            }
+            CorimRoleTypeChoice::Maintainer => {
                 Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
             }
             CorimRoleTypeChoice::other(s) => Ok(Self::Extensions(match s.parse::<i8>() {
@@ -545,6 +569,7 @@ impl TryFrom<CorimRoleTypeChoiceCbor> for CorimRoleTypeChoice {
             CorimRoleTypeChoiceCbor::Known(v) => match v {
                 CorimRoleTypeChoiceKnownCbor::ManifestCreator => Ok(Self::ManifestCreator),
                 CorimRoleTypeChoiceKnownCbor::ManifestSigner => Ok(Self::ManifestSigner),
+                CorimRoleTypeChoiceKnownCbor::TagCreator => Ok(Self::TagCreator),
             },
             CorimRoleTypeChoiceCbor::Extensions(e) => Ok(Self::other(e.to_string())),
         }
@@ -569,6 +594,15 @@ impl TryFrom<&CorimRoleTypeChoice> for CorimRoleTypeChoiceCbor {
             CorimRoleTypeChoice::ManifestSigner => {
                 Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
             }
+            CorimRoleTypeChoice::TagCreator => {
+                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::TagCreator))
+            }
+            CorimRoleTypeChoice::Creator => {
+                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
+            }
+            CorimRoleTypeChoice::Maintainer => {
+                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
+            }
             CorimRoleTypeChoice::other(s) => Ok(Self::Extensions(match s.parse::<i8>() {
                 Ok(i) => i,
                 Err(e) => return Err(e.to_string()),
@@ -584,6 +618,7 @@ impl TryFrom<&CorimRoleTypeChoiceCbor> for CorimRoleTypeChoice {
             CorimRoleTypeChoiceCbor::Known(v) => match v {
                 CorimRoleTypeChoiceKnownCbor::ManifestCreator => Ok(Self::ManifestCreator),
                 CorimRoleTypeChoiceKnownCbor::ManifestSigner => Ok(Self::ManifestSigner),
+                CorimRoleTypeChoiceKnownCbor::TagCreator => Ok(Self::TagCreator),
             },
             CorimRoleTypeChoiceCbor::Extensions(e) => Ok(Self::other(e.to_string())),
         }
@@ -595,7 +630,9 @@ impl TryFrom<Value> for CorimRoleTypeChoiceCbor {
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
             Value::Integer(i) => {
-                if i.eq(&Integer::from(1)) {
+                if i.eq(&Integer::from(0)) {
+                    Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::TagCreator))
+                } else if i.eq(&Integer::from(1)) {
                     Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
                 } else if i.eq(&Integer::from(2)) {
                     Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
@@ -616,7 +653,9 @@ impl TryFrom<&Value> for CorimRoleTypeChoiceCbor {
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
             Value::Integer(i) => {
-                if i.eq(&Integer::from(1)) {
+                if i.eq(&Integer::from(0)) {
+                    Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::TagCreator))
+                } else if i.eq(&Integer::from(1)) {
                     Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
                 } else if i.eq(&Integer::from(2)) {
                     Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
@@ -632,13 +671,25 @@ impl TryFrom<&Value> for CorimRoleTypeChoiceCbor {
     }
 }
 
-/// CBOR-encodable enumeration of known `corim-role-type-choice` values.
+/// CBOR-encodable enumeration of known role values.
+///
+/// Includes both `$corim-role-type-choice` and `$comid-role-type-choice` values
+/// because [`EntityMap`] is shared between both entity
+/// map instantiations.
+///
+/// Note: `Creator` (1) and `ManifestCreator` (1) share the same CBOR value,
+/// as do `Maintainer` (2) and `ManifestSigner` (2). When decoding from CBOR,
+/// the CoRIM names are preferred.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr)]
 #[allow(missing_docs)]
 #[repr(i8)]
 pub enum CorimRoleTypeChoiceKnownCbor {
+    TagCreator = 0,
     ManifestCreator = 1,
     ManifestSigner = 2,
+    // Creator = 1 and Maintainer = 2 share values with ManifestCreator
+    // and ManifestSigner respectively; they are handled via the JSON enum
+    // variants and map to the same CBOR integers.
 }
 
 /// The `crypto-key-type-choice` socket is defined in [CoRIM Section 5.1.4.6].

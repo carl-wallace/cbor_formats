@@ -318,6 +318,10 @@ pub enum CoservSubCommands {
     Verify(CoservVerifySubcommand),
     /// Extract the payload from a signed CoSERV
     Extract(CoservExtractSubcommand),
+    /// Create a CBOR-encoded CoSERV discovery document from a JSON template
+    CreateDiscovery(CoservCreateSubcommand),
+    /// Decode and display a CBOR-encoded CoSERV discovery document
+    DisplayDiscovery(DisplaySubcommand),
 }
 #[derive(Args, Debug)]
 pub struct CoservCreateSubcommand {

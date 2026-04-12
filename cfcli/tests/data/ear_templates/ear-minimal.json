@@ -1,0 +1,13 @@
+{
+  "profile": "tag:ietf.org,2026:rats/ear#03",
+  "iat": 1700000000,
+  "verifier_id": {
+    "developer": "https://veraison.example",
+    "build": "v1.0.0"
+  },
+  "submods": {
+    "platform": {
+      "status": 2
+    }
+  }
+}
