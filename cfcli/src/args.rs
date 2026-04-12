@@ -14,6 +14,8 @@ pub enum Commands {
     Cots(CotsCommand),
     /// Create, display, sign, verify, and extract CoSERV (Concise Service) objects
     Coserv(CoservCommand),
+    /// Create, display, sign, verify, and extract EAR (EAT Attestation Result) objects
+    Ear(EarCommand),
     /// Create and display EAT (Entity Attestation Token) objects
     Eat(EatCommand),
 }
@@ -360,6 +362,77 @@ pub struct CoservExtractSubcommand {
     /// a signed CoSERV file (COSE Sign1, tag #18)
     #[clap(short = 'f', long)]
     pub signed_coserv_file: String,
+
+    /// directory where the extracted payload is stored
+    #[clap(short, long, default_value = ".")]
+    pub output_dir: String,
+}
+
+//----------------------------------------------------------
+// EAR
+//----------------------------------------------------------
+/// EAR operations
+#[derive(Args, Debug)]
+pub struct EarCommand {
+    #[clap(subcommand)]
+    pub command: EarSubCommands,
+}
+#[derive(Subcommand, Debug)]
+pub enum EarSubCommands {
+    /// Create a CBOR-encoded EAR from a JSON template
+    Create(EarCreateSubcommand),
+    /// Decode and display a CBOR-encoded EAR
+    Display(DisplaySubcommand),
+    /// Sign an EAR using a COSE Sign1 structure with a JWK key
+    Sign(EarSignSubcommand),
+    /// Verify the signature on a signed EAR using a JWK key
+    Verify(EarVerifySubcommand),
+    /// Extract the payload from a signed EAR
+    Extract(EarExtractSubcommand),
+}
+#[derive(Args, Debug)]
+pub struct EarCreateSubcommand {
+    /// an EAR template file (in JSON format)
+    #[clap(short, long)]
+    pub template: Option<String>,
+
+    /// a directory containing EAR template files
+    #[clap(short = 'T', long)]
+    pub template_dir: Option<String>,
+
+    /// directory where the created files are stored
+    #[clap(short, long, default_value = ".")]
+    pub output_dir: String,
+}
+#[derive(Args, Debug)]
+pub struct EarSignSubcommand {
+    /// an unsigned EAR file (in CBOR format)
+    #[clap(short = 'f', long)]
+    pub ear_file: String,
+
+    /// a JWK key file (in JSON format)
+    #[clap(short, long)]
+    pub key_file: String,
+
+    /// directory where the signed file is stored
+    #[clap(short, long, default_value = ".")]
+    pub output_dir: String,
+}
+#[derive(Args, Debug)]
+pub struct EarVerifySubcommand {
+    /// a signed EAR file (COSE Sign1, tag #18)
+    #[clap(short = 'f', long)]
+    pub signed_ear_file: String,
+
+    /// a JWK key file (in JSON format)
+    #[clap(short, long)]
+    pub key_file: String,
+}
+#[derive(Args, Debug)]
+pub struct EarExtractSubcommand {
+    /// a signed EAR file (COSE Sign1, tag #18)
+    #[clap(short = 'f', long)]
+    pub signed_ear_file: String,
 
     /// directory where the extracted payload is stored
     #[clap(short, long, default_value = ".")]

@@ -1,0 +1,27 @@
+[package]
+name = "etime"
+description = "CBOR-focused encoders/decoders for Extended Time structures (RFC 9581)"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/carl-wallace/cbor-formats/tree/main/etime"
+categories = ["cryptography", "data-structures", "encoding", "no-std", "parser-implementations"]
+keywords = ["cbor", "time", "etime", "rfc9581"]
+readme = "README.md"
+version = "0.1.1"
+edition = "2024"
+rust-version = "1.85.0"
+
+[features]
+default = []
+
+[dependencies]
+ciborium = "0.2.2"
+serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
+serde_bytes = "0.11"
+serde_json = "1.0.149"
+
+[dev-dependencies]
+hex-literal = "1.1.0"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

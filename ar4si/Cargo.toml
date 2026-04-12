@@ -1,0 +1,25 @@
+[package]
+name = "ar4si"
+description = "CBOR-focused encoders/decoders for AR4SI structures"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/carl-wallace/cbor-formats/tree/main/ar4si"
+categories = ["cryptography", "data-structures", "encoding", "no-std", "parser-implementations"]
+keywords = ["cbor", "json", "ar4si", "rats", "attestation"]
+readme = "README.md"
+version = "0.1.1"
+edition = "2024"
+rust-version = "1.85.0"
+
+[dependencies]
+cbor_derive = { version = "0.1.1", path = "../cbor_derive" }
+common = { version = "0.1.1", path = "../common" }
+ciborium = "0.2.2"
+serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
+serde_repr = "0.1.20"
+
+[dev-dependencies]
+hex-literal = "1.1.0"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

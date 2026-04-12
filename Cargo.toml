@@ -2,6 +2,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "ar4si",
     "cbor_derive",
     "cfcli",
     "cmw",
@@ -12,7 +13,10 @@ members = [
     "cose_crypto",
     "coswid",
     "cots",
+    "ear",
     "eat",
+    "epoch_markers",
+    "etime",
     "webauthn_asf"
 ]
 

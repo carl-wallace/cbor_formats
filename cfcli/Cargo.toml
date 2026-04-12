@@ -9,6 +9,8 @@ rust-version = "1.85.0"
 [dependencies]
 cbor_derive = { version = "0.1.1", path = "../cbor_derive" }
 common = { version = "0.1.1", path = "../common" }
+ar4si = { version = "0.1.1", path = "../ar4si" }
+ear = { version = "0.1.1", path = "../ear" }
 corim = { version = "0.1.1", path = "../corim" }
 coserv = { version = "0.1.1", path = "../coserv" }
 cose = { version = "0.1.1", path = "../cose" }
