@@ -82,19 +82,27 @@ pub struct VerifierId {
 #[allow(missing_docs)]
 pub struct TrustworthinessVector {
     #[cbor(tag = "0", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub instance_identity: Option<i8>,
     #[cbor(tag = "1", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub configuration: Option<i8>,
     #[cbor(tag = "2", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub executables: Option<i8>,
     #[cbor(tag = "3", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub file_system: Option<i8>,
     #[cbor(tag = "4", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hardware: Option<i8>,
     #[cbor(tag = "5", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub runtime_opaque: Option<i8>,
     #[cbor(tag = "6", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub storage_opaque: Option<i8>,
     #[cbor(tag = "7", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sourced_data: Option<i8>,
 }

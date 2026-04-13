@@ -46,6 +46,7 @@ pub struct StatefulClass {
     #[cbor(value = "Map", cbor = "true")]
     pub class: ClassMap,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub measurements: Option<Vec<MeasurementMap>>,
 }
 
@@ -69,6 +70,7 @@ pub struct StatefulClass {
 pub struct StatefulInstance {
     pub instance: InstanceIdTypeChoice,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub measurements: Option<Vec<MeasurementMap>>,
 }
 
@@ -92,5 +94,6 @@ pub struct StatefulInstance {
 pub struct StatefulGroup {
     pub group: GroupIdTypeChoice,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub measurements: Option<Vec<MeasurementMap>>,
 }

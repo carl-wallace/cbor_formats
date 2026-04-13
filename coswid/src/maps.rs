@@ -88,34 +88,47 @@ pub struct ConciseSwidTag {
     #[cbor(tag = "12", value = "Integer")]
     pub tag_version: i64,
     #[cbor(tag = "8", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub corpus: Option<bool>,
     #[cbor(tag = "9", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub patch: Option<bool>,
     #[cbor(tag = "11", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supplemental: Option<bool>,
     #[cbor(tag = "1", value = "Text")]
     pub software_name: String,
     #[cbor(tag = "13", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub software_version: Option<String>,
     #[cbor(tag = "14", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub version_scheme: Option<VersionScheme>,
     #[cbor(tag = "10", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub media: Option<String>,
     #[cbor(tag = "5", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub software_meta: Option<OneOrMoreSoftwareMetaEntry>,
     #[cbor(tag = "2", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub entity: Option<OneOrMoreEntityEntry>,
     #[cbor(tag = "4", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub link: Option<OneOrMoreLinkEntry>,
     #[cbor(tag = "3", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub evidence: Option<EvidenceEntry>,
     #[cbor(tag = "6", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub payload: Option<PayloadEntry>,
     //* $$coswid-extension,
     #[cbor(tag = "15", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
     //global-attributes,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
@@ -146,21 +159,26 @@ pub struct ConciseSwidTag {
 #[allow(missing_docs)]
 pub struct DirectoryEntry {
     #[cbor(tag = "22", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub key: Option<bool>,
     #[cbor(tag = "23", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<String>,
     #[cbor(tag = "24", value = "Text")]
     pub fs_name: String,
     #[cbor(tag = "25", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub root: Option<String>,
     //todo handle recursion via Box
     // #[cbor(tag = "26", value = "Text")]
     // pub path_elements: Option<Box<PathElementsGroup>>,
     //   * $$directory-extension,
     #[cbor(tag = "15", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
     //   global-attributes,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
@@ -184,16 +202,20 @@ pub struct EntityEntry {
     #[cbor(tag = "31", value = "Text")]
     pub entity_name: String,
     #[cbor(tag = "32", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub reg_id: Option<Uri>,
     #[cbor(tag = "33")]
     pub role: OneOrMoreRole,
     #[cbor(tag = "34", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub thumbprint: Option<HashEntry>,
     //   * $$entity-extension,
     #[cbor(tag = "15", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
     //   global-attributes,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
@@ -215,24 +237,33 @@ pub struct EntityEntry {
 #[allow(missing_docs)]
 pub struct EvidenceEntry {
     #[cbor(tag = "16", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub directory: Option<OneOrMoreDirectoryEntry>,
     #[cbor(tag = "17", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub file: Option<OneOrMoreFileEntry>,
     #[cbor(tag = "18", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub process: Option<OneOrMoreProcessEntry>,
     #[cbor(tag = "19", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub resource: Option<OneOrMoreResourceEntry>,
     #[cbor(tag = "35", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub date: Option<Time>,
     #[cbor(tag = "36", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub device_id: Option<String>,
     #[cbor(tag = "23", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<String>,
     //   * $$evidence-extension,
     #[cbor(tag = "15", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
     //   global-attributes,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
@@ -254,24 +285,32 @@ pub struct EvidenceEntry {
 #[allow(missing_docs)]
 pub struct FileEntry {
     #[cbor(tag = "22", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub key: Option<bool>,
     #[cbor(tag = "23", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<String>,
     #[cbor(tag = "24", value = "Text")]
     pub fs_name: String,
     #[cbor(tag = "25", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub root: Option<String>,
     #[cbor(tag = "20", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub size: Option<i64>,
     #[cbor(tag = "21", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub file_version: Option<String>,
     #[cbor(tag = "7", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hash: Option<HashEntry>,
     //   * $$file-extension,
     #[cbor(tag = "15", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
     //   global-attributes,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
@@ -296,24 +335,31 @@ pub struct FileEntry {
 #[allow(missing_docs)]
 pub struct LinkEntry {
     #[cbor(tag = "37", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub artifact: Option<String>,
     #[cbor(tag = "38", value = "Text")]
     pub href: Uri,
     #[cbor(tag = "10", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub media: Option<String>,
     #[cbor(tag = "39")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ownership: Option<Ownership>,
     #[cbor(tag = "40")]
     pub rel: Rel,
     #[cbor(tag = "41", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub media_type: Option<String>,
     #[cbor(tag = "42")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub use_choice: Option<UseChoice>,
     //   * $$link-extension,
     #[cbor(tag = "15", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
     //   global-attributes,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
@@ -331,8 +377,10 @@ pub struct LinkEntry {
 #[allow(missing_docs)]
 pub struct PathElementsGroup {
     #[cbor(tag = "16", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub directory: Option<OneOrMoreDirectoryEntry>,
     #[cbor(tag = "17", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub file: Option<OneOrMoreFileEntry>,
 }
 
@@ -358,12 +406,16 @@ pub struct PathElementsGroup {
 #[allow(missing_docs)]
 pub struct ResourceCollection {
     #[cbor(tag = "16", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub directory: Option<OneOrMoreDirectoryEntry>,
     #[cbor(tag = "17", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub file: Option<OneOrMoreFileEntry>,
     #[cbor(tag = "18", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub process: Option<OneOrMoreProcessEntry>,
     #[cbor(tag = "19", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub resource: Option<OneOrMoreResourceEntry>,
 }
 
@@ -382,18 +434,24 @@ pub struct ResourceCollection {
 #[allow(missing_docs)]
 pub struct PayloadEntry {
     #[cbor(tag = "16", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub directory: Option<OneOrMoreDirectoryEntry>,
     #[cbor(tag = "17", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub file: Option<OneOrMoreFileEntry>,
     #[cbor(tag = "18", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub process: Option<OneOrMoreProcessEntry>,
     #[cbor(tag = "19", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub resource: Option<OneOrMoreResourceEntry>,
     //   * $$payload-extension,
     #[cbor(tag = "15", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
     //   global-attributes,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
@@ -415,12 +473,15 @@ pub struct ProcessEntry {
     #[cbor(tag = "27", value = "Text")]
     pub process_name: String,
     #[cbor(tag = "28", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub pid: Option<i64>,
     //   * process-extension,
     #[cbor(tag = "15", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
     //   global-attributes,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
@@ -442,9 +503,11 @@ pub struct ResourceEntry {
     pub resource_entry_type: String,
     //   * $$resource-extension,
     #[cbor(tag = "15", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
     //   global-attributes,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
@@ -477,39 +540,56 @@ pub struct ResourceEntry {
 #[allow(missing_docs)]
 pub struct SoftwareMetaEntry {
     #[cbor(tag = "43", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub activation_status: Option<String>,
     #[cbor(tag = "44", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub channel_type: Option<String>,
     #[cbor(tag = "45", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub colloquial_version: Option<String>,
     #[cbor(tag = "46", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     #[cbor(tag = "47", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub edition: Option<String>,
     #[cbor(tag = "48", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub entitlement_data_required: Option<bool>,
     #[cbor(tag = "49", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub entitlement_key: Option<String>,
     #[cbor(tag = "50", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub generator: Option<String>,
     #[cbor(tag = "51", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub persistent_id: Option<String>,
     #[cbor(tag = "52", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub product: Option<String>,
     #[cbor(tag = "53", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub product_family: Option<String>,
     #[cbor(tag = "54", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub revision: Option<String>,
     #[cbor(tag = "55", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub summary: Option<String>,
     #[cbor(tag = "56", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub unspsc_code: Option<String>,
     #[cbor(tag = "57", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub unspsc_version: Option<String>,
     //   * software-meta-extension,
     #[cbor(tag = "15", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
     //   global-attributes,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }

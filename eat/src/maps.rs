@@ -139,62 +139,91 @@ use crate::json_specific::Submodule;
 #[allow(missing_docs)]
 pub struct ClaimsSetClaims {
     #[cbor(tag = "1", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub iss: Option<String>,
     #[cbor(tag = "2", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sub: Option<String>,
     #[cbor(tag = "3", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub aud: Option<String>,
     #[cbor(tag = "4", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub exp: Option<Time>,
     #[cbor(tag = "5", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub nbf: Option<Time>,
     #[cbor(tag = "6", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub iat: Option<Time>,
     #[cbor(tag = "7", value = "Bytes")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cti: Option<Vec<u8>>,
     #[cbor(tag = "10")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub nonce: Option<NonceType>,
     #[cbor(tag = "267", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub boot_count: Option<u64>,
     #[cbor(tag = "268", value = "Bytes")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub boot_seed: Option<Vec<u8>>,
     #[cbor(tag = "263")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub debug_status: Option<DebugStatusType>,
     #[cbor(tag = "269", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub dloas: Option<Vec<DloaType>>,
     #[cbor(tag = "259", value = "Bytes")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hardware_model: Option<Vec<u8>>,
     #[cbor(tag = "260", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hardware_version: Option<HardwareVersionType>,
     #[cbor(tag = "275")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub intended_use: Option<IntendedUseType>,
     #[cbor(tag = "264", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<LocationType>,
     #[cbor(tag = "265")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub profile: Option<ProfileTypeChoice>,
     #[cbor(tag = "262", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub oem_boot: Option<bool>,
     #[cbor(tag = "270", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sw_name: Option<String>,
     #[cbor(tag = "271", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sw_version: Option<SwVersionType>,
     #[cbor(tag = "256")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ueid: Option<UeidType>,
     #[cbor(tag = "261", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub uptime: Option<u64>,
     #[cbor(tag = "272", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub manifests: Option<ManifestsType>,
     #[cbor(tag = "273", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub measurements: Option<MeasurementsType>,
     #[cbor(tag = "274", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub measurement_results: Option<MeasurementResultsGroupArray>,
     #[cbor(tag = "258")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub oemid: Option<Oemid>,
     #[cbor(tag = "257", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sueids: Option<TupleMap>,
     #[cbor(tag = "266", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub submods: Option<Submodule>,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
@@ -234,18 +263,25 @@ pub struct LocationType {
     #[cbor(tag = "2", value = "Integer")]
     pub longitude: u64,
     #[cbor(tag = "3", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub altitude: Option<u64>,
     #[cbor(tag = "4", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub accuracy: Option<u64>,
     #[cbor(tag = "5", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub altitude_accuracy: Option<u64>,
     #[cbor(tag = "6", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub heading: Option<u64>,
     #[cbor(tag = "7", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub speed: Option<u64>,
     #[cbor(tag = "8", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub timestamp: Option<Time>,
     #[cbor(tag = "9", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub age: Option<u64>,
 }
 

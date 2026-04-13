@@ -53,18 +53,25 @@ use common::{TextOrBinary, TextOrInt, Tuple, TupleCbor};
 #[allow(missing_docs)]
 pub struct HeaderMap {
     #[cbor(tag = "1")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub alg_id: Option<TextOrInt>,
     #[cbor(tag = "2", value = "Array")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub criticality: Option<Vec<TextOrInt>>,
     #[cbor(tag = "3")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub content_type: Option<TextOrInt>,
     #[cbor(tag = "4")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub key_id: Option<TextOrBinary>,
     #[cbor(tag = "5", value = "Bytes")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub iv: Option<Vec<u8>>,
     #[cbor(tag = "6", value = "Bytes")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub partial_iv: Option<Vec<u8>>,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
@@ -98,16 +105,22 @@ impl HeaderMap {
 #[allow(missing_docs)]
 pub struct CoseKey {
     #[cbor(tag = "1")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub kty: Option<TextOrInt>,
     #[cbor(tag = "2", value = "Bytes")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub kid: Option<Vec<u8>>,
     #[cbor(tag = "3")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub alg: Option<TextOrInt>,
     #[cbor(tag = "4", value = "Array")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub key_ops: Option<Vec<TextOrInt>>,
     #[cbor(tag = "5", value = "Bytes")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub iv: Option<Vec<u8>>,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 

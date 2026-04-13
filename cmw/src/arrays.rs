@@ -50,6 +50,7 @@ pub struct CborRecord {
     #[cbor(value = "Bytes")]
     #[serde(with = "serde_bytes")]
     pub value: Vec<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ind: Option<CmwIndicator>,
 }
 
@@ -77,5 +78,6 @@ pub struct JsonRecord {
     pub media_type: String,
     #[cbor(value = "Text")]
     pub value: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ind: Option<CmwIndicator>,
 }

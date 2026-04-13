@@ -111,6 +111,7 @@ pub struct CoservMap {
     #[cbor(tag = "1", value = "Map", cbor = "true")]
     pub query: QueryMap,
     #[cbor(tag = "2", value = "Map", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub results: Option<ResultsMap>,
 }
 
@@ -168,10 +169,13 @@ pub struct QueryMap {
 #[allow(missing_docs)]
 pub struct EnvironmentSelectorMap {
     #[cbor(tag = "0", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub class: Option<Vec<StatefulClass>>,
     #[cbor(tag = "1", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub instance: Option<Vec<StatefulInstance>>,
     #[cbor(tag = "2", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub group: Option<Vec<StatefulGroup>>,
 }
 
@@ -345,6 +349,7 @@ impl TryFrom<&ResultSet> for ResultSetCbor {
 pub struct ResultsMap {
     pub result_set: ResultSet,
     pub expiry: Tdate,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub source_artifacts: Option<Vec<CborRecord>>,
 }
 

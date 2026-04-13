@@ -144,6 +144,7 @@ pub type TaggedCoseSign1 = Required<CoseSign1Cbor, 18>;
 pub struct SigStructure {
     pub context: SignatureOrSignature1,
     pub body_protected: EmptyOrSerializedMap,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sign_protected: Option<EmptyOrSerializedMap>,
     pub external_aad: BytesType,
     pub payload: BytesType,
@@ -196,6 +197,7 @@ pub struct CoseRecipient {
     pub unprotected: HeaderMap,
     pub ciphertext: BinaryOrNil,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub recipients: Option<Vec<CoseRecipient>>,
 }
 

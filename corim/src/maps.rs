@@ -63,8 +63,10 @@ use serde::ser::Error as OtherError;
 #[allow(missing_docs)]
 pub struct AttestKeyConditionsMap {
     #[cbor(tag = "0", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub mkey: Option<MeasuredElementTypeChoice>,
     #[cbor(tag = "1", value = "Array")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub authorized_by: Option<Vec<CryptoKeyTypeChoice>>,
 }
 
@@ -86,14 +88,19 @@ pub struct AttestKeyConditionsMap {
 #[allow(missing_docs)]
 pub struct ClassMap {
     #[cbor(tag = "0", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<ClassIdTypeChoice>,
     #[cbor(tag = "1", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub vendor: Option<String>,
     #[cbor(tag = "2", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub model: Option<String>,
     #[cbor(tag = "3", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub layer: Option<u128>,
     #[cbor(tag = "4", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub index: Option<u128>,
 }
 
@@ -115,17 +122,21 @@ pub struct ClassMap {
 #[allow(missing_docs)]
 pub struct ConciseMidTag {
     #[cbor(tag = "0", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub language: Option<String>,
     #[cbor(tag = "1", value = "Map", cbor = "true")]
-    #[serde(rename = "tag-identity")]
+    #[serde(rename = "tag-identity", skip_serializing_if = "Option::is_none")]
     pub tag_identity: Option<TagIdentityMap>,
     #[cbor(tag = "2", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<EntityMap>>,
     #[cbor(tag = "3", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub linked_tags: Option<Vec<LinkedTagMap>>,
     #[cbor(tag = "4", value = "Map", cbor = "true")]
     pub triples: TriplesMap,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
@@ -146,6 +157,7 @@ pub struct CorimLocatorMap {
     #[cbor(tag = "0", cbor = "true")]
     pub href: TaggedUriType,
     #[cbor(tag = "1", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub thumbprint: Option<HashEntry>,
 }
 
@@ -172,12 +184,16 @@ pub struct CorimMap {
     #[cbor(tag = "1", value = "Array")]
     pub tags: Vec<ConciseTagTypeChoice>,
     #[cbor(tag = "2", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub dependent_rims: Option<Vec<CorimLocatorMap>>,
     #[cbor(tag = "3", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub profile: Option<ProfileTypeChoice>,
     #[cbor(tag = "4", value = "Map", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub rim_validity: Option<ValidityMap>,
     #[cbor(tag = "5", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<EntityMap>>,
 }
 
@@ -197,6 +213,7 @@ pub struct CorimMetaMap {
     #[cbor(tag = "0", value = "Map", cbor = "true")]
     pub signer: CorimSignerMap,
     #[cbor(tag = "1", value = "Map", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub validity: Option<ValidityMap>,
 }
 
@@ -217,6 +234,7 @@ pub struct CorimSignerMap {
     #[cbor(tag = "0")]
     pub entity_name: EntityNameTypeChoice,
     #[cbor(tag = "1", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub reg_id: Option<TaggedUriType>,
     //todo extensibility
     //extensions
@@ -240,6 +258,7 @@ pub struct EntityMap {
     #[cbor(tag = "31")]
     pub name: EntityNameTypeChoice,
     #[cbor(tag = "32", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub regid: Option<TaggedUriType>,
     #[cbor(tag = "33", value = "Array", cbor = "true")]
     pub roles: Vec<CorimRoleTypeChoice>,
@@ -291,10 +310,13 @@ pub type ComidEntityMapCbor = EntityMapCbor;
 #[allow(missing_docs)]
 pub struct EnvironmentMap {
     #[cbor(tag = "0", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub class: Option<ClassMap>,
     #[cbor(tag = "1")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub instance: Option<InstanceIdTypeChoice>,
     #[cbor(tag = "2")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub group: Option<GroupIdTypeChoice>,
     //todo extensibility
     //extensions
@@ -323,24 +345,34 @@ pub struct EnvironmentMap {
 #[allow(missing_docs)]
 pub struct FlagsMap {
     #[cbor(tag = "0", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_configured: Option<bool>,
     #[cbor(tag = "1", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_secure: Option<bool>,
     #[cbor(tag = "2", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_recovery: Option<bool>,
     #[cbor(tag = "3", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_debug: Option<bool>,
     #[cbor(tag = "4", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_replay_protected: Option<bool>,
     #[cbor(tag = "5", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_integrity_protected: Option<bool>,
     #[cbor(tag = "6", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_runtime_meas: Option<bool>,
     #[cbor(tag = "7", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_immutable: Option<bool>,
     #[cbor(tag = "8", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_tcb: Option<bool>,
     #[cbor(tag = "9", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_confidentiality_protected: Option<bool>,
 }
 
@@ -378,10 +410,12 @@ pub struct LinkedTagMap {
 #[allow(missing_docs)]
 pub struct MeasurementMap {
     #[cbor(tag = "0", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub mkey: Option<MeasuredElementTypeChoice>,
     #[cbor(tag = "1", value = "Map", cbor = "true")]
     pub value: MeasurementValuesMap,
     #[cbor(tag = "2", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub authorized_by: Option<Vec<CryptoKeyTypeChoice>>,
 }
 
@@ -414,37 +448,51 @@ pub struct MeasurementMap {
 #[allow(missing_docs)]
 pub struct MeasurementValuesMap {
     #[cbor(tag = "0", value = "Map", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub version: Option<VersionMap>,
     #[cbor(tag = "1")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub svn: Option<SvnTypeChoice>,
     #[cbor(tag = "2", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub digests: Option<Vec<HashEntry>>,
     #[cbor(tag = "3", value = "Map", cbor = "true")]
-    #[serde(rename = "op-flags")]
+    #[serde(rename = "op-flags", skip_serializing_if = "Option::is_none")]
     pub flags: Option<FlagsMap>,
     #[cbor(tag = "4")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub raw_value: Option<RawValueTypeChoice>,
     #[cbor(tag = "5", value = "Bytes")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub raw_value_mask: Option<Vec<u8>>,
     #[cbor(tag = "6", value = "Bytes")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub mac_addr: Option<Vec<u8>>,
     #[cbor(tag = "7", value = "Bytes")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ip_addr: Option<Vec<u8>>,
     #[cbor(tag = "8", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub serial_number: Option<String>,
     #[cbor(tag = "9")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ueid: Option<UeidType>,
     #[cbor(tag = "10")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub uuid: Option<UuidType>,
     #[cbor(tag = "11", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     #[cbor(tag = "13", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cryptokeys: Option<Vec<CryptoKeyTypeChoice>>,
     // #[cbor(tag = "14", value = "Map")]
     // pub integrity_registers: Option<IntegrityRegisters>,
     #[cbor(tag = "15")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub int_range: Option<IntRangeTypeChoice>,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
@@ -488,7 +536,7 @@ pub struct TagIdentityMap {
     #[serde(rename = "id")]
     pub tag_id: TagIdTypeChoice,
     #[cbor(tag = "1")]
-    #[serde(rename = "version", default)]
+    #[serde(rename = "version", default, skip_serializing_if = "Option::is_none")]
     pub tag_version: Option<TagVersionType>,
 }
 
@@ -526,26 +574,35 @@ impl TagIdentityMap {
 #[allow(missing_docs)]
 pub struct TriplesMap {
     #[cbor(tag = "0", value = "Array", cbor = "true")]
-    #[serde(rename = "reference-values")]
+    #[serde(rename = "reference-values", skip_serializing_if = "Option::is_none")]
     pub reference_triples: Option<Vec<ReferenceTripleRecord>>,
     #[cbor(tag = "1", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub endorsed_triples: Option<Vec<EndorsedTripleRecord>>,
     #[cbor(tag = "2", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub identity_triples: Option<Vec<IdentityTripleRecord>>,
     #[cbor(tag = "3", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub attest_key_triples: Option<Vec<AttestKeyTripleRecord>>,
     #[cbor(tag = "4", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub dependency_triples: Option<Vec<DomainDependencyTripleRecord>>,
     #[cbor(tag = "5", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub membership_triples: Option<Vec<DomainMembershipTripleRecord>>,
     #[cbor(tag = "6", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub coswid_triples: Option<Vec<CoswidTripleRecord>>,
     #[cbor(tag = "8", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub conditional_endorsement_series_triples:
         Option<Vec<ConditionalEndorsementSeriesTripleRecord>>,
     #[cbor(tag = "10", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub conditional_endorsement_triples: Option<Vec<ConditionalEndorsementTripleRecord>>,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
@@ -563,8 +620,10 @@ pub struct TriplesMap {
 #[allow(missing_docs)]
 pub struct ValidityMap {
     #[cbor(tag = "0", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub not_before: Option<Time>,
     #[cbor(tag = "1", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub not_after: Option<Time>,
 }
 
@@ -585,6 +644,7 @@ pub struct VersionMap {
     #[cbor(tag = "0", value = "Text")]
     pub version: String,
     #[cbor(tag = "1")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub version_scheme: Option<VersionScheme>,
 }
 
@@ -605,6 +665,7 @@ pub struct ConciseTlTag {
     #[cbor(tag = "0", cbor = "true")]
     pub tag_id: TagIdTypeChoice,
     #[cbor(tag = "1", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tag_version: Option<u64>,
     #[cbor(tag = "2", value = "Array")]
     pub corim_ids: Vec<CorimIdTypeChoice>,

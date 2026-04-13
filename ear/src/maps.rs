@@ -71,20 +71,25 @@ pub struct Ear {
     #[cbor(tag = "265", value = "Text")]
     pub profile: String,
     #[cbor(tag = "1000")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<TrustworthinessTier>,
     #[cbor(tag = "6", value = "Integer")]
     pub iat: i64,
     #[cbor(tag = "4", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub exp: Option<i64>,
     #[cbor(tag = "1004", value = "Map", cbor = "true")]
     pub verifier_id: VerifierId,
     #[cbor(tag = "1002", value = "Bytes")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub raw_evidence: Option<Vec<u8>>,
     #[cbor(tag = "266", cbor = "true")]
     pub submods: EarSubmods,
     #[cbor(tag = "10")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub nonce: Option<NonceType>,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
@@ -112,16 +117,21 @@ pub struct Ear {
 #[allow(missing_docs)]
 pub struct EarAppraisal {
     #[cbor(tag = "265")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub profile: Option<ProfileTypeChoice>,
     #[cbor(tag = "1000")]
     pub status: TrustworthinessTier,
     #[cbor(tag = "1001", value = "Map", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub trustworthiness_vector: Option<TrustworthinessVector>,
     #[cbor(tag = "1003")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub appraisal_policy_ids: Option<AppraisalPolicyIds>,
     #[cbor(tag = "10")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub nonce: Option<NonceType>,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 

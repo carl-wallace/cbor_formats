@@ -114,12 +114,20 @@ fn corim_display(args: &DisplaySubcommand) {
     };
     let comid_cbor: CorimMapCbor = match from_reader(data.as_slice()) {
         Ok(c) => c,
-        Err(e) => {
-            println!(
-                "Unable to parse data read from {} as a CBOR-encoded CoMID with error {}",
-                args.file_to_display, e
-            );
-            return;
+        Err(_) => {
+            // Try unwrapping COSE Sign1 envelope, then strip tag 501 if present
+            let payload = crate::utils::unwrap_sign1_payload(&data);
+            let payload = strip_corim_tag(&payload);
+            match from_reader(payload.as_slice()) {
+                Ok(c) => c,
+                Err(e) => {
+                    println!(
+                        "Unable to parse data read from {} as a CBOR-encoded CoRIM with error {}",
+                        args.file_to_display, e
+                    );
+                    return;
+                }
+            }
         }
     };
     let comid_json: CorimMap = match comid_cbor.try_into() {
@@ -133,7 +141,7 @@ fn corim_display(args: &DisplaySubcommand) {
         }
     };
 
-    let json = match serde_json::to_string(&comid_json) {
+    let json = match serde_json::to_string_pretty(&comid_json) {
         Ok(s) => s,
         Err(e) => {
             println!(
@@ -385,6 +393,24 @@ fn ensure_corim_tag(data: &[u8]) -> Result<Vec<u8>, String> {
                 .map_err(|e| format!("failed to serialize tagged CoRIM: {e}"))?;
             Ok(buf)
         }
+    }
+}
+
+/// Strip CBOR tag 501 wrapper if present, returning the inner bytes.
+fn strip_corim_tag(data: &[u8]) -> Vec<u8> {
+    let value: Value = match from_reader(data) {
+        Ok(v) => v,
+        Err(_) => return data.to_vec(),
+    };
+    match value {
+        Value::Tag(501, inner) => {
+            let mut buf = Vec::new();
+            if into_writer(&*inner, &mut buf).is_ok() {
+                return buf;
+            }
+            data.to_vec()
+        }
+        _ => data.to_vec(),
     }
 }
 

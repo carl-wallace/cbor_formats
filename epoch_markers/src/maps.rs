@@ -201,11 +201,15 @@ pub struct TstInfoCborTimeTag {
     #[cbor(tag = "4", cbor = "true")]
     pub etime: ProfiledEtime,
     #[cbor(tag = "5", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ordering: Option<bool>,
     #[cbor(tag = "6", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub nonce: Option<i64>,
     #[cbor(tag = "7", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tsa: Option<GeneralName>,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }

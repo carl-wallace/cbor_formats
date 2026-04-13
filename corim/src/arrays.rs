@@ -59,6 +59,7 @@ pub struct AttestKeyTripleRecord {
     #[cbor(value = "Array")]
     pub key_list: Vec<CryptoKeyTypeChoice>,
     #[cbor(value = "Map", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub conditions: Option<AttestKeyConditionsMap>,
 }
 
@@ -158,6 +159,7 @@ pub struct IdentityTripleRecord {
     #[cbor(value = "Array")]
     pub key_list: Vec<CryptoKeyTypeChoice>,
     #[cbor(value = "Map", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub conditions: Option<AttestKeyConditionsMap>,
 }
 
@@ -259,6 +261,7 @@ pub struct ConditionalEndorsementSeriesCondition {
     #[cbor(value = "Array", cbor = "true")]
     pub claims_list: Vec<MeasurementMap>,
     #[cbor(value = "Array")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub authorized_by: Option<Vec<CryptoKeyTypeChoice>>,
 }
 

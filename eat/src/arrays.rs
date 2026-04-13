@@ -341,6 +341,7 @@ pub struct DloaType {
     #[cbor(value = "Text")]
     pub dloa_platform_label: String,
     #[cbor(value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub dloa_application_label: Option<String>,
 }
 
@@ -361,6 +362,7 @@ pub struct HardwareVersionType {
     #[cbor(value = "Text")]
     pub version: String,
     #[cbor(cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub scheme: Option<VersionScheme>,
 }
 
@@ -689,5 +691,6 @@ pub struct SwVersionType {
     #[cbor(value = "Text")]
     pub version: String,
     #[cbor(cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub scheme: Option<VersionScheme>,
 }

@@ -59,33 +59,47 @@ use serde::ser::Error as OtherError;
 #[allow(missing_docs)]
 pub struct AbbreviatedSwidTag {
     #[cbor(tag = "12")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tag_version: Option<TagVersionType>,
     #[cbor(tag = "8", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub corpus: Option<bool>,
     #[cbor(tag = "9", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub patch: Option<bool>,
     #[cbor(tag = "11", value = "Bool")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub supplemental: Option<bool>,
     #[cbor(tag = "1", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub software_name: Option<String>,
     #[cbor(tag = "13", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub software_version: Option<String>,
     #[cbor(tag = "14")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub version_scheme: Option<VersionScheme>,
     #[cbor(tag = "10", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub media: Option<String>,
     #[cbor(tag = "5", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub software_meta: Option<OneOrMoreSoftwareMetaEntry>,
     #[cbor(tag = "2", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub entity: Option<OneOrMoreEntityEntry>,
     #[cbor(tag = "4", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub link: Option<OneOrMoreLinkEntry>,
     #[cbor(tag = "3", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub evidence: Option<EvidenceEntry>,
     #[cbor(tag = "6", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub payload: Option<PayloadEntry>,
     //* $$coswid-extension,
     #[cbor(tag = "15", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
     //global-attributes,
     // todo extensions and attributes
@@ -107,6 +121,7 @@ pub struct CasAndTasMap {
     #[cbor(tag = "0", value = "Array", cbor = "true")]
     pub tas: Vec<TrustAnchor>,
     #[cbor(tag = "1", value = "Array")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cas: Option<Vec<PkixCa>>,
 }
 
@@ -134,16 +149,21 @@ pub struct CasAndTasMap {
 #[allow(missing_docs)]
 pub struct ConciseTaStoreMap {
     #[cbor(tag = "0", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub language: Option<String>,
     #[cbor(tag = "1", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub store_identity: Option<TagIdentityMap>,
     #[cbor(tag = "2", cbor = "true")]
     pub environments: EnvironmentGroupList,
     #[cbor(tag = "3", value = "Array")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub purposes: Option<Vec<TasListPurpose>>,
     #[cbor(tag = "4", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub perm_claims: Option<Vec<ClaimsSetClaims>>,
     #[cbor(tag = "5", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub excl_claims: Option<Vec<ClaimsSetClaims>>,
     #[cbor(tag = "6", cbor = "true")]
     pub keys: CasAndTasMap,
@@ -162,9 +182,12 @@ pub struct ConciseTaStoreMap {
 #[allow(missing_docs)]
 pub struct EnvironmentGroupListMap {
     #[cbor(tag = "1", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub environment_map: Option<EnvironmentMap>,
     #[cbor(tag = "2", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub concise_swid_tag: Option<AbbreviatedSwidTag>,
     #[cbor(tag = "3", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub named_ta_store: Option<String>,
 }

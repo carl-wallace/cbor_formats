@@ -77,12 +77,18 @@ fn eat_display(args: &DisplaySubcommand) {
     };
     let cbor: ClaimsSetClaimsCbor = match from_reader(data.as_slice()) {
         Ok(c) => c,
-        Err(e) => {
-            println!(
-                "Unable to parse data read from {} as a CBOR-encoded EAT with error {}",
-                args.file_to_display, e
-            );
-            return;
+        Err(_) => {
+            let payload = crate::utils::unwrap_sign1_payload(&data);
+            match from_reader(payload.as_slice()) {
+                Ok(c) => c,
+                Err(e) => {
+                    println!(
+                        "Unable to parse data read from {} as a CBOR-encoded EAT with error {}",
+                        args.file_to_display, e
+                    );
+                    return;
+                }
+            }
         }
     };
     let json: ClaimsSetClaims = match cbor.try_into() {
