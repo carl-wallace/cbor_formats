@@ -137,7 +137,7 @@ fn mac0_hmac_sha256_round_trip() {
 #[test]
 fn mac0_hmac_sha384_round_trip() {
     let key_bytes = [0x43u8; 48];
-    let mac_key = HmacSha384Key::from_bytes(&key_bytes);
+    let mac_key = HmacSha384Key::from_bytes(&key_bytes).unwrap();
 
     let payload = b"MAC this data.";
     let protected = helpers::header_with_algorithm(CoseAlgorithm::Hs384);
@@ -154,7 +154,7 @@ fn mac0_hmac_sha384_round_trip() {
 #[test]
 fn mac0_hmac_sha512_round_trip() {
     let key_bytes = [0x44u8; 64];
-    let mac_key = HmacSha512Key::from_bytes(&key_bytes);
+    let mac_key = HmacSha512Key::from_bytes(&key_bytes).unwrap();
 
     let payload = b"MAC this data.";
     let protected = helpers::header_with_algorithm(CoseAlgorithm::Hs512);

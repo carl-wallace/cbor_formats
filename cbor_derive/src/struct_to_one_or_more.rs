@@ -165,7 +165,7 @@ impl DeriveStructToOneOrMore {
                             let items: Result<Vec<_>, String> = a.iter().map(|v|#sname_base::try_from(v)).collect();
                             Ok(Self::More(items?))
                         },
-                        _ => Err("".to_string()),
+                        _ => Err(format!("expected map or array while parsing {}", stringify!(#sname))),
                     }
                 }
             }
@@ -178,7 +178,7 @@ impl DeriveStructToOneOrMore {
                             let items: Result<Vec<_>, String> = a.iter().map(|v|#sname_base::try_from(v)).collect();
                             Ok(Self::More(items?))
                         },
-                        _ => Err("".to_string()),
+                        _ => Err(format!("expected map or array while parsing {}", stringify!(#sname))),
                     }
                 }
             }

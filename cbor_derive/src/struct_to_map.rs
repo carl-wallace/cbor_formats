@@ -280,10 +280,10 @@ impl DeriveStructToMap {
                             Some(i) => {
                                 match i.try_into() {
                                     Ok(ival) => ival,
-                                    Err(_) => return Err("".to_string())
+                                    Err(_) => return Err(format!("map key integer out of range while parsing {}", #ident_name))
                                 }
                             }
-                            None => return Err("".to_string())
+                            None => return Err(format!("expected integer map key while parsing {}", #ident_name))
                         };
                         // accumulate duplicates as TupleCbor items
                         if indices.contains(&index) && !m.contains_key(&index) {
@@ -313,10 +313,10 @@ impl DeriveStructToMap {
                             Some(i) => {
                                 match i.try_into() {
                                     Ok(ival) => ival,
-                                    Err(_) => return Err("".to_string())
+                                    Err(_) => return Err(format!("map key integer out of range while parsing {}", #ident_name))
                                 }
                             }
-                            None => return Err("".to_string())
+                            None => return Err(format!("expected integer map key while parsing {}", #ident_name))
                         };
                         // accumulate duplicates as TupleCbor items
                         if indices.contains(&index) && !m.contains_key(&index) {

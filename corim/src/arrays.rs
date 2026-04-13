@@ -34,7 +34,7 @@ use alloc::{vec, vec::Vec};
 use crate::choices::*;
 use crate::maps::*;
 use alloc::format;
-use alloc::string::{String, ToString};
+use alloc::string::String;
 use cbor_derive::StructToArray;
 
 /// The `attest-key-triple-record` type is defined in [CoRIM Section 5.1.10].

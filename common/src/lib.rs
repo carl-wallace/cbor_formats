@@ -511,7 +511,7 @@ impl TryFrom<&Value> for TimeCbor {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Tag(_i, k) => {
+            Value::Tag(1, k) => {
                 let integer = k
                     .as_integer()
                     .ok_or_else(|| "Expected integer value inside tag for TimeCbor".to_string())?;

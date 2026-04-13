@@ -19,7 +19,7 @@ use serde::{de::Error, de::Visitor};
 use alloc::{vec, vec::Vec};
 
 use alloc::format;
-use alloc::string::{String, ToString};
+use alloc::string::String;
 use cbor_derive::StructToArray;
 
 use corim::choices::{GroupIdTypeChoice, InstanceIdTypeChoice};

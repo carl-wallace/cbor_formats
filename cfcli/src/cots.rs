@@ -17,10 +17,10 @@ pub fn cots_main(args: &CotsCommand) {
         CotsSubCommands::Create(c) => cots_create(c),
         CotsSubCommands::Display(c) => cots_display(c),
         CotsSubCommands::CreateStore(_) => {
-            todo!("cfcli support")
+            println!("CoTS create-store is not yet implemented");
         }
         CotsSubCommands::CreateCorim(_) => {
-            todo!("cfcli support")
+            println!("CoTS create-corim is not yet implemented");
         }
     }
 }

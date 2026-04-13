@@ -5,7 +5,6 @@ use ciborium::value::Value;
 use common::{BytesType, TaggedUriTypeCbor, TimeCbor, UeidType, UuidType};
 use corim::choices::*;
 use corim::maps::*;
-use coswid::maps::*;
 use hex_literal::hex;
 
 mod utils;
@@ -82,51 +81,91 @@ fn class_map_class_id_only_test() {
 }
 
 #[test]
-#[ignore] // test vectors are from older spec version, need draft-10 vectors
-fn concise_mid_tag_test() {
-    let files = vec![
-        "./tests/examples/comid-psa-refval.cbor",
-        "./tests/examples/comid-dice-refval.cbor",
-        "./tests/examples/comid_1.cbor",
-        "./tests/examples/comid_2.cbor",
-        "./tests/examples/comid-psa-iakpub.cbor",
-        "./tests/examples/comid-psa-integ-iakpub.cbor",
-    ];
+fn concise_mid_tag_roundtrip() {
+    use corim::arrays::ReferenceTripleRecordCbor;
 
-    for f in files {
-        let comid_cbor_bytes = read_cbor(&Some(f.to_string()));
-        println!(
-            "Encoded ConciseMidTag from veraison ({}): {:?}",
-            f,
-            buffer_to_hex(comid_cbor_bytes.as_slice())
-        );
-        let comid_d: ConciseMidTagCbor = from_reader(comid_cbor_bytes.clone().as_slice()).unwrap();
-        //println!("Decoded ConciseMidTag: {:?}", comid_d);
-        let mut encoded_token = vec![];
-        let _ = into_writer(&comid_d, &mut encoded_token);
-        assert_eq!(comid_cbor_bytes, encoded_token);
+    let env = EnvironmentMapCbor {
+        class: Some(ClassMapCbor {
+            id: Some(ClassIdTypeChoiceCbor::Uuid(Required(UuidType(
+                TEST_UUID.as_bytes().to_vec(),
+            )))),
+            vendor: Some("ACME Ltd".to_string()),
+            model: Some("Roadrunner".to_string()),
+            layer: None,
+            index: None,
+        }),
+        instance: Some(InstanceIdTypeChoice::Ueid(Required(UeidType(
+            TEST_UEID.to_vec(),
+        )))),
+        group: None,
+    };
+    let mvm = MeasurementValuesMapCbor {
+        version: Some(VersionMapCbor {
+            version: "1.0.0".to_string(),
+            version_scheme: None,
+        }),
+        svn: None,
+        digests: Some(vec![common::arrays::HashEntryCbor {
+            hash_alg_id: 1,
+            hash_value: vec![0xAA; 32],
+        }]),
+        flags: None,
+        raw_value: None,
+        raw_value_mask: None,
+        mac_addr: None,
+        ip_addr: None,
+        serial_number: Some("SN-001".to_string()),
+        ueid: None,
+        uuid: None,
+        name: None,
+        cryptokeys: None,
+        int_range: None,
+        other: None,
+    };
+    let comid = ConciseMidTagCbor {
+        language: None,
+        other: None,
+        tag_identity: Some(TagIdentityMapCbor {
+            tag_id: TagIdTypeChoiceCbor::Uuid(UuidType(TEST_UUID.as_bytes().to_vec())),
+            tag_version: Some(TagVersionType::U64(1)),
+        }),
+        entities: None,
+        linked_tags: None,
+        triples: TriplesMapCbor {
+            reference_triples: Some(vec![ReferenceTripleRecordCbor {
+                environment_map: env,
+                measurement_map: vec![MeasurementMapCbor {
+                    mkey: None,
+                    value: mvm,
+                    authorized_by: None,
+                }],
+            }]),
+            endorsed_triples: None,
+            identity_triples: None,
+            attest_key_triples: None,
+            dependency_triples: None,
+            membership_triples: None,
+            coswid_triples: None,
+            conditional_endorsement_series_triples: None,
+            conditional_endorsement_triples: None,
+            other: None,
+        },
+    };
 
-        let comid_json: ConciseMidTag = comid_d.try_into().unwrap();
-        println!("{}", serde_json::to_string(&comid_json).unwrap());
+    // CBOR round-trip
+    let mut buf = vec![];
+    let _ = into_writer(&comid, &mut buf);
+    let decoded: ConciseMidTagCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(comid, decoded);
 
-        let mut encoded_token2 = vec![];
-        let _ = into_writer(&comid_json, &mut encoded_token2);
-        println!(
-            "Encoded ConciseMidTag with string keys: {:?}",
-            buffer_to_hex(encoded_token2.as_slice())
-        );
-
-        //todo the roundtrip here does not always yield expected result due to differences in tagged int encoding
-        // (tag 600 becomes tag 551 in the ->JSON-> transition)
-        // let comid_cbor: ConciseMidTagCbor = comid_json.try_into().unwrap();
-        // let mut encoded_token3 = vec![];
-        // let _ = into_writer(&comid_cbor, &mut encoded_token3);
-        // println!(
-        //     "Re-encoded ConciseMidTag with integer keys: {:?}",
-        //     buffer_to_hex(encoded_token3.as_slice())
-        // );
-        // assert_eq!(comid_cbor_bytes, encoded_token3);
-    }
+    // CBOR -> JSON -> CBOR round-trip
+    let json: ConciseMidTag = decoded.try_into().unwrap();
+    let json_str = serde_json::to_string(&json).unwrap();
+    let json_back: ConciseMidTag = serde_json::from_str(&json_str).unwrap();
+    let cbor_back: ConciseMidTagCbor = json_back.try_into().unwrap();
+    let mut buf2 = vec![];
+    let _ = into_writer(&cbor_back, &mut buf2);
+    assert_eq!(buf, buf2);
 }
 
 #[test]
@@ -157,51 +196,115 @@ fn corim_locator_map_test() {
 }
 
 #[test]
-#[ignore] // test vectors are from older spec version, need draft-10 vectors
-fn corim_map_test() {
-    let comid_cbor_bytes = read_cbor(&Some("./tests/examples/corim_1.cbor".to_string()));
-    println!(
-        "Encoded CorimMap from veraison: {:?}",
-        buffer_to_hex(comid_cbor_bytes.as_slice())
-    );
-    let comid_d: CorimMapCbor = from_reader(comid_cbor_bytes.as_slice()).unwrap();
-    println!("Decoded CorimMapCbor: {:?}", comid_d);
-    let mut encoded_token = vec![];
-    let _ = into_writer(&comid_d, &mut encoded_token);
-    assert_eq!(comid_cbor_bytes, encoded_token);
+fn corim_map_roundtrip() {
+    use corim::arrays::ReferenceTripleRecordCbor;
 
-    //parse the tags now
-    for t in comid_d.tags {
-        match t {
-            BytesType(b) => {
-                let x: Result<Value, _> = from_reader(b.as_slice());
-                match &x {
-                    Ok(Value::Tag(505, v)) => {
-                        let val: Value = *v.clone();
-                        let swid: ConciseSwidTagCbor = val.try_into().unwrap();
-                        let tagged_swid = TaggedCoswidCbor(Required(swid));
-                        let mut encoded_token_swid = vec![];
-                        let _ = into_writer(&tagged_swid, &mut encoded_token_swid);
-                        assert_eq!(b, encoded_token_swid);
-                    }
-                    Ok(Value::Tag(506, v)) => {
-                        let val: Value = *v.clone();
-                        let comid: ConciseMidTagCbor = val.try_into().unwrap();
-                        let tagged_comid = TaggedComidCbor(Required(comid));
-                        let mut encoded_token_comid = vec![];
-                        let _ = into_writer(&tagged_comid, &mut encoded_token_comid);
-                        assert_eq!(b, encoded_token_comid);
-                    }
-                    Ok(_) => {
-                        panic!()
-                    }
-                    Err(_) => {
-                        panic!()
-                    }
-                }
-            }
+    // Build a minimal CoMID
+    let comid = ConciseMidTagCbor {
+        language: None,
+        other: None,
+        tag_identity: Some(TagIdentityMapCbor {
+            tag_id: TagIdTypeChoiceCbor::Uuid(UuidType(TEST_UUID.as_bytes().to_vec())),
+            tag_version: Some(TagVersionType::U64(0)),
+        }),
+        entities: None,
+        linked_tags: None,
+        triples: TriplesMapCbor {
+            reference_triples: Some(vec![ReferenceTripleRecordCbor {
+                environment_map: EnvironmentMapCbor {
+                    class: Some(ClassMapCbor {
+                        id: Some(ClassIdTypeChoiceCbor::Uuid(Required(UuidType(
+                            TEST_UUID.as_bytes().to_vec(),
+                        )))),
+                        vendor: Some("Test Vendor".to_string()),
+                        model: None,
+                        layer: None,
+                        index: None,
+                    }),
+                    instance: None,
+                    group: None,
+                },
+                measurement_map: vec![MeasurementMapCbor {
+                    mkey: None,
+                    value: MeasurementValuesMapCbor {
+                        version: None,
+                        svn: None,
+                        digests: Some(vec![common::arrays::HashEntryCbor {
+                            hash_alg_id: 1,
+                            hash_value: vec![0xBB; 32],
+                        }]),
+                        flags: None,
+                        raw_value: None,
+                        raw_value_mask: None,
+                        mac_addr: None,
+                        ip_addr: None,
+                        serial_number: None,
+                        ueid: None,
+                        uuid: None,
+                        name: None,
+                        cryptokeys: None,
+                        int_range: None,
+                        other: None,
+                    },
+                    authorized_by: None,
+                }],
+            }]),
+            endorsed_triples: None,
+            identity_triples: None,
+            attest_key_triples: None,
+            dependency_triples: None,
+            membership_triples: None,
+            coswid_triples: None,
+            conditional_endorsement_series_triples: None,
+            conditional_endorsement_triples: None,
+            other: None,
+        },
+    };
+
+    // Serialize the CoMID as a tagged (506) CBOR byte string for embedding in CoRIM
+    let tagged_comid = TaggedComidCbor(Required(comid));
+    let mut comid_bytes = vec![];
+    let _ = into_writer(&tagged_comid, &mut comid_bytes);
+
+    // Build a CoRIM containing the CoMID
+    let corim = CorimMapCbor {
+        id: CorimIdTypeChoice::Str("test-corim-id".to_string()),
+        tags: vec![BytesType(comid_bytes.clone())],
+        dependent_rims: None,
+        profile: None,
+        rim_validity: None,
+        entities: None,
+    };
+
+    // CBOR round-trip
+    let mut buf = vec![];
+    let _ = into_writer(&corim, &mut buf);
+    let decoded: CorimMapCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(corim, decoded);
+    assert_eq!(decoded.tags.len(), 1);
+
+    // Verify the embedded tag can be parsed back as a tagged CoMID
+    let BytesType(tag_bytes) = &decoded.tags[0];
+    let tag_value: Value = from_reader(tag_bytes.as_slice()).unwrap();
+    match &tag_value {
+        Value::Tag(506, inner) => {
+            let comid_dec: ConciseMidTagCbor = inner.as_ref().clone().try_into().unwrap();
+            assert_eq!(
+                comid_dec.tag_identity.unwrap().tag_version,
+                Some(TagVersionType::U64(0))
+            );
         }
+        other => panic!("expected tag 506, got: {:?}", other),
     }
+
+    // CBOR -> JSON -> CBOR round-trip
+    let json: CorimMap = decoded.try_into().unwrap();
+    let json_str = serde_json::to_string(&json).unwrap();
+    let json_back: CorimMap = serde_json::from_str(&json_str).unwrap();
+    let cbor_back: CorimMapCbor = json_back.try_into().unwrap();
+    let mut buf2 = vec![];
+    let _ = into_writer(&cbor_back, &mut buf2);
+    assert_eq!(buf, buf2);
 }
 
 #[test]

@@ -402,7 +402,7 @@ fn corim_sign(args: &CorimSignSubcommand) {
         }
     };
 
-    // Ensure the payload is wrapped in tag 501 (unsigned CoRIM) for cocli interop.
+    // Ensure the payload is wrapped in tag 501 per draft-ietf-rats-corim Section 4.1.
     // If it's already tagged, use as-is; otherwise wrap it.
     let corim_bytes = match ensure_corim_tag(&corim_file_bytes) {
         Ok(b) => b,
@@ -474,7 +474,7 @@ fn corim_sign(args: &CorimSignSubcommand) {
         return;
     }
 
-    // Build protected header matching cocli format:
+    // Build protected header:
     // label 1 = alg, label 3 = content_type, label 8 = meta (as bstr)
     let hdr = HeaderMap {
         alg_id: Some(TextOrInt::Int(algorithm.to_i64())),

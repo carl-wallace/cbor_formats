@@ -64,7 +64,7 @@ cfcli corim display --file-to-display unsigned-corim.cbor
 ### CoRIM signing and verification
 
 The `corim` command supports signing, verifying, and extracting CoRIM payloads
-using COSE Sign1 with JWK keys (EC P-256, P-384, and Ed25519).
+using COSE Sign1 with JWK or COSE Key files (EC P-256, P-384, and Ed25519).
 
 ```sh
 # Sign a CoRIM
@@ -88,7 +88,7 @@ cfcli corim extract \
 ### CoSERV signing and verification
 
 The `coserv` command supports signing, verifying, and extracting CoSERV payloads
-using COSE Sign1 with JWK keys (EC P-256, P-384, and Ed25519).
+using COSE Sign1 with JWK or COSE Key files (EC P-256, P-384, and Ed25519).
 
 ```sh
 # Sign a CoSERV
@@ -111,7 +111,7 @@ cfcli coserv extract \
 ### EAR signing and verification
 
 The `ear` command supports signing, verifying, and extracting EAR payloads
-using COSE Sign1 with JWK keys (EC P-256, P-384, and Ed25519).
+using COSE Sign1 with JWK or COSE Key files (EC P-256, P-384, and Ed25519).
 
 ```sh
 # Sign an EAR
@@ -133,24 +133,8 @@ cfcli ear extract \
 
 ### CoTS store creation
 
-The `cots` command has additional subcommands for building trust anchor stores
-from X.509 certificates.
-
-```sh
-# Create a concise-ta-store-map from CA and TA certificates
-cfcli cots create-store \
-  --cas ca-certs/ \
-  --tas ta-certs/ \
-  --environment env.json \
-  --language en \
-  --output store.cbor
-
-# Wrap a CoTS in a CoRIM
-cfcli cots create-corim \
-  --template corim.json \
-  --cots cots.cbor \
-  --output corim.cbor
-```
+The `cots create-store` and `cots create-corim` subcommands are **not yet implemented**.
+The `cots create` and `cots display` subcommands are available.
 
 ## Minimum Supported Rust Version
 

@@ -33,6 +33,13 @@ tl;dr: not ready to use.
 This is a work-in-progress implementation which is at an early stage of
 development.
 
+### Limitations
+
+- **Nested token deserialization**: `NestedTokenCbor` cannot currently be deserialized
+  from CBOR `Value` types. EATs that contain nested tokens (RFC 9711 Section 4.2.18)
+  will produce an error during CBOR decoding. JSON-to-CBOR conversion of nested tokens
+  is supported.
+
 ## Minimum Supported Rust Version
 
 This crate requires **Rust 1.85** at a minimum.

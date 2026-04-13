@@ -151,13 +151,13 @@ pub struct NestedTokenCbor(pub SelectorCbor);
 impl TryFrom<Value> for NestedTokenCbor {
     type Error = String;
     fn try_from(_value: Value) -> Result<Self, Self::Error> {
-        todo!()
+        Err("NestedTokenCbor deserialization from CBOR Value is not yet implemented".to_string())
     }
 }
 impl TryFrom<&Value> for NestedTokenCbor {
     type Error = String;
     fn try_from(_value: &Value) -> Result<Self, Self::Error> {
-        todo!()
+        Err("NestedTokenCbor deserialization from CBOR Value is not yet implemented".to_string())
     }
 }
 impl TryFrom<NestedToken> for NestedTokenCbor {

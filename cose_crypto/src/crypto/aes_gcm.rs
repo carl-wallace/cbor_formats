@@ -1,4 +1,4 @@
-//! AES-GCM AEAD implementations (A128GCM, A192GCM, A256GCM).
+//! AES-GCM AEAD implementations (A128GCM, A256GCM).
 #![allow(deprecated)]
 
 use alloc::string::ToString;
@@ -76,10 +76,10 @@ impl CoseAead for AesGcmKey {
         match self {
             Self::Aes128(cipher) => cipher
                 .encrypt(nonce, payload)
-                .map_err(|_| CoseCryptoError::DecryptionFailed),
+                .map_err(|_| CoseCryptoError::EncryptionFailed),
             Self::Aes256(cipher) => cipher
                 .encrypt(nonce, payload)
-                .map_err(|_| CoseCryptoError::DecryptionFailed),
+                .map_err(|_| CoseCryptoError::EncryptionFailed),
         }
     }
 

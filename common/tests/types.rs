@@ -382,6 +382,16 @@ fn time_cbor_non_tag_fails() {
 }
 
 #[test]
+fn time_cbor_wrong_tag_fails() {
+    // Tag 0 is date/time string, not epoch-based — should be rejected
+    let v = Value::Tag(0, Box::new(Value::Integer(1234567890.into())));
+    assert!(TimeCbor::try_from(&v).is_err());
+    // Arbitrary wrong tag
+    let v = Value::Tag(99, Box::new(Value::Integer(1234567890.into())));
+    assert!(TimeCbor::try_from(&v).is_err());
+}
+
+#[test]
 fn time_cbor_roundtrip() {
     let tc = TimeCbor::try_from(1700000000i64).unwrap();
     let mut buf = vec![];

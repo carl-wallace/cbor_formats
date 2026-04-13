@@ -18,6 +18,8 @@ pub enum CoseCryptoError {
     VerificationFailed,
     /// MAC verification failed.
     MacVerificationFailed,
+    /// Encryption failed.
+    EncryptionFailed,
     /// Decryption failed.
     DecryptionFailed,
     /// CBOR encoding/decoding error.
@@ -37,6 +39,7 @@ impl fmt::Display for CoseCryptoError {
             Self::InvalidKey(msg) => write!(f, "invalid key: {msg}"),
             Self::VerificationFailed => write!(f, "signature verification failed"),
             Self::MacVerificationFailed => write!(f, "MAC verification failed"),
+            Self::EncryptionFailed => write!(f, "encryption failed"),
             Self::DecryptionFailed => write!(f, "decryption failed"),
             Self::CborError(msg) => write!(f, "CBOR error: {msg}"),
             Self::MissingField(msg) => write!(f, "missing field: {msg}"),

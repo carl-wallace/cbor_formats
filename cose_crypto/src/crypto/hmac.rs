@@ -6,6 +6,7 @@ use alloc::vec::Vec;
 use ::hmac::{Hmac, KeyInit, Mac};
 use cose::maps::CoseKeyCbor;
 use sha2::{Sha256, Sha384, Sha512};
+use subtle::ConstantTimeEq;
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::algorithm::CoseAlgorithm;
@@ -25,6 +26,11 @@ pub struct HmacSha256Key {
 impl HmacSha256Key {
     /// Create from raw key bytes with the specified algorithm (HS256 or HS256/64).
     pub fn from_bytes(key: &[u8], algorithm: CoseAlgorithm) -> Result<Self, CoseCryptoError> {
+        if key.is_empty() {
+            return Err(CoseCryptoError::InvalidKey(
+                "HMAC key must not be empty".to_string(),
+            ));
+        }
         match algorithm {
             CoseAlgorithm::Hs256 | CoseAlgorithm::Hs256_64 => Ok(Self {
                 key_bytes: key.to_vec(),
@@ -65,7 +71,7 @@ impl CoseMacAlgorithm for HmacSha256Key {
     fn verify(&self, data: &[u8], tag: &[u8]) -> Result<(), CoseCryptoError> {
         let computed = self.compute(data)?;
         let expected_len = self.algorithm.tag_size().unwrap_or(computed.len());
-        if tag.len() != expected_len || !constant_time_eq(&computed[..expected_len], tag) {
+        if tag.len() != expected_len || !bool::from(computed[..expected_len].ct_eq(tag)) {
             return Err(CoseCryptoError::MacVerificationFailed);
         }
         Ok(())
@@ -84,16 +90,21 @@ pub struct HmacSha384Key {
 
 impl HmacSha384Key {
     /// Create from raw key bytes.
-    pub fn from_bytes(key: &[u8]) -> Self {
-        Self {
-            key_bytes: key.to_vec(),
+    pub fn from_bytes(key: &[u8]) -> Result<Self, CoseCryptoError> {
+        if key.is_empty() {
+            return Err(CoseCryptoError::InvalidKey(
+                "HMAC key must not be empty".to_string(),
+            ));
         }
+        Ok(Self {
+            key_bytes: key.to_vec(),
+        })
     }
 
     /// Create from a COSE key structure.
     pub fn from_cose_key(cose_key: &CoseKeyCbor) -> Result<Self, CoseCryptoError> {
         match keys::parse_cose_key(cose_key)? {
-            ParsedCoseKey::Symmetric { k } => Ok(Self::from_bytes(&k)),
+            ParsedCoseKey::Symmetric { k } => Self::from_bytes(&k),
             _ => Err(CoseCryptoError::KeyMismatch(
                 "expected symmetric key".to_string(),
             )),
@@ -111,7 +122,7 @@ impl CoseMacAlgorithm for HmacSha384Key {
 
     fn verify(&self, data: &[u8], tag: &[u8]) -> Result<(), CoseCryptoError> {
         let computed = self.compute(data)?;
-        if tag.len() != computed.len() || !constant_time_eq(&computed, tag) {
+        if tag.len() != computed.len() || !bool::from(computed.ct_eq(tag)) {
             return Err(CoseCryptoError::MacVerificationFailed);
         }
         Ok(())
@@ -130,16 +141,21 @@ pub struct HmacSha512Key {
 
 impl HmacSha512Key {
     /// Create from raw key bytes.
-    pub fn from_bytes(key: &[u8]) -> Self {
-        Self {
-            key_bytes: key.to_vec(),
+    pub fn from_bytes(key: &[u8]) -> Result<Self, CoseCryptoError> {
+        if key.is_empty() {
+            return Err(CoseCryptoError::InvalidKey(
+                "HMAC key must not be empty".to_string(),
+            ));
         }
+        Ok(Self {
+            key_bytes: key.to_vec(),
+        })
     }
 
     /// Create from a COSE key structure.
     pub fn from_cose_key(cose_key: &CoseKeyCbor) -> Result<Self, CoseCryptoError> {
         match keys::parse_cose_key(cose_key)? {
-            ParsedCoseKey::Symmetric { k } => Ok(Self::from_bytes(&k)),
+            ParsedCoseKey::Symmetric { k } => Self::from_bytes(&k),
             _ => Err(CoseCryptoError::KeyMismatch(
                 "expected symmetric key".to_string(),
             )),
@@ -157,7 +173,7 @@ impl CoseMacAlgorithm for HmacSha512Key {
 
     fn verify(&self, data: &[u8], tag: &[u8]) -> Result<(), CoseCryptoError> {
         let computed = self.compute(data)?;
-        if tag.len() != computed.len() || !constant_time_eq(&computed, tag) {
+        if tag.len() != computed.len() || !bool::from(computed.ct_eq(tag)) {
             return Err(CoseCryptoError::MacVerificationFailed);
         }
         Ok(())
@@ -166,16 +182,4 @@ impl CoseMacAlgorithm for HmacSha512Key {
     fn algorithm(&self) -> CoseAlgorithm {
         CoseAlgorithm::Hs512
     }
-}
-
-/// Constant-time byte comparison.
-fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
-    if a.len() != b.len() {
-        return false;
-    }
-    let mut diff = 0u8;
-    for (x, y) in a.iter().zip(b.iter()) {
-        diff |= x ^ y;
-    }
-    diff == 0
 }

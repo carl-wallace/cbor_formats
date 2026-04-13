@@ -22,8 +22,6 @@ pub enum CoseAlgorithm {
     Hs512,
     /// AES-GCM 128-bit key (IANA label 1)
     A128Gcm,
-    /// AES-GCM 192-bit key (IANA label 2)
-    A192Gcm,
     /// AES-GCM 256-bit key (IANA label 3)
     A256Gcm,
     /// ML-DSA-44 (IANA label -48)
@@ -49,7 +47,6 @@ impl CoseAlgorithm {
             6 => Ok(Self::Hs384),
             7 => Ok(Self::Hs512),
             1 => Ok(Self::A128Gcm),
-            2 => Ok(Self::A192Gcm),
             3 => Ok(Self::A256Gcm),
             #[cfg(feature = "pqc")]
             -48 => Ok(Self::MlDsa44),
@@ -72,7 +69,6 @@ impl CoseAlgorithm {
             Self::Hs384 => 6,
             Self::Hs512 => 7,
             Self::A128Gcm => 1,
-            Self::A192Gcm => 2,
             Self::A256Gcm => 3,
             #[cfg(feature = "pqc")]
             Self::MlDsa44 => -48,
@@ -102,7 +98,6 @@ impl CoseAlgorithm {
             Self::Hs384 => "HS384",
             Self::Hs512 => "HS512",
             Self::A128Gcm => "A128GCM",
-            Self::A192Gcm => "A192GCM",
             Self::A256Gcm => "A256GCM",
             #[cfg(feature = "pqc")]
             Self::MlDsa44 => "ML-DSA-44",
@@ -120,7 +115,6 @@ impl CoseAlgorithm {
             Self::Hs384 => Some(48),
             Self::Hs512 => Some(64),
             Self::A128Gcm => Some(16),
-            Self::A192Gcm => Some(24),
             Self::A256Gcm => Some(32),
             _ => None,
         }
@@ -129,7 +123,7 @@ impl CoseAlgorithm {
     /// Returns the nonce/IV size in bytes, if applicable.
     pub fn nonce_size(self) -> Option<usize> {
         match self {
-            Self::A128Gcm | Self::A192Gcm | Self::A256Gcm => Some(12),
+            Self::A128Gcm | Self::A256Gcm => Some(12),
             _ => None,
         }
     }

@@ -5,6 +5,7 @@
 //! | generic key-value pair (tag + value) | [`Tuple`] / [`TupleCbor`] |
 
 use alloc::boxed::Box;
+use alloc::format;
 use alloc::string::{String, ToString};
 use alloc::{vec, vec::Vec};
 use ciborium::value::{Integer, Value};
@@ -124,9 +125,15 @@ impl TryFrom<&TupleCbor> for Vec<Value> {
 impl TryFrom<Vec<Value>> for TupleCbor {
     type Error = String;
     fn try_from(v: Vec<Value>) -> Result<Self, Self::Error> {
+        if v.len() < 2 {
+            return Err(format!(
+                "TupleCbor requires at least 2 elements, got {}",
+                v.len()
+            ));
+        }
         Ok(TupleCbor {
-            key: v[0usize].clone(),
-            value: v[1usize].clone(),
+            key: v[0].clone(),
+            value: v[1].clone(),
         })
     }
 }
