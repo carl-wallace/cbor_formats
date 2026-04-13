@@ -1,12 +1,12 @@
 //! CoSERV (Concise Service) create, display, sign, verify, and extract operations.
 
+use crate::key_utils::{algorithm_from_key, signer_from_key, verifier_from_key};
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
 use ciborium::value::Value;
 use common::{BinaryOrNil, TextOrInt};
 use cose::arrays::CoseSign1Cbor;
 use cose::maps::HeaderMap;
-use crate::key_utils::{algorithm_from_key, signer_from_key, verifier_from_key};
 use cose_crypto::sign::{CoseSign1Builder, verify_sign1};
 use coserv::discovery::*;
 use coserv::maps::*;
@@ -176,9 +176,9 @@ fn coserv_template_to_cbor(template_file: &String, output_dir: &Path) {
             return;
         }
     };
-    output_file
-        .write_all(encoded_token.as_slice())
-        .expect("Unable to write CoSERV file");
+    if let Err(e) = output_file.write_all(encoded_token.as_slice()) {
+        println!("Failed to write CoSERV file {:?}: {}", output_pathbuf, e);
+    }
 }
 
 // ── COSE Sign1 tag #18 helpers ──
@@ -506,9 +506,12 @@ fn discovery_template_to_cbor(template_file: &String, output_dir: &Path) {
             return;
         }
     };
-    output_file
-        .write_all(encoded.as_slice())
-        .expect("Unable to write discovery document file");
+    if let Err(e) = output_file.write_all(encoded.as_slice()) {
+        println!(
+            "Failed to write discovery document {:?}: {}",
+            output_pathbuf, e
+        );
+    }
 }
 
 /// Decode and display a CBOR-encoded CoSERV discovery document as JSON.

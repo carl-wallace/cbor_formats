@@ -1,4 +1,5 @@
 use cose_crypto::algorithm::CoseAlgorithm;
+use cose_crypto::crypto::CoseAead;
 use cose_crypto::crypto::aes_gcm::AesGcmKey;
 use cose_crypto::crypto::ecdsa::{Es256Signer, Es256Verifier, Es384Signer, Es384Verifier};
 use cose_crypto::crypto::eddsa::{Ed25519Signer, Ed25519Verifier};
@@ -254,6 +255,23 @@ fn encrypt0_wrong_key_fails() {
 
     let wrong_aead = AesGcmKey::from_bytes(&[0x99u8; 16]).unwrap();
     assert!(decrypt_encrypt0(&msg, &wrong_aead, &[]).is_err());
+}
+
+// ── AES-GCM invalid nonce length ──
+
+#[test]
+fn encrypt0_wrong_nonce_length_returns_error() {
+    let key_bytes = [0x55u8; 16];
+    let aead = AesGcmKey::from_bytes(&key_bytes).unwrap();
+
+    // Too short
+    assert!(aead.encrypt(&[0u8; 8], &[], b"data").is_err());
+    // Too long
+    assert!(aead.encrypt(&[0u8; 16], &[], b"data").is_err());
+    // Empty
+    assert!(aead.encrypt(&[], &[], b"data").is_err());
+    // Correct length works
+    assert!(aead.encrypt(&[0u8; 12], &[], b"data").is_ok());
 }
 
 // ── Sign1 with external AAD ──

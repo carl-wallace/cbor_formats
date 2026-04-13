@@ -27,8 +27,14 @@ fn cose_wg_p256_sign_verify_roundtrip() {
     let pub_key = parse_cose_key(pub_cbor);
 
     // Algorithm detection
-    assert_eq!(algorithm_from_cose_key(&priv_key).unwrap(), CoseAlgorithm::Es256);
-    assert_eq!(algorithm_from_cose_key(&pub_key).unwrap(), CoseAlgorithm::Es256);
+    assert_eq!(
+        algorithm_from_cose_key(&priv_key).unwrap(),
+        CoseAlgorithm::Es256
+    );
+    assert_eq!(
+        algorithm_from_cose_key(&pub_key).unwrap(),
+        CoseAlgorithm::Es256
+    );
 
     // Sign with private key
     let signer = signer_from_cose_key(&priv_key).unwrap();
@@ -184,10 +190,7 @@ fn sign_with_jwk_converted_cose_key_ed25519() {
     let key_cbor = include_bytes!("../../cfcli/tests/data/keys/ed25519-from-jwk.cosekey");
     let key = parse_cose_key(key_cbor);
 
-    assert_eq!(
-        algorithm_from_cose_key(&key).unwrap(),
-        CoseAlgorithm::Eddsa
-    );
+    assert_eq!(algorithm_from_cose_key(&key).unwrap(), CoseAlgorithm::Eddsa);
 
     let signer = signer_from_cose_key(&key).unwrap();
     let verifier = verifier_from_cose_key(&key).unwrap();
@@ -267,8 +270,8 @@ mod ml_dsa {
     /// Load a COSE Key from the draft-ietf-cose-dilithium test vector JSON.
     fn load_spec_cose_key(variant: &str) -> CoseKeyCbor {
         let path = format!("./tests/examples/{variant}.cose.json");
-        let data = std::fs::read_to_string(&path)
-            .unwrap_or_else(|e| panic!("failed to read {path}: {e}"));
+        let data =
+            std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("failed to read {path}: {e}"));
         let raw: serde_json::Value = serde_json::from_str(&data).unwrap();
         let key_hex = raw["key"].as_str().unwrap();
         let key_bytes = hex::decode(key_hex).unwrap();
@@ -278,8 +281,8 @@ mod ml_dsa {
     /// Load a COSE_Sign1 from the draft-ietf-cose-dilithium test vector JSON.
     fn load_spec_sign1(variant: &str) -> cose::arrays::CoseSign1Cbor {
         let path = format!("./tests/examples/{variant}.cose.json");
-        let data = std::fs::read_to_string(&path)
-            .unwrap_or_else(|e| panic!("failed to read {path}: {e}"));
+        let data =
+            std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("failed to read {path}: {e}"));
         let raw: serde_json::Value = serde_json::from_str(&data).unwrap();
         let sign1_hex = raw["sign1"].as_str().unwrap();
         let sign1_bytes = hex::decode(sign1_hex).unwrap();
@@ -287,8 +290,7 @@ mod ml_dsa {
         match from_reader::<cose::arrays::CoseSign1Cbor, _>(sign1_bytes.as_slice()) {
             Ok(s) => s,
             Err(_) => {
-                let value: ciborium::value::Value =
-                    from_reader(sign1_bytes.as_slice()).unwrap();
+                let value: ciborium::value::Value = from_reader(sign1_bytes.as_slice()).unwrap();
                 if let ciborium::value::Value::Tag(18, inner) = value {
                     let mut buf = vec![];
                     ciborium::ser::into_writer(&*inner, &mut buf).unwrap();

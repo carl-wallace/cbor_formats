@@ -30,10 +30,7 @@ fn encode_cose_key(entries: Vec<(Value, Value)>) -> Vec<u8> {
 fn ec2_key(crv: i64, x: &[u8], y: &[u8], d: Option<&[u8]>) -> Vec<u8> {
     let mut entries = vec![
         (Value::Integer(1.into()), Value::Integer(2.into())), // kty: EC2
-        (
-            Value::Integer((-1i64).into()),
-            Value::Integer(crv.into()),
-        ), // crv
+        (Value::Integer((-1i64).into()), Value::Integer(crv.into())), // crv
         (Value::Integer((-2i64).into()), Value::Bytes(x.to_vec())), // x
         (Value::Integer((-3i64).into()), Value::Bytes(y.to_vec())), // y
     ];
@@ -48,10 +45,7 @@ fn ec2_key(crv: i64, x: &[u8], y: &[u8], d: Option<&[u8]>) -> Vec<u8> {
 fn okp_key(crv: i64, x: &[u8], d: Option<&[u8]>) -> Vec<u8> {
     let mut entries = vec![
         (Value::Integer(1.into()), Value::Integer(1.into())), // kty: OKP
-        (
-            Value::Integer((-1i64).into()),
-            Value::Integer(crv.into()),
-        ), // crv
+        (Value::Integer((-1i64).into()), Value::Integer(crv.into())), // crv
         (Value::Integer((-2i64).into()), Value::Bytes(x.to_vec())), // x
     ];
     if let Some(d) = d {

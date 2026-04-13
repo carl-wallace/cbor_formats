@@ -6,6 +6,7 @@ use alloc::string::ToString;
 use alloc::vec::Vec;
 use ciborium::value::Value;
 use cose::maps::CoseKeyCbor;
+use zeroize::{Zeroize, Zeroizing};
 
 use crate::algorithm::CoseAlgorithm;
 use crate::crypto::{CoseSigner, CoseVerifier};
@@ -86,6 +87,37 @@ pub enum ParsedCoseKey {
         /// Public key bytes (label -1)
         pub_key: Vec<u8>,
     },
+}
+
+impl Zeroize for ParsedCoseKey {
+    fn zeroize(&mut self) {
+        match self {
+            Self::EcPrivate { d, x, y, .. } => {
+                d.zeroize();
+                x.zeroize();
+                y.zeroize();
+            }
+            Self::EcPublic { x, y, .. } => {
+                x.zeroize();
+                y.zeroize();
+            }
+            Self::OkpPrivate { d, x, .. } => {
+                d.zeroize();
+                x.zeroize();
+            }
+            Self::OkpPublic { x, .. } => x.zeroize(),
+            Self::Symmetric { k } => k.zeroize(),
+            #[cfg(feature = "pqc")]
+            Self::AkpPrivate {
+                pub_key, priv_key, ..
+            } => {
+                pub_key.zeroize();
+                priv_key.zeroize();
+            }
+            #[cfg(feature = "pqc")]
+            Self::AkpPublic { pub_key, .. } => pub_key.zeroize(),
+        }
+    }
 }
 
 /// Extract a parameter value from the `other` field of a CoseKeyCbor by integer label.
@@ -226,8 +258,9 @@ fn parse_akp_key(key: &CoseKeyCbor) -> Result<ParsedCoseKey, CoseCryptoError> {
 /// Symmetric keys require an explicit `alg` field since the key size alone
 /// is ambiguous (e.g. 32 bytes could be HMAC-SHA-256 or AES-256-GCM).
 pub fn algorithm_from_cose_key(key: &CoseKeyCbor) -> Result<CoseAlgorithm, CoseCryptoError> {
-    match parse_cose_key(key)? {
-        ParsedCoseKey::EcPrivate { crv, .. } | ParsedCoseKey::EcPublic { crv, .. } => match crv {
+    let parsed = Zeroizing::new(parse_cose_key(key)?);
+    match &*parsed {
+        ParsedCoseKey::EcPrivate { crv, .. } | ParsedCoseKey::EcPublic { crv, .. } => match *crv {
             CRV_P256 => Ok(CoseAlgorithm::Es256),
             CRV_P384 => Ok(CoseAlgorithm::Es384),
             other => Err(CoseCryptoError::InvalidKey(format!(
@@ -235,7 +268,7 @@ pub fn algorithm_from_cose_key(key: &CoseKeyCbor) -> Result<CoseAlgorithm, CoseC
             ))),
         },
         ParsedCoseKey::OkpPrivate { crv, .. } | ParsedCoseKey::OkpPublic { crv, .. } => {
-            match crv {
+            match *crv {
                 CRV_ED25519 => Ok(CoseAlgorithm::Eddsa),
                 other => Err(CoseCryptoError::InvalidKey(format!(
                     "unsupported OKP curve: {other}"
@@ -253,7 +286,7 @@ pub fn algorithm_from_cose_key(key: &CoseKeyCbor) -> Result<CoseAlgorithm, CoseC
         }
         #[cfg(feature = "pqc")]
         ParsedCoseKey::AkpPrivate { alg, .. } | ParsedCoseKey::AkpPublic { alg, .. } => {
-            CoseAlgorithm::from_i64(alg)
+            CoseAlgorithm::from_i64(*alg)
         }
     }
 }
@@ -265,29 +298,28 @@ pub fn signer_from_cose_key(key: &CoseKeyCbor) -> Result<Box<dyn CoseSigner>, Co
     use crate::crypto::ecdsa::{Es256Signer, Es384Signer};
     use crate::crypto::eddsa::Ed25519Signer;
 
-    match parse_cose_key(key)? {
+    let parsed = Zeroizing::new(parse_cose_key(key)?);
+    match &*parsed {
         ParsedCoseKey::EcPrivate { crv, d, .. } => match crv {
-            CRV_P256 => Ok(Box::new(Es256Signer::from_bytes(&d)?)),
-            CRV_P384 => Ok(Box::new(Es384Signer::from_bytes(&d)?)),
+            &CRV_P256 => Ok(Box::new(Es256Signer::from_bytes(d)?)),
+            &CRV_P384 => Ok(Box::new(Es384Signer::from_bytes(d)?)),
             other => Err(CoseCryptoError::InvalidKey(format!(
                 "unsupported EC2 curve: {other}"
             ))),
         },
         ParsedCoseKey::OkpPrivate { crv, d, .. } => match crv {
-            CRV_ED25519 => Ok(Box::new(Ed25519Signer::from_bytes(&d)?)),
+            &CRV_ED25519 => Ok(Box::new(Ed25519Signer::from_bytes(d)?)),
             other => Err(CoseCryptoError::InvalidKey(format!(
                 "unsupported OKP curve: {other}"
             ))),
         },
         #[cfg(feature = "pqc")]
-        ParsedCoseKey::AkpPrivate {
-            alg, priv_key, ..
-        } => {
+        ParsedCoseKey::AkpPrivate { alg, priv_key, .. } => {
             use crate::crypto::ml_dsa::{MlDsa44Signer, MlDsa65Signer, MlDsa87Signer};
-            match CoseAlgorithm::from_i64(alg)? {
-                CoseAlgorithm::MlDsa44 => Ok(Box::new(MlDsa44Signer::from_seed(&priv_key)?)),
-                CoseAlgorithm::MlDsa65 => Ok(Box::new(MlDsa65Signer::from_seed(&priv_key)?)),
-                CoseAlgorithm::MlDsa87 => Ok(Box::new(MlDsa87Signer::from_seed(&priv_key)?)),
+            match CoseAlgorithm::from_i64(*alg)? {
+                CoseAlgorithm::MlDsa44 => Ok(Box::new(MlDsa44Signer::from_seed(priv_key)?)),
+                CoseAlgorithm::MlDsa65 => Ok(Box::new(MlDsa65Signer::from_seed(priv_key)?)),
+                CoseAlgorithm::MlDsa87 => Ok(Box::new(MlDsa87Signer::from_seed(priv_key)?)),
                 _ => Err(CoseCryptoError::InvalidKey(format!(
                     "unsupported AKP algorithm: {alg}"
                 ))),
@@ -303,40 +335,36 @@ pub fn signer_from_cose_key(key: &CoseKeyCbor) -> Result<Box<dyn CoseSigner>, Co
 ///
 /// Uses the public key components. If a private key is present, the public
 /// components are still used for verification.
-pub fn verifier_from_cose_key(
-    key: &CoseKeyCbor,
-) -> Result<Box<dyn CoseVerifier>, CoseCryptoError> {
+pub fn verifier_from_cose_key(key: &CoseKeyCbor) -> Result<Box<dyn CoseVerifier>, CoseCryptoError> {
     use crate::crypto::ecdsa::{Es256Verifier, Es384Verifier};
     use crate::crypto::eddsa::Ed25519Verifier;
 
-    match parse_cose_key(key)? {
+    let parsed = Zeroizing::new(parse_cose_key(key)?);
+    match &*parsed {
         ParsedCoseKey::EcPublic { crv, x, y } | ParsedCoseKey::EcPrivate { crv, x, y, .. } => {
             match crv {
-                CRV_P256 => Ok(Box::new(Es256Verifier::from_xy(&x, &y)?)),
-                CRV_P384 => Ok(Box::new(Es384Verifier::from_xy(&x, &y)?)),
+                &CRV_P256 => Ok(Box::new(Es256Verifier::from_xy(x, y)?)),
+                &CRV_P384 => Ok(Box::new(Es384Verifier::from_xy(x, y)?)),
                 other => Err(CoseCryptoError::InvalidKey(format!(
                     "unsupported EC2 curve: {other}"
                 ))),
             }
         }
-        ParsedCoseKey::OkpPublic { crv, x } | ParsedCoseKey::OkpPrivate { crv, x, .. } => {
-            match crv {
-                CRV_ED25519 => Ok(Box::new(Ed25519Verifier::from_bytes(&x)?)),
-                other => Err(CoseCryptoError::InvalidKey(format!(
-                    "unsupported OKP curve: {other}"
-                ))),
-            }
-        }
+        ParsedCoseKey::OkpPublic { crv, x } | ParsedCoseKey::OkpPrivate { crv, x, .. } => match crv
+        {
+            &CRV_ED25519 => Ok(Box::new(Ed25519Verifier::from_bytes(x)?)),
+            other => Err(CoseCryptoError::InvalidKey(format!(
+                "unsupported OKP curve: {other}"
+            ))),
+        },
         #[cfg(feature = "pqc")]
         ParsedCoseKey::AkpPublic { alg, pub_key }
-        | ParsedCoseKey::AkpPrivate {
-            alg, pub_key, ..
-        } => {
+        | ParsedCoseKey::AkpPrivate { alg, pub_key, .. } => {
             use crate::crypto::ml_dsa::{MlDsa44Verifier, MlDsa65Verifier, MlDsa87Verifier};
-            match CoseAlgorithm::from_i64(alg)? {
-                CoseAlgorithm::MlDsa44 => Ok(Box::new(MlDsa44Verifier::from_bytes(&pub_key)?)),
-                CoseAlgorithm::MlDsa65 => Ok(Box::new(MlDsa65Verifier::from_bytes(&pub_key)?)),
-                CoseAlgorithm::MlDsa87 => Ok(Box::new(MlDsa87Verifier::from_bytes(&pub_key)?)),
+            match CoseAlgorithm::from_i64(*alg)? {
+                CoseAlgorithm::MlDsa44 => Ok(Box::new(MlDsa44Verifier::from_bytes(pub_key)?)),
+                CoseAlgorithm::MlDsa65 => Ok(Box::new(MlDsa65Verifier::from_bytes(pub_key)?)),
+                CoseAlgorithm::MlDsa87 => Ok(Box::new(MlDsa87Verifier::from_bytes(pub_key)?)),
                 _ => Err(CoseCryptoError::InvalidKey(format!(
                     "unsupported AKP algorithm: {alg}"
                 ))),
@@ -374,11 +402,7 @@ mod tests {
     use common::{TextOrInt, TupleCbor};
 
     /// Build a CoseKeyCbor with the given kty and key-specific parameters.
-    fn build_cose_key(
-        kty: i64,
-        alg: Option<i64>,
-        params: Vec<(i64, Value)>,
-    ) -> CoseKeyCbor {
+    fn build_cose_key(kty: i64, alg: Option<i64>, params: Vec<(i64, Value)>) -> CoseKeyCbor {
         let other: Vec<TupleCbor> = params
             .into_iter()
             .map(|(label, value)| TupleCbor {
@@ -410,14 +434,21 @@ mod tests {
         };
         let d = sk.to_bytes().to_vec();
 
-        let cose_key = build_cose_key(2, None, vec![
-            (-1, Value::Integer(CRV_P256.into())),
-            (-2, Value::Bytes(x.clone())),
-            (-3, Value::Bytes(y.clone())),
-            (-4, Value::Bytes(d)),
-        ]);
+        let cose_key = build_cose_key(
+            2,
+            None,
+            vec![
+                (-1, Value::Integer(CRV_P256.into())),
+                (-2, Value::Bytes(x.clone())),
+                (-3, Value::Bytes(y.clone())),
+                (-4, Value::Bytes(d)),
+            ],
+        );
 
-        assert_eq!(algorithm_from_cose_key(&cose_key).unwrap(), CoseAlgorithm::Es256);
+        assert_eq!(
+            algorithm_from_cose_key(&cose_key).unwrap(),
+            CoseAlgorithm::Es256
+        );
 
         let signer = signer_from_cose_key(&cose_key).unwrap();
         let verifier = verifier_from_cose_key(&cose_key).unwrap();
@@ -432,11 +463,15 @@ mod tests {
         verify_sign1(&sign1, verifier.as_ref(), &[]).unwrap();
 
         // Also test public-only key for verification
-        let pub_key = build_cose_key(2, None, vec![
-            (-1, Value::Integer(CRV_P256.into())),
-            (-2, Value::Bytes(x)),
-            (-3, Value::Bytes(y)),
-        ]);
+        let pub_key = build_cose_key(
+            2,
+            None,
+            vec![
+                (-1, Value::Integer(CRV_P256.into())),
+                (-2, Value::Bytes(x)),
+                (-3, Value::Bytes(y)),
+            ],
+        );
         let pub_verifier = verifier_from_cose_key(&pub_key).unwrap();
         verify_sign1(&sign1, pub_verifier.as_ref(), &[]).unwrap();
 
@@ -450,13 +485,20 @@ mod tests {
         let sk = ed25519_dalek::SigningKey::generate(&mut rng);
         let vk = sk.verifying_key();
 
-        let cose_key = build_cose_key(1, None, vec![
-            (-1, Value::Integer(CRV_ED25519.into())),
-            (-2, Value::Bytes(vk.as_bytes().to_vec())),
-            (-4, Value::Bytes(sk.to_bytes().to_vec())),
-        ]);
+        let cose_key = build_cose_key(
+            1,
+            None,
+            vec![
+                (-1, Value::Integer(CRV_ED25519.into())),
+                (-2, Value::Bytes(vk.as_bytes().to_vec())),
+                (-4, Value::Bytes(sk.to_bytes().to_vec())),
+            ],
+        );
 
-        assert_eq!(algorithm_from_cose_key(&cose_key).unwrap(), CoseAlgorithm::Eddsa);
+        assert_eq!(
+            algorithm_from_cose_key(&cose_key).unwrap(),
+            CoseAlgorithm::Eddsa
+        );
 
         let signer = signer_from_cose_key(&cose_key).unwrap();
         let verifier = verifier_from_cose_key(&cose_key).unwrap();
@@ -473,16 +515,12 @@ mod tests {
 
     #[test]
     fn cose_key_symmetric_requires_alg() {
-        let cose_key = build_cose_key(4, None, vec![
-            (-1, Value::Bytes(vec![0u8; 32])),
-        ]);
+        let cose_key = build_cose_key(4, None, vec![(-1, Value::Bytes(vec![0u8; 32]))]);
         // Should fail: no alg field
         assert!(algorithm_from_cose_key(&cose_key).is_err());
 
         // With alg field
-        let cose_key_with_alg = build_cose_key(4, Some(5), vec![
-            (-1, Value::Bytes(vec![0u8; 32])),
-        ]);
+        let cose_key_with_alg = build_cose_key(4, Some(5), vec![(-1, Value::Bytes(vec![0u8; 32]))]);
         assert_eq!(
             algorithm_from_cose_key(&cose_key_with_alg).unwrap(),
             CoseAlgorithm::Hs256

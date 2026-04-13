@@ -6,6 +6,7 @@ use alloc::vec::Vec;
 use ::hmac::{Hmac, KeyInit, Mac};
 use cose::maps::CoseKeyCbor;
 use sha2::{Sha256, Sha384, Sha512};
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::algorithm::CoseAlgorithm;
 use crate::error::CoseCryptoError;
@@ -14,8 +15,10 @@ use crate::keys::{self, ParsedCoseKey};
 use super::CoseMacAlgorithm;
 
 /// HMAC-SHA-256 key, used for both HS256 (full 32-byte tag) and HS256/64 (truncated 8-byte tag).
+#[derive(Zeroize, ZeroizeOnDrop)]
 pub struct HmacSha256Key {
     key_bytes: Vec<u8>,
+    #[zeroize(skip)]
     algorithm: CoseAlgorithm,
 }
 
@@ -74,6 +77,7 @@ impl CoseMacAlgorithm for HmacSha256Key {
 }
 
 /// HMAC-SHA-384 key.
+#[derive(Zeroize, ZeroizeOnDrop)]
 pub struct HmacSha384Key {
     key_bytes: Vec<u8>,
 }
@@ -119,6 +123,7 @@ impl CoseMacAlgorithm for HmacSha384Key {
 }
 
 /// HMAC-SHA-512 key.
+#[derive(Zeroize, ZeroizeOnDrop)]
 pub struct HmacSha512Key {
     key_bytes: Vec<u8>,
 }

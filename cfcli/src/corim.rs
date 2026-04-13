@@ -1,5 +1,6 @@
 //! CoRIM (Concise Reference Integrity Manifest) create, display, sign, verify, and extract operations.
 
+use crate::key_utils::{algorithm_from_key, signer_from_key, verifier_from_key};
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
 use ciborium::value::Value;
@@ -7,7 +8,6 @@ use common::{TextOrInt, Tuple};
 use corim::maps::*;
 use cose::arrays::CoseSign1Cbor;
 use cose::maps::HeaderMap;
-use crate::key_utils::{algorithm_from_key, signer_from_key, verifier_from_key};
 use cose_crypto::sign::{CoseSign1Builder, verify_sign1};
 use serde::Deserialize;
 use std::fs;
@@ -174,9 +174,9 @@ fn corim_template_to_cbor(template_file: &String, output_dir: &Path) {
             return;
         }
     };
-    output_file
-        .write_all(encoded_token.as_slice())
-        .expect("Unable to write manifest file");
+    if let Err(e) = output_file.write_all(encoded_token.as_slice()) {
+        println!("Failed to write CoRIM file {:?}: {}", output_pathbuf, e);
+    }
 }
 
 // ── Meta JSON parsing (cocli-compatible format) ──
@@ -240,12 +240,39 @@ fn parse_time(s: &str) -> Result<i64, String> {
     let min: i64 = time_parts[1].parse().map_err(|_| format!("bad min: {s}"))?;
     let sec: i64 = time_parts[2].parse().map_err(|_| format!("bad sec: {s}"))?;
 
+    if !(1970..=9999).contains(&year) {
+        return Err(format!("year out of range: {year}"));
+    }
+    if !(1..=12).contains(&month) {
+        return Err(format!("month out of range: {month}"));
+    }
+    if !(1..=31).contains(&day) {
+        return Err(format!("day out of range: {day}"));
+    }
+    if !(0..=23).contains(&hour) {
+        return Err(format!("hour out of range: {hour}"));
+    }
+    if !(0..=59).contains(&min) {
+        return Err(format!("minute out of range: {min}"));
+    }
+    if !(0..=59).contains(&sec) {
+        return Err(format!("second out of range: {sec}"));
+    }
+
     // Simple days-from-epoch calculation (no leap second handling)
     let mut days = 0i64;
     for y in 1970..year {
         days += if is_leap_year(y) { 366 } else { 365 };
     }
     let month_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    let max_day = if month == 2 && is_leap_year(year) {
+        29
+    } else {
+        month_days[(month - 1) as usize]
+    };
+    if day > max_day as i64 {
+        return Err(format!("day {day} out of range for month {month}"));
+    }
     for m in 1..month {
         days += month_days[(m - 1) as usize] as i64;
         if m == 2 && is_leap_year(year) {

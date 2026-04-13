@@ -167,7 +167,7 @@ fn cots_template_to_cbor(template_file: &String, output_dir: &Path) {
             return;
         }
     };
-    output_file
-        .write_all(encoded_token.as_slice())
-        .expect("Unable to write manifest file");
+    if let Err(e) = output_file.write_all(encoded_token.as_slice()) {
+        println!("Failed to write CoTS file {:?}: {}", output_pathbuf, e);
+    }
 }

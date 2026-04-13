@@ -9,6 +9,7 @@ use alloc::vec::Vec;
 
 use base64ct::{Base64UrlUnpadded, Encoding};
 use serde::Deserialize;
+use zeroize::Zeroizing;
 
 use crate::algorithm::CoseAlgorithm;
 use crate::crypto::ecdsa::{Es256Signer, Es256Verifier, Es384Signer, Es384Verifier};
@@ -74,7 +75,7 @@ pub fn signer_from_jwk(json: &[u8]) -> Result<Box<dyn CoseSigner>, CoseCryptoErr
         .d
         .as_deref()
         .ok_or_else(|| CoseCryptoError::InvalidKey("missing private key (d)".to_string()))?;
-    let d_bytes = b64url_decode(d)?;
+    let d_bytes = Zeroizing::new(b64url_decode(d)?);
 
     match jwk.kty.as_str() {
         "EC" => match jwk.crv.as_deref() {

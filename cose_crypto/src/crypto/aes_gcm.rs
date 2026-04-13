@@ -62,6 +62,12 @@ impl CoseAead for AesGcmKey {
         aad: &[u8],
         plaintext: &[u8],
     ) -> Result<Vec<u8>, CoseCryptoError> {
+        if nonce.len() != 12 {
+            return Err(CoseCryptoError::InvalidKey(alloc::format!(
+                "AES-GCM nonce must be 12 bytes, got {}",
+                nonce.len()
+            )));
+        }
         let nonce = Nonce::from_slice(nonce);
         let payload = Payload {
             msg: plaintext,
@@ -83,6 +89,12 @@ impl CoseAead for AesGcmKey {
         aad: &[u8],
         ciphertext: &[u8],
     ) -> Result<Vec<u8>, CoseCryptoError> {
+        if nonce.len() != 12 {
+            return Err(CoseCryptoError::InvalidKey(alloc::format!(
+                "AES-GCM nonce must be 12 bytes, got {}",
+                nonce.len()
+            )));
+        }
         let nonce = Nonce::from_slice(nonce);
         let payload = Payload {
             msg: ciphertext,
