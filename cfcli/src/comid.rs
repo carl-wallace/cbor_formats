@@ -43,6 +43,10 @@ fn comid_create(args: &ComidCreateSubcommand) {
 
 /// Decode and display a CBOR-encoded CoMID as JSON.
 fn comid_display(args: &DisplaySubcommand) {
+    if matches!(args.format, crate::args::DisplayFormat::Diag) {
+        crate::cbor_diag::display_diag(&args.file_to_display);
+        return;
+    }
     let data = match fs::read(&args.file_to_display) {
         Ok(b) => b,
         Err(e) => {

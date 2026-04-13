@@ -43,14 +43,26 @@ Commands:
 ### Creating objects from JSON templates
 
 Each format supports a `create` subcommand that takes a JSON template and produces
-a CBOR-encoded output file.
+a CBOR-encoded output file. Example templates are in `tests/data/`.
 
 ```sh
 # Create a CoMID from a JSON template
-cfcli comid create --template comid.json --output-dir out/
+cfcli comid create --template tests/data/comid_templates/comid-minimal.json --output-dir out/
 
 # Create from all templates in a directory
-cfcli comid create --template-dir templates/ --output-dir out/
+cfcli comid create --template-dir tests/data/comid_templates/ --output-dir out/
+
+# Create a CoRIM containing CoMID tags
+cfcli corim create \
+  --template tests/data/corim_templates/corim-minimal.json \
+  --comid-dir tests/data/comid_templates/ \
+  --output-dir out/
+
+# Create an EAT
+cfcli eat create --template tests/data/eat_templates/eat-minimal.json --output-dir out/
+
+# Create an EAR
+cfcli ear create --template tests/data/ear_templates/ear-minimal.json --output-dir out/
 ```
 
 ### Displaying CBOR-encoded objects
@@ -58,77 +70,72 @@ cfcli comid create --template-dir templates/ --output-dir out/
 Each format supports a `display` subcommand that decodes and prints a CBOR file.
 
 ```sh
-cfcli corim display --file-to-display unsigned-corim.cbor
+cfcli corim display --file-to-display out/corim-minimal.cbor
 ```
 
-### CoRIM signing and verification
+### Signing and verification
 
-The `corim` command supports signing, verifying, and extracting CoRIM payloads
-using COSE Sign1 with JWK or COSE Key files (EC P-256, P-384, and Ed25519).
+The `corim`, `coserv`, `ear`, and `eat` commands support signing, verifying, and
+extracting payloads using COSE Sign1. Key files can be JWK (JSON) or COSE Key
+(CBOR) format. Supported algorithms: ES256 (P-256), ES384 (P-384), EdDSA (Ed25519),
+and ML-DSA-44/65/87 (with the `pqc` feature).
+
+Example keys are in `tests/data/keys/` (both `.jwk` and `.cosekey` formats).
 
 ```sh
-# Sign a CoRIM
+# Sign a CoRIM (using a JWK key)
 cfcli corim sign \
-  --corim-file unsigned-corim.cbor \
-  --key-file ec-p256.jwk \
-  --meta-file meta.json \
+  --corim-file out/corim-minimal.cbor \
+  --key-file tests/data/keys/es256.jwk \
+  --meta-file tests/data/corim_templates/meta-minimal.json \
+  --output-dir out/
+
+# Sign a CoRIM (using a COSE Key)
+cfcli corim sign \
+  --corim-file out/corim-minimal.cbor \
+  --key-file tests/data/keys/es256.cosekey \
+  --meta-file tests/data/corim_templates/meta-full.json \
   --output-dir out/
 
 # Verify a signed CoRIM
 cfcli corim verify \
-  --signed-corim-file signed-corim.cbor \
-  --key-file ec-p256.jwk
+  --signed-corim-file out/signed-corim-minimal.cbor \
+  --key-file tests/data/keys/es256.jwk
 
 # Extract payload and tags from a signed CoRIM
 cfcli corim extract \
-  --signed-corim-file signed-corim.cbor \
-  --output-dir out/
-```
-
-### CoSERV signing and verification
-
-The `coserv` command supports signing, verifying, and extracting CoSERV payloads
-using COSE Sign1 with JWK or COSE Key files (EC P-256, P-384, and Ed25519).
-
-```sh
-# Sign a CoSERV
-cfcli coserv sign \
-  --coserv-file unsigned-coserv.cbor \
-  --key-file ec-p256.jwk \
+  --signed-corim-file out/signed-corim-minimal.cbor \
   --output-dir out/
 
-# Verify a signed CoSERV
-cfcli coserv verify \
-  --signed-coserv-file signed-coserv.cbor \
-  --key-file ec-p256.jwk
-
-# Extract payload from a signed CoSERV
-cfcli coserv extract \
-  --signed-coserv-file signed-coserv.cbor \
-  --output-dir out/
-```
-
-### EAR signing and verification
-
-The `ear` command supports signing, verifying, and extracting EAR payloads
-using COSE Sign1 with JWK or COSE Key files (EC P-256, P-384, and Ed25519).
-
-```sh
-# Sign an EAR
+# Sign and verify an EAR
 cfcli ear sign \
-  --ear-file unsigned-ear.cbor \
-  --key-file ec-p256.jwk \
+  --ear-file out/ear-minimal.cbor \
+  --key-file tests/data/keys/ed25519.cosekey \
   --output-dir out/
 
-# Verify a signed EAR
 cfcli ear verify \
-  --signed-ear-file signed-ear.cbor \
-  --key-file ec-p256.jwk
+  --signed-ear-file out/signed-ear-minimal.cbor \
+  --key-file tests/data/keys/ed25519.cosekey
 
-# Extract payload from a signed EAR
-cfcli ear extract \
-  --signed-ear-file signed-ear.cbor \
+# Sign and verify an EAT
+cfcli eat sign \
+  --eat-file out/eat-minimal.cbor \
+  --key-file tests/data/keys/es384.jwk \
   --output-dir out/
+
+cfcli eat verify \
+  --signed-eat-file out/signed-eat-minimal.cbor \
+  --key-file tests/data/keys/es384.jwk
+
+# Sign and verify a CoSERV
+cfcli coserv sign \
+  --coserv-file out/coserv-query-refval.cbor \
+  --key-file tests/data/keys/es256.cosekey \
+  --output-dir out/
+
+cfcli coserv verify \
+  --signed-coserv-file out/signed-coserv-query-refval.cbor \
+  --key-file tests/data/keys/es256.cosekey
 ```
 
 ### CoTS store creation

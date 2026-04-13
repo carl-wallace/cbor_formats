@@ -29,8 +29,8 @@ use cose_crypto::sign::{CoseSign1Builder, verify_sign1};
 // verify_sign1(&sign1, &verifier, &[]).unwrap();
 ```
 
-JWK key parsing is available via the `jwk` module for loading keys from JSON Web Key files
-(EC P-256, P-384, and OKP Ed25519).
+Key parsing is available via the `jwk` module (JSON Web Key files) and the `keys` module
+(COSE Key CBOR), supporting EC P-256, P-384, OKP Ed25519, and ML-DSA (with the `pqc` feature).
 
 ## Status
 
@@ -54,13 +54,19 @@ development.
 
 ### Key Generation
 
-The `gen_keys` example generates sample JWK key files (ES256, ES384, EdDSA) for use with `cfcli` sign/verify commands:
+The `gen_keys` example generates sample JWK key material (ES256, ES384, EdDSA):
 
 ```sh
 cargo run --example gen_keys -p cose_crypto
 ```
 
-Output is a set of key-value pairs that can be assembled into JWK JSON files. See `cfcli/tests/data/keys/` for pre-generated samples.
+The `gen_cose_keys` example generates COSE Key CBOR files and converts existing JWK keys:
+
+```sh
+cargo run --example gen_cose_keys -p cose_crypto
+```
+
+Pre-generated key files in both formats are in `cfcli/tests/data/keys/` (`.jwk` and `.cosekey`).
 
 ## Minimum Supported Rust Version
 

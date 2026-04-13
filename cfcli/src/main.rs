@@ -17,6 +17,7 @@
 
 use clap::Parser;
 mod args;
+mod cbor_diag;
 mod comid;
 mod corim;
 mod coserv;

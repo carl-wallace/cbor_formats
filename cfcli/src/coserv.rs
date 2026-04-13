@@ -59,6 +59,10 @@ fn coserv_create(args: &CoservCreateSubcommand) {
 
 /// Decode and display a CBOR-encoded CoSERV as JSON.
 fn coserv_display(args: &DisplaySubcommand) {
+    if matches!(args.format, crate::args::DisplayFormat::Diag) {
+        crate::cbor_diag::display_diag(&args.file_to_display);
+        return;
+    }
     let data = match fs::read(&args.file_to_display) {
         Ok(b) => b,
         Err(e) => {
@@ -516,6 +520,10 @@ fn discovery_template_to_cbor(template_file: &String, output_dir: &Path) {
 
 /// Decode and display a CBOR-encoded CoSERV discovery document as JSON.
 fn coserv_display_discovery(args: &DisplaySubcommand) {
+    if matches!(args.format, crate::args::DisplayFormat::Diag) {
+        crate::cbor_diag::display_diag(&args.file_to_display);
+        return;
+    }
     let data = match fs::read(&args.file_to_display) {
         Ok(b) => b,
         Err(e) => {

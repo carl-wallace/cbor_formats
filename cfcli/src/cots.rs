@@ -50,6 +50,10 @@ fn cots_create(args: &CotsCreateSubcommand) {
 
 /// Decode and display a CBOR-encoded CoTS as JSON.
 fn cots_display(args: &DisplaySubcommand) {
+    if matches!(args.format, crate::args::DisplayFormat::Diag) {
+        crate::cbor_diag::display_diag(&args.file_to_display);
+        return;
+    }
     let data = match fs::read(&args.file_to_display) {
         Ok(b) => b,
         Err(e) => {

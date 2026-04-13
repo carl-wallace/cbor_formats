@@ -12,6 +12,16 @@ pub enum SigningFormat {
     Jws,
 }
 
+/// Display output format.
+#[derive(Clone, Debug, Default, ValueEnum)]
+pub enum DisplayFormat {
+    /// JSON (decoded to JSON-friendly structs) — default
+    #[default]
+    Json,
+    /// CBOR diagnostic notation (RFC 8949 Section 8)
+    Diag,
+}
+
 #[derive(Subcommand, Debug)]
 pub enum Commands {
     /// Create and display CoMID (Concise Module Identifier) objects
@@ -37,6 +47,10 @@ pub struct DisplaySubcommand {
     /// a CBOR-encoded file to decode and display
     #[clap(short, long)]
     pub file_to_display: String,
+
+    /// output format: json (default) or diag (CBOR diagnostic notation)
+    #[clap(long, value_enum, default_value_t = DisplayFormat::Json)]
+    pub format: DisplayFormat,
 }
 
 //----------------------------------------------------------

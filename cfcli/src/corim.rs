@@ -4,7 +4,7 @@ use crate::key_utils::{algorithm_from_key, signer_from_key, verifier_from_key};
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
 use ciborium::value::Value;
-use common::{TextOrInt, Tuple};
+use common::{BytesType, TextOrInt, Tuple};
 use corim::maps::*;
 use cose::arrays::CoseSign1Cbor;
 use cose::maps::HeaderMap;
@@ -48,15 +48,60 @@ fn corim_create(args: &CorimCreateSubcommand) {
         find_files(f, "json", &mut files)
     }
 
+    // Collect CoMID CBOR files to embed as tag 506
+    let mut tag_bytes: Vec<BytesType> = vec![];
+    let mut comid_files = vec![];
+    if let Some(f) = &args.comid {
+        comid_files.push(f.clone());
+    }
+    if let Some(f) = args.comid_dir.as_ref() {
+        find_files(f, "cbor", &mut comid_files);
+    }
+    for f in &comid_files {
+        match load_tagged_cbor(f, 506) {
+            Ok(b) => tag_bytes.push(b),
+            Err(e) => println!("Skipping CoMID file {}: {}", f, e),
+        }
+    }
+
+    // Collect CoSWID CBOR files to embed as tag 505
+    let mut coswid_files = vec![];
+    if let Some(f) = &args.coswid {
+        coswid_files.push(f.clone());
+    }
+    if let Some(f) = args.coswid_dir.as_ref() {
+        find_files(f, "cbor", &mut coswid_files);
+    }
+    for f in &coswid_files {
+        match load_tagged_cbor(f, 505) {
+            Ok(b) => tag_bytes.push(b),
+            Err(e) => println!("Skipping CoSWID file {}: {}", f, e),
+        }
+    }
+
     let output_dir = Path::new(&args.output_dir);
 
     for f in &files {
-        corim_template_to_cbor(f, output_dir);
+        corim_template_to_cbor(f, output_dir, &tag_bytes);
     }
+}
+
+/// Read a CBOR file, wrap its content in a CBOR tag, and serialize to bytes.
+fn load_tagged_cbor(path: &str, tag: u64) -> Result<BytesType, String> {
+    let data = fs::read(path).map_err(|e| format!("failed to read: {e}"))?;
+    let value: Value = from_reader(data.as_slice()).map_err(|e| format!("invalid CBOR: {e}"))?;
+    let tagged = Value::Tag(tag, Box::new(value));
+    let mut buf = Vec::new();
+    into_writer(&tagged, &mut buf).map_err(|e| format!("failed to serialize: {e}"))?;
+    Ok(BytesType(buf))
 }
 
 /// Decode and display a CBOR-encoded CoRIM as JSON.
 fn corim_display(args: &DisplaySubcommand) {
+    if matches!(args.format, crate::args::DisplayFormat::Diag) {
+        crate::cbor_diag::display_diag(&args.file_to_display);
+        return;
+    }
     let data = match fs::read(&args.file_to_display) {
         Ok(b) => b,
         Err(e) => {
@@ -101,47 +146,53 @@ fn corim_display(args: &DisplaySubcommand) {
     println!("{}", json);
 }
 
-/// Convert a single CoRIM JSON template to a CBOR-encoded file.
-fn corim_template_to_cbor(template_file: &String, output_dir: &Path) {
+/// Convert a single CoRIM JSON template to a CBOR-encoded file, merging in any
+/// additional CoMID/CoSWID tag bytes.
+fn corim_template_to_cbor(template_file: &String, output_dir: &Path, extra_tags: &[BytesType]) {
     let data = match fs::read_to_string(template_file) {
         Ok(s) => s,
         Err(e) => {
             println!(
-                "Unable to read CoMID template from {} with error {}",
+                "Unable to read CoRIM template from {} with error {}",
                 template_file, e
             );
             return;
         }
     };
 
-    let comid_json: CorimMap = match serde_json::from_str(&data) {
+    let corim_json: CorimMap = match serde_json::from_str(&data) {
         Ok(s) => s,
         Err(e) => {
             println!(
-                "Unable to parse CoMID template from {} with error {}",
+                "Unable to parse CoRIM template from {} with error {}",
                 template_file, e
             );
             return;
         }
     };
 
-    let comid_cbor: CorimMapCbor = match comid_json.try_into() {
+    let mut corim_cbor: CorimMapCbor = match corim_json.try_into() {
         Ok(s) => s,
-        Err(_) => {
+        Err(e) => {
             println!(
-                "Unable to convert JSON CoMID object to CBOR CoMID object for template {}",
-                template_file
+                "Unable to convert CoRIM template to CBOR for {}: {}",
+                template_file, e
             );
             return;
         }
     };
 
+    // Merge in CoMID/CoSWID CBOR files provided via --comid/--comid-dir/--coswid/--coswid-dir
+    for tag in extra_tags {
+        corim_cbor.tags.push(tag.clone());
+    }
+
     let mut encoded_token = vec![];
-    match into_writer(&comid_cbor, &mut encoded_token) {
+    match into_writer(&corim_cbor, &mut encoded_token) {
         Ok(_) => {}
         Err(e) => {
             println!(
-                "Unable to generate CBOR-encoded CoMID from template in {} with error {}",
+                "Unable to generate CBOR-encoded CoRIM from template in {} with error {}",
                 template_file, e
             )
         }

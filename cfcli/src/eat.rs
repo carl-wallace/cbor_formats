@@ -61,6 +61,10 @@ fn eat_create(args: &EatCreateSubcommand) {
 
 /// Decode and display a CBOR-encoded EAT as JSON.
 fn eat_display(args: &DisplaySubcommand) {
+    if matches!(args.format, crate::args::DisplayFormat::Diag) {
+        crate::cbor_diag::display_diag(&args.file_to_display);
+        return;
+    }
     let data = match fs::read(&args.file_to_display) {
         Ok(b) => b,
         Err(e) => {
