@@ -129,7 +129,7 @@ pub struct ConciseMidTag {
     pub tag_identity: Option<TagIdentityMap>,
     #[cbor(tag = "2", value = "Array", cbor = "true")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub entities: Option<Vec<EntityMap>>,
+    pub entities: Option<Vec<ComidEntityMap>>,
     #[cbor(tag = "3", value = "Array", cbor = "true")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linked_tags: Option<Vec<LinkedTagMap>>,
@@ -252,9 +252,17 @@ pub struct CorimSignerMap {
 ///   * extension
 /// }
 /// ```
+/// The `corim-entity-map` instantiation of `entity-map`.
+///
+/// ```text
+/// corim-entity-map = entity-map<$corim-role-type-choice,
+///                               $$corim-entity-map-extension>
+/// ```
+///
+/// [CoRIM Section 4.1.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-4.1.4
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
-pub struct EntityMap {
+pub struct CorimEntityMap {
     #[cbor(tag = "31")]
     pub name: EntityNameTypeChoice,
     #[cbor(tag = "32", cbor = "true")]
@@ -264,35 +272,30 @@ pub struct EntityMap {
     pub roles: Vec<CorimRoleTypeChoice>,
 }
 
-/// The `corim-entity-map` instantiation of [`EntityMap`].
-///
-/// ```text
-/// corim-entity-map = entity-map<$corim-role-type-choice,
-///                               $$corim-entity-map-extension>
-/// ```
-///
-/// See [CoRIM Section 4.1.4].
-///
-/// [CoRIM Section 4.1.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-4.1.4
-pub type CorimEntityMap = EntityMap;
-
-/// CBOR-encoded form of [`CorimEntityMap`].
-pub type CorimEntityMapCbor = EntityMapCbor;
-
-/// The `comid-entity-map` instantiation of [`EntityMap`].
+/// The `comid-entity-map` instantiation of `entity-map`.
 ///
 /// ```text
 /// comid-entity-map = entity-map<$comid-role-type-choice,
 ///                               $$comid-entity-map-extension>
 /// ```
 ///
-/// See [CoRIM Section 5.1.3].
-///
 /// [CoRIM Section 5.1.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.3
-pub type ComidEntityMap = EntityMap;
+#[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
+#[allow(missing_docs)]
+pub struct ComidEntityMap {
+    #[cbor(tag = "31")]
+    pub name: EntityNameTypeChoice,
+    #[cbor(tag = "32", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub regid: Option<TaggedUriType>,
+    #[cbor(tag = "33", value = "Array", cbor = "true")]
+    pub roles: Vec<ComidRoleTypeChoice>,
+}
 
-/// CBOR-encoded form of [`ComidEntityMap`].
-pub type ComidEntityMapCbor = EntityMapCbor;
+/// Backward compatibility alias.
+pub type EntityMap = CorimEntityMap;
+/// Backward compatibility alias.
+pub type EntityMapCbor = CorimEntityMapCbor;
 
 /// The `environment-map` type is defined in [CoRIM Section 5.1.4.1].
 ///

@@ -3,15 +3,22 @@
 ![Apache2/MIT licensed][license-image]
 ![Rust Version][rustc-image]
 
-The `cbor_derive` crate provides procedural macros that can be used to derive support for marshaling data between a Rust 
-struct and the vectors used by the [ciborium](https://crates.io/crates/ciborium) library to process CBOR-encoded 
-maps and arrays. The `StructToMap` macro maps the fields of a struct onto a `Vec<(Value,Value)>`.
-The `StructToArray` macro maps the fields of a struct onto a `Vec<Value>`. 
+The `cbor_derive` crate provides procedural macros for marshaling data between Rust types and the
+vectors used by the [ciborium](https://crates.io/crates/ciborium) library for CBOR-encoded maps,
+arrays, and choice types.
+
+| Macro | Input | Generates |
+|-------|-------|-----------|
+| `StructToMap` | struct with `#[cbor(tag = "N")]` fields | `*Cbor` companion struct for CBOR maps with integer keys |
+| `StructToArray` | struct with `#[cbor(value = "T")]` fields | `*Cbor` companion struct for CBOR arrays |
+| `StructToOneOrMore` | struct | `OneOrMore*Cbor` enum for CDDL `one-or-more` pattern |
+| `EnumToChoice` | enum with `#[cbor(...)]` variants | `TryFrom<Value>` dispatch; optionally a `*Cbor` companion with `Required<T, N>` wrappers or `Value(i8)` + constants |
 
 ### Naming Convention and Rationale
 
-Each derive macro generates a companion struct whose name is the original struct name with a `Cbor` suffix
-(e.g., `CorimMetaMap` → `CorimMetaMapCbor`). The two structs serve different serialization paths:
+Each derive macro generates a companion type whose name is the original name with a `Cbor` suffix
+(e.g., `CorimMetaMap` → `CorimMetaMapCbor`, `ClassIdTypeChoice` → `ClassIdTypeChoiceCbor`).
+The two types serve different serialization paths:
 
 - **Base type** (e.g., `CorimMetaMap`) — Uses standard serde `Serialize`/`Deserialize` derives. This works
   directly with [serde_json](https://crates.io/crates/serde_json) for JSON encoding and with
@@ -219,6 +226,45 @@ serializes with CBOR tag 1 via `TimeCbor`).
 | `label => ~time-int` (unwrapped) | `field: i64` | `tag = "N", value = "Integer"` | `~` strips the tag |
 | `label => ~uri` (unwrapped) | `field: String` | `tag = "N", value = "Text"` | `~` strips the tag |
 | `label => nonce-type` (custom serde) | `field: NonceType` | `tag = "N"` | Type has own `TryFrom<&Value>` and serde impls; no `value` or `cbor` needed |
+
+### EnumToChoice
+
+The `EnumToChoice` macro handles CDDL choice types (`/` operator) and `&(name: value)` integer groups.
+
+**Variant attributes** (on variants with one unnamed field):
+
+| Attribute | Dispatch |
+|-----------|----------|
+| `tag = "N"` | Match `Value::Tag(N, inner)`, construct via `TryFrom` on inner |
+| `tag = "N", cbor = "true"` | Match tag N, deserialize via ciborium serde (for `Required<T, N>`) |
+| `value = "Text"` | Match `Value::Text` (also: Bytes, Integer, Bool, Map, Array) |
+| `socket = "true"` | Catch-all for CDDL `$` sockets (captures unmatched tags as `TupleCbor`) |
+| (none) | Try `TryFrom<&Value>` on the variant's inner type |
+
+**Variant attributes** (on unit variants):
+
+| Attribute | Dispatch |
+|-----------|----------|
+| `tag = "N"` | Map this variant to integer value N |
+
+**Struct-level attributes:**
+
+| Attribute | Effect |
+|-----------|--------|
+| `companion = "true"` | Auto-generate a `*Cbor` companion enum |
+
+When `companion = "true"` is set, the macro generates:
+- For tagged enums: a companion with `Required<T, N>` wrappers, `TryFrom<Value>`, and bidirectional `TryFrom` between JSON/CBOR forms
+- For integer-unit enums: a companion with `Value(i8)` + `SCREAMING_SNAKE_CASE` constants, and bidirectional `TryFrom`
+
+**When to use `companion = "true"`:** When the JSON and CBOR representations differ — typically
+because the CBOR form uses CBOR tags (`Required<T, N>`) or integer values that the JSON form
+represents as strings or bare types. Apply it to the JSON-facing enum; the macro generates the
+CBOR-facing `*Cbor` companion.
+
+**When to omit `companion`:** When the enum is already the CBOR representation (name ends in `Cbor`),
+or when the same type works for both JSON and CBOR (e.g., `Text/Bytes` dispatch where no tag
+wrapping is needed). In these cases the macro only generates `TryFrom<Value>` for CBOR decoding.
 
 ## Status
 

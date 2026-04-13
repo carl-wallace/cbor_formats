@@ -595,6 +595,36 @@ pub type TaggedSvn = Required<u64, 552>;
 /// [CoRIM Section 5.1.4.5.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5.4
 pub type TaggedMinSvn = Required<u64, 553>;
 
+/// A profile identifier: URI (text) or OID (bare bytes).
+///
+/// Used by EAT (RFC 9711) and EAR (draft-ietf-rats-ear) for the profile claim.
+/// The CDDL is `general-uri / general-oid` where both are untagged.
+///
+/// Note: CoRIM uses `ProfileTypeChoice` (in the `corim` crate) which includes tagged OID (`#6.111`).
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+#[allow(missing_docs)]
+pub enum GeneralProfile {
+    Uri(String),
+    Oid(OidType),
+}
+impl TryFrom<Value> for GeneralProfile {
+    type Error = String;
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        Self::try_from(&value)
+    }
+}
+impl TryFrom<&Value> for GeneralProfile {
+    type Error = String;
+    fn try_from(value: &Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Text(s) => Ok(Self::Uri(s.clone())),
+            Value::Bytes(b) => Ok(Self::Oid(OidType(b.clone()))),
+            _ => Err("expected text or bytes for GeneralProfile".to_string()),
+        }
+    }
+}
+
 /// A choice between a text string and a byte string value.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]

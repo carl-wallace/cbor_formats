@@ -12,7 +12,7 @@ mod utils;
 #[test]
 fn class_id_type_choice_test() {
     let v = vec![0x01, 0x02, 0x03];
-    let fab = ClassIdTypeChoiceCbor::Oid(Required(OidType(v)));
+    let fab = ClassIdTypeChoiceCbor::oid(Required(OidType(v)));
     let mut encoded_token = vec![];
     into_writer(&fab, &mut encoded_token).unwrap();
 
@@ -21,7 +21,7 @@ fn class_id_type_choice_test() {
     let fab_c: ClassIdTypeChoiceCbor = fab_j.try_into().unwrap();
     assert_eq!(fab, fab_c);
 
-    let fab2 = ClassIdTypeChoiceCbor::Uuid(Required(UuidType(vec![
+    let fab2 = ClassIdTypeChoiceCbor::uuid(Required(UuidType(vec![
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ])));
     let mut encoded_token2 = vec![];
@@ -32,7 +32,7 @@ fn class_id_type_choice_test() {
     let fab2_c: ClassIdTypeChoiceCbor = fab2_j.try_into().unwrap();
     assert_eq!(fab2, fab2_c);
 
-    let fab3 = ClassIdTypeChoiceCbor::Bytes(Required(common::BytesType([0x01].to_vec())));
+    let fab3 = ClassIdTypeChoiceCbor::bytes(Required(common::BytesType([0x01].to_vec())));
     let mut encoded_token3 = vec![];
     into_writer(&fab3, &mut encoded_token3).unwrap();
 

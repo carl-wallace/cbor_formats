@@ -24,9 +24,9 @@ use serde::{
 };
 
 use cbor_derive::StructToMap;
+use common::GeneralProfile;
 use common::tuple_map::{TupleMap, TupleMapCbor};
 use common::*;
-use corim::choices::ProfileTypeChoice;
 
 use crate::arrays::*;
 use crate::cbor_specific::SubmoduleCbor;
@@ -188,7 +188,7 @@ pub struct ClaimsSetClaims {
     pub location: Option<LocationType>,
     #[cbor(tag = "265")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub profile: Option<ProfileTypeChoice>,
+    pub profile: Option<GeneralProfile>,
     #[cbor(tag = "262", value = "Bool")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub oem_boot: Option<bool>,

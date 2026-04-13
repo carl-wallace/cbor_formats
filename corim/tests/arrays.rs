@@ -54,7 +54,7 @@ fn attest_key_triple_record_test() {
 fn coswid_triple_record_test() {
     let mut encoded_token = vec![];
     let c = ClassMapCbor {
-        id: Some(ClassIdTypeChoiceCbor::Uuid(Required(UuidType(
+        id: Some(ClassIdTypeChoiceCbor::uuid(Required(UuidType(
             TEST_UUID.as_bytes().to_vec(),
         )))),
         vendor: None,

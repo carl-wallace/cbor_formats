@@ -158,30 +158,60 @@ pub fn derive_struct_to_one_or_more(input: TokenStream) -> TokenStream {
     DeriveStructToOneOrMore::new(input).to_tokens().into()
 }
 
-/// The `EnumToChoice` derive macro generates `TryFrom<Value>`, `TryFrom<&Value>`, and `Serialize`
+/// The `EnumToChoice` derive macro generates `TryFrom<Value>` and `TryFrom<&Value>`
 /// implementations for enums representing CDDL choice types (`/` operator).
 ///
-/// Each variant must have exactly one unnamed field. Dispatch is controlled by `#[cbor(...)]`
-/// attributes on each variant:
+/// ## Variant attributes
 ///
-/// - `#[cbor(tag = "N")]` — Match on `Value::Tag(N, inner)`, construct variant via `TryFrom` on inner value
-/// - `#[cbor(tag = "N", cbor = "true")]` — Match on tag N, re-serialize/deserialize via ciborium serde (for `Required<T, N>` types)
-/// - `#[cbor(value = "Text")]` — Match on `Value::Text(s)`, etc. (supports Text, Bytes, Integer, Bool, Map, Array)
-/// - `#[cbor(socket = "true")]` — Catch-all for CDDL `$` sockets: matches any unmatched `Value::Tag(t, b)` as a `TupleCbor`
+/// Variants with one unnamed field dispatch on CBOR value type or tag:
+///
+/// - `#[cbor(tag = "N")]` — Match `Value::Tag(N, inner)`, construct via `TryFrom` on inner value
+/// - `#[cbor(tag = "N", cbor = "true")]` — Match tag N, deserialize via ciborium serde (for `Required<T, N>` types)
+/// - `#[cbor(value = "Text")]` — Match `Value::Text` (also: Bytes, Integer, Bool, Map, Array)
+/// - `#[cbor(socket = "true")]` — Catch-all for CDDL `$` sockets: captures unmatched `Value::Tag` as `TupleCbor`
 /// - No attribute — Try `TryFrom<&Value>` on the variant's inner type (fallback)
 ///
-/// ```ignore
-/// use cbor_derive::EnumToChoice;
+/// Unit variants map to integer constants (for CDDL `&(name: N)` groups):
 ///
+/// - `#[cbor(tag = "N")]` on a unit variant — Maps this variant to integer value N
+///
+/// ## Struct-level attributes
+///
+/// - `#[cbor(companion = "true")]` — Auto-generate a `*Cbor` companion enum with:
+///   - `Required<T, N>` wrappers for `tag + cbor` variants
+///   - `Value(i8)` + associated constants for integer-unit variants
+///   - Bidirectional `TryFrom` conversions between JSON and CBOR forms
+///   - `TryFrom<Value>` for the companion
+///
+/// ## Examples
+///
+/// Tagged choice with auto-generated companion:
+/// ```ignore
 /// #[derive(EnumToChoice)]
-/// enum ClassIdTypeChoiceCbor {
-///     #[cbor(tag = "111")]
-///     Oid(TaggedOidTypeCbor),
-///     #[cbor(tag = "37")]
-///     Uuid(TaggedUuidType),
-///     #[cbor(tag = "560")]
-///     Bytes(TaggedBytes),
+/// #[cbor(companion = "true")]
+/// #[serde(tag = "type", content = "value")]
+/// enum ClassIdTypeChoice {
+///     #[cbor(tag = "111", cbor = "true")]
+///     oid(OidType),
+///     #[cbor(tag = "37", cbor = "true")]
+///     uuid(UuidType),
 /// }
+/// // Generates ClassIdTypeChoiceCbor with Required<OidType, 111>, Required<UuidType, 37>
+/// ```
+///
+/// Integer enum with auto-generated companion:
+/// ```ignore
+/// #[derive(EnumToChoice)]
+/// #[cbor(companion = "true")]
+/// enum CorimRoleTypeChoice {
+///     #[cbor(tag = "0")]
+///     TagCreator,
+///     #[cbor(tag = "1")]
+///     ManifestCreator,
+///     #[serde(other)]
+///     other(String),
+/// }
+/// // Generates CorimRoleTypeChoiceCbor with Value(i8) + TAG_CREATOR, MANIFEST_CREATOR constants
 /// ```
 #[proc_macro_derive(EnumToChoice, attributes(cbor))]
 #[proc_macro_error]

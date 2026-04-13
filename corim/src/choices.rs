@@ -27,7 +27,6 @@
 //!
 //! [draft-ietf-rats-corim-10]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10
 
-use alloc::format;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
 use cbor_derive::EnumToChoice;
@@ -190,68 +189,18 @@ pub type ConciseTagTypeChoice = BytesType;
 /// $class-id-type-choice /= tagged-uuid-type
 /// $class-id-type-choice /= tagged-bytes
 /// ```
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, EnumToChoice)]
+#[cbor(companion = "true")]
 #[allow(missing_docs)]
 #[allow(non_camel_case_types)]
 #[serde(tag = "type", content = "value")]
 pub enum ClassIdTypeChoice {
-    oid(OidType),
-    uuid(UuidType),
-    bytes(BytesType),
-}
-
-impl TryFrom<ClassIdTypeChoiceCbor> for ClassIdTypeChoice {
-    type Error = String;
-    fn try_from(value: ClassIdTypeChoiceCbor) -> Result<Self, Self::Error> {
-        match value {
-            ClassIdTypeChoiceCbor::Oid(b) => Ok(Self::oid(b.0)),
-            ClassIdTypeChoiceCbor::Uuid(b) => Ok(Self::uuid(b.0.clone())),
-            ClassIdTypeChoiceCbor::Bytes(b) => Ok(Self::bytes(b.0)),
-        }
-    }
-}
-impl TryFrom<&ClassIdTypeChoiceCbor> for ClassIdTypeChoice {
-    type Error = String;
-    fn try_from(value: &ClassIdTypeChoiceCbor) -> Result<Self, Self::Error> {
-        match value {
-            ClassIdTypeChoiceCbor::Oid(b) => Ok(Self::oid(b.0.clone())),
-            ClassIdTypeChoiceCbor::Uuid(b) => Ok(Self::uuid(b.0.clone())),
-            ClassIdTypeChoiceCbor::Bytes(b) => Ok(Self::bytes(b.0.clone())),
-        }
-    }
-}
-
-/// CBOR-encodable counterpart of [`ClassIdTypeChoice`].
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, EnumToChoice)]
-#[serde(untagged)]
-#[allow(missing_docs)]
-pub enum ClassIdTypeChoiceCbor {
     #[cbor(tag = "111", cbor = "true")]
-    Oid(TaggedOidTypeCbor),
+    oid(OidType),
     #[cbor(tag = "37", cbor = "true")]
-    Uuid(TaggedUuidType),
+    uuid(UuidType),
     #[cbor(tag = "560", cbor = "true")]
-    Bytes(TaggedBytes),
-}
-impl TryFrom<ClassIdTypeChoice> for ClassIdTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: ClassIdTypeChoice) -> Result<Self, Self::Error> {
-        match value {
-            ClassIdTypeChoice::oid(b) => Ok(Self::Oid(TaggedOidTypeCbor { 0: b })),
-            ClassIdTypeChoice::uuid(b) => Ok(Self::Uuid(TaggedUuidType { 0: b })),
-            ClassIdTypeChoice::bytes(b) => Ok(Self::Bytes(TaggedBytes { 0: b })),
-        }
-    }
-}
-impl TryFrom<&ClassIdTypeChoice> for ClassIdTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: &ClassIdTypeChoice) -> Result<Self, Self::Error> {
-        match value {
-            ClassIdTypeChoice::oid(b) => Ok(Self::Oid(TaggedOidTypeCbor { 0: b.clone() })),
-            ClassIdTypeChoice::uuid(b) => Ok(Self::Uuid(TaggedUuidType { 0: b.clone() })),
-            ClassIdTypeChoice::bytes(b) => Ok(Self::Bytes(TaggedBytes { 0: b.clone() })),
-        }
-    }
+    bytes(BytesType),
 }
 
 /// The `corim-id-type-choice` socket is defined in [CoRIM Section 4.1.1].
@@ -364,6 +313,13 @@ impl<'de> Deserialize<'de> for CorimIdTypeChoice {
 /// $comid-role-type-choice /= &(creator: 1)
 /// $comid-role-type-choice /= &(maintainer: 2)
 /// ```
+/// JSON representation of `$corim-role-type-choice`.
+///
+/// ```text
+/// $corim-role-type-choice /= &(tag-creator: 0)
+/// $corim-role-type-choice /= &(manifest-creator: 1)
+/// $corim-role-type-choice /= &(manifest-signer: 2)
+/// ```
 #[derive(
     Clone,
     Debug,
@@ -371,90 +327,56 @@ impl<'de> Deserialize<'de> for CorimIdTypeChoice {
     PartialEq,
     serde_enum_str::Deserialize_enum_str,
     serde_enum_str::Serialize_enum_str,
+    EnumToChoice,
 )]
+#[cbor(companion = "true")]
 #[allow(non_camel_case_types)]
 #[allow(missing_docs)]
 pub enum CorimRoleTypeChoice {
+    #[serde(rename = "tagCreator")]
+    #[cbor(tag = "0")]
+    TagCreator,
     #[serde(rename = "manifestCreator")]
+    #[cbor(tag = "1")]
     ManifestCreator,
     #[serde(rename = "manifestSigner")]
+    #[cbor(tag = "2")]
     ManifestSigner,
-    #[serde(rename = "tagCreator")]
-    TagCreator,
-    #[serde(rename = "creator")]
-    Creator,
-    #[serde(rename = "maintainer")]
-    Maintainer,
     #[serde(other)]
     other(String),
 }
 
-impl TryFrom<CorimRoleTypeChoice> for CorimRoleTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: CorimRoleTypeChoice) -> Result<Self, Self::Error> {
-        Self::try_from(&value)
-    }
-}
-
-impl TryFrom<CorimRoleTypeChoiceCbor> for CorimRoleTypeChoice {
-    type Error = String;
-    fn try_from(value: CorimRoleTypeChoiceCbor) -> Result<Self, Self::Error> {
-        Self::try_from(&value)
-    }
-}
-
-/// CBOR-encodable counterpart of [`CorimRoleTypeChoice`].
+/// JSON representation of `$comid-role-type-choice`.
 ///
-/// Carries the raw integer value from the wire. Known values are available as
-/// associated constants for comparison. The `$` socket in CDDL means any
-/// integer is valid — unknown values are extensions, not errors.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, EnumToChoice)]
-#[serde(untagged)]
+/// ```text
+/// $comid-role-type-choice /= &(tag-creator: 0)
+/// $comid-role-type-choice /= &(creator: 1)
+/// $comid-role-type-choice /= &(maintainer: 2)
+/// ```
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    PartialEq,
+    serde_enum_str::Deserialize_enum_str,
+    serde_enum_str::Serialize_enum_str,
+    EnumToChoice,
+)]
+#[cbor(companion = "true")]
+#[allow(non_camel_case_types)]
 #[allow(missing_docs)]
-pub enum CorimRoleTypeChoiceCbor {
-    #[cbor(value = "Integer")]
-    Value(i8),
-}
-
-impl CorimRoleTypeChoiceCbor {
-    /// `&(tag-creator: 0)` — both `$corim-role-type-choice` and `$comid-role-type-choice`
-    pub const TAG_CREATOR: i8 = 0;
-    /// `&(manifest-creator: 1)` / `&(creator: 1)`
-    pub const MANIFEST_CREATOR: i8 = 1;
-    /// `&(manifest-signer: 2)` / `&(maintainer: 2)`
-    pub const MANIFEST_SIGNER: i8 = 2;
-}
-
-impl TryFrom<&CorimRoleTypeChoice> for CorimRoleTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: &CorimRoleTypeChoice) -> Result<Self, Self::Error> {
-        match value {
-            CorimRoleTypeChoice::TagCreator => Ok(Self::Value(Self::TAG_CREATOR)),
-            CorimRoleTypeChoice::ManifestCreator | CorimRoleTypeChoice::Creator => {
-                Ok(Self::Value(Self::MANIFEST_CREATOR))
-            }
-            CorimRoleTypeChoice::ManifestSigner | CorimRoleTypeChoice::Maintainer => {
-                Ok(Self::Value(Self::MANIFEST_SIGNER))
-            }
-            CorimRoleTypeChoice::other(s) => {
-                Ok(Self::Value(s.parse::<i8>().map_err(|e| e.to_string())?))
-            }
-        }
-    }
-}
-
-impl TryFrom<&CorimRoleTypeChoiceCbor> for CorimRoleTypeChoice {
-    type Error = String;
-    fn try_from(value: &CorimRoleTypeChoiceCbor) -> Result<Self, Self::Error> {
-        match value {
-            CorimRoleTypeChoiceCbor::Value(v) => match *v {
-                CorimRoleTypeChoiceCbor::TAG_CREATOR => Ok(Self::TagCreator),
-                CorimRoleTypeChoiceCbor::MANIFEST_CREATOR => Ok(Self::ManifestCreator),
-                CorimRoleTypeChoiceCbor::MANIFEST_SIGNER => Ok(Self::ManifestSigner),
-                other => Ok(Self::other(other.to_string())),
-            },
-        }
-    }
+pub enum ComidRoleTypeChoice {
+    #[serde(rename = "tagCreator")]
+    #[cbor(tag = "0")]
+    TagCreator,
+    #[serde(rename = "creator")]
+    #[cbor(tag = "1")]
+    Creator,
+    #[serde(rename = "maintainer")]
+    #[cbor(tag = "2")]
+    Maintainer,
+    #[serde(other)]
+    other(String),
 }
 
 /// The `crypto-key-type-choice` socket is defined in [CoRIM Section 5.1.4.6].
@@ -586,138 +508,21 @@ pub enum InstanceIdTypeChoice {
 /// spec-defined extensibility via the CDDL socket (`$measured-element-type-choice /=`).
 ///
 /// [CoRIM Section 5.1.4.5.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5.1
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, EnumToChoice)]
+#[cbor(companion = "true")]
+#[serde(tag = "type", content = "value")]
 #[allow(missing_docs)]
 pub enum MeasuredElementTypeChoice {
-    Oid(TaggedOidType),
-    Uuid(TaggedUuidType),
-    Uint(u64),
-    Text(String),
-    Other(Tuple),
-}
-
-impl TryFrom<MeasuredElementTypeChoiceCbor> for MeasuredElementTypeChoice {
-    type Error = String;
-    fn try_from(value: MeasuredElementTypeChoiceCbor) -> Result<Self, Self::Error> {
-        match value {
-            MeasuredElementTypeChoiceCbor::Oid(b) => Ok(Self::Oid(b.0)),
-            MeasuredElementTypeChoiceCbor::Uuid(b) => Ok(Self::Uuid(Required(b.0))),
-            MeasuredElementTypeChoiceCbor::Uint(v) => Ok(Self::Uint(v)),
-            MeasuredElementTypeChoiceCbor::Text(s) => Ok(Self::Text(s)),
-            MeasuredElementTypeChoiceCbor::Other(b) => match Tuple::try_from(b) {
-                Ok(v) => Ok(Self::Other(v)),
-                Err(e) => Err(e),
-            },
-        }
-    }
-}
-impl TryFrom<&MeasuredElementTypeChoiceCbor> for MeasuredElementTypeChoice {
-    type Error = String;
-    fn try_from(value: &MeasuredElementTypeChoiceCbor) -> Result<Self, Self::Error> {
-        match value {
-            MeasuredElementTypeChoiceCbor::Oid(b) => Ok(Self::Oid(b.0.clone())),
-            MeasuredElementTypeChoiceCbor::Uuid(b) => Ok(Self::Uuid(Required(b.0.clone()))),
-            MeasuredElementTypeChoiceCbor::Uint(v) => Ok(Self::Uint(*v)),
-            MeasuredElementTypeChoiceCbor::Text(s) => Ok(Self::Text(s.clone())),
-            MeasuredElementTypeChoiceCbor::Other(b) => match Tuple::try_from(b) {
-                Ok(v) => Ok(Self::Other(v)),
-                Err(e) => Err(e),
-            },
-        }
-    }
-}
-impl TryFrom<Value> for MeasuredElementTypeChoice {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        MeasuredElementTypeChoice::try_from(&value)
-    }
-}
-impl TryFrom<&Value> for MeasuredElementTypeChoice {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Tag(111, b) => Ok(Self::Oid(OidType(match b.as_bytes() {
-                Some(b) => b.clone(),
-                None => {
-                    return Err(
-                        "Failed to parse OID value as a MeasuredElementTypeChoice".to_string()
-                    );
-                }
-            }))),
-            Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => {
-                        return Err(
-                            "Failed to parse UUID value as a MeasuredElementTypeChoice".to_string()
-                        );
-                    }
-                }),
-            })),
-            Value::Integer(i) => Ok(Self::Uint(match (*i).try_into() {
-                Ok(v) => v,
-                Err(e) => {
-                    return Err(format!(
-                        "Failed to parse uint in MeasuredElementTypeChoice: {}",
-                        e
-                    ));
-                }
-            })),
-            Value::Text(s) => Ok(Self::Text(s.clone())),
-            _ => Err(format!(
-                "Failed to parse MeasuredElementTypeChoice from value: {:?}",
-                value
-            )),
-        }
-    }
-}
-
-/// CBOR-encodable counterpart of [`MeasuredElementTypeChoice`].
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, EnumToChoice)]
-#[serde(untagged)]
-#[allow(missing_docs)]
-pub enum MeasuredElementTypeChoiceCbor {
     #[cbor(tag = "111", cbor = "true")]
-    Oid(TaggedOidTypeCbor),
+    Oid(OidType),
     #[cbor(tag = "37", cbor = "true")]
-    Uuid(TaggedUuidType),
+    Uuid(UuidType),
     #[cbor(value = "Integer")]
     Uint(u64),
     #[cbor(value = "Text")]
     Text(String),
     #[cbor(socket = "true")]
-    Other(TupleCbor),
-}
-impl TryFrom<MeasuredElementTypeChoice> for MeasuredElementTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: MeasuredElementTypeChoice) -> Result<Self, Self::Error> {
-        match value {
-            MeasuredElementTypeChoice::Oid(b) => Ok(Self::Oid(Required(b))),
-            MeasuredElementTypeChoice::Uuid(b) => Ok(Self::Uuid(Required(b.0))),
-            MeasuredElementTypeChoice::Uint(v) => Ok(Self::Uint(v)),
-            MeasuredElementTypeChoice::Text(s) => Ok(Self::Text(s)),
-            MeasuredElementTypeChoice::Other(b) => match TupleCbor::try_from(b) {
-                Ok(v) => Ok(Self::Other(v)),
-                Err(e) => Err(e),
-            },
-        }
-    }
-}
-impl TryFrom<&MeasuredElementTypeChoice> for MeasuredElementTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: &MeasuredElementTypeChoice) -> Result<Self, Self::Error> {
-        match value {
-            MeasuredElementTypeChoice::Oid(b) => Ok(Self::Oid(Required(b.clone()))),
-            MeasuredElementTypeChoice::Uuid(b) => Ok(Self::Uuid(Required(b.0.clone()))),
-            MeasuredElementTypeChoice::Uint(v) => Ok(Self::Uint(*v)),
-            MeasuredElementTypeChoice::Text(s) => Ok(Self::Text(s.clone())),
-            MeasuredElementTypeChoice::Other(b) => match TupleCbor::try_from(b) {
-                Ok(v) => Ok(Self::Other(v)),
-                Err(e) => Err(e),
-            },
-        }
-    }
+    Other(Tuple),
 }
 
 /// The `profile-type-choice` socket is defined in [CoRIM Section 4.1.4].
@@ -727,117 +532,23 @@ impl TryFrom<&MeasuredElementTypeChoice> for MeasuredElementTypeChoiceCbor {
 /// ```
 ///
 /// [CoRIM Section 4.1.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-4.1.4
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+/// CoRIM profile: `uri / tagged-oid-type` per [CoRIM Section 4.1.4].
+///
+/// For EAT/EAR profiles (`general-uri / general-oid` with bare untagged OID),
+/// use [`common::GeneralProfile`] instead.
+///
+/// [CoRIM Section 4.1.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-4.1.4
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, EnumToChoice)]
+#[cbor(companion = "true")]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum ProfileTypeChoice {
-    Uri(Uri),
-    Oid(TaggedOidType),
-    Oid2(OidType),
-    Other(Tuple),
-}
-impl TryFrom<ProfileTypeChoiceCbor> for ProfileTypeChoice {
-    type Error = String;
-    fn try_from(value: ProfileTypeChoiceCbor) -> Result<Self, Self::Error> {
-        match value {
-            ProfileTypeChoiceCbor::Uri(s) => Ok(Self::Uri(s)),
-            ProfileTypeChoiceCbor::Oid(b) => Ok(Self::Oid(match b {
-                Required(b) => b,
-            })),
-            ProfileTypeChoiceCbor::Oid2(b) => Ok(Self::Oid2(b)),
-            ProfileTypeChoiceCbor::Other(b) => match Tuple::try_from(b) {
-                Ok(v) => Ok(Self::Other(v)),
-                Err(e) => Err(e),
-            },
-        }
-    }
-}
-impl TryFrom<&ProfileTypeChoiceCbor> for ProfileTypeChoice {
-    type Error = String;
-    fn try_from(value: &ProfileTypeChoiceCbor) -> Result<Self, Self::Error> {
-        match value {
-            ProfileTypeChoiceCbor::Uri(s) => Ok(Self::Uri(s.clone())),
-            ProfileTypeChoiceCbor::Oid(b) => Ok(Self::Oid(match b {
-                Required(b) => b.clone(),
-            })),
-            ProfileTypeChoiceCbor::Oid2(b) => Ok(Self::Oid2(b.clone())),
-            ProfileTypeChoiceCbor::Other(b) => match Tuple::try_from(b) {
-                Ok(v) => Ok(Self::Other(v)),
-                Err(e) => Err(e),
-            },
-        }
-    }
-}
-impl TryFrom<Value> for ProfileTypeChoice {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Text(s) => Ok(Self::Uri(s)),
-            Value::Bytes(s) => Ok(Self::Oid2(OidType(s))),
-            Value::Tag(111, b) => Ok(Self::Oid(OidType(match b.as_bytes() {
-                Some(b) => b.clone(),
-                None => return Err("Failed to parse OID value as an ProfileTypeChoice".to_string()),
-            }))),
-            _ => Err("Failed to parse value as a ProfileTypeChoice".to_string()),
-        }
-    }
-}
-impl TryFrom<&Value> for ProfileTypeChoice {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Text(s) => Ok(Self::Uri(s.clone())),
-            Value::Bytes(s) => Ok(Self::Oid2(OidType(s.clone()))),
-            Value::Tag(111, b) => Ok(Self::Oid(OidType(match b.as_bytes() {
-                Some(b) => b.clone(),
-                None => return Err("Failed to parse OID value as an ProfileTypeChoice".to_string()),
-            }))),
-            _ => Err("Failed to parse value as a ProfileTypeChoice".to_string()),
-        }
-    }
-}
-
-/// CBOR-encodable counterpart of [`ProfileTypeChoice`].
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, EnumToChoice)]
-#[serde(untagged)]
-#[allow(missing_docs)]
-pub enum ProfileTypeChoiceCbor {
     #[cbor(value = "Text")]
     Uri(Uri),
     #[cbor(tag = "111", cbor = "true")]
-    Oid(TaggedOidTypeCbor),
-    #[cbor(value = "Bytes")]
-    Oid2(OidType),
+    Oid(OidType),
     #[cbor(socket = "true")]
-    Other(TupleCbor),
-}
-impl TryFrom<ProfileTypeChoice> for ProfileTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: ProfileTypeChoice) -> Result<Self, Self::Error> {
-        match value {
-            ProfileTypeChoice::Uri(s) => Ok(Self::Uri(s)),
-            ProfileTypeChoice::Oid(b) => Ok(Self::Oid(TaggedOidTypeCbor { 0: b })),
-            ProfileTypeChoice::Oid2(b) => Ok(Self::Oid2(b)),
-            ProfileTypeChoice::Other(b) => match TupleCbor::try_from(b) {
-                Ok(v) => Ok(Self::Other(v)),
-                Err(e) => Err(e),
-            },
-        }
-    }
-}
-impl TryFrom<&ProfileTypeChoice> for ProfileTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: &ProfileTypeChoice) -> Result<Self, Self::Error> {
-        match value {
-            ProfileTypeChoice::Uri(s) => Ok(Self::Uri(s.clone())),
-            ProfileTypeChoice::Oid(b) => Ok(Self::Oid(TaggedOidTypeCbor { 0: b.clone() })),
-            ProfileTypeChoice::Oid2(b) => Ok(Self::Oid2(b.clone())),
-            ProfileTypeChoice::Other(b) => match TupleCbor::try_from(b) {
-                Ok(v) => Ok(Self::Other(v)),
-                Err(e) => Err(e),
-            },
-        }
-    }
+    Other(Tuple),
 }
 
 /// The `svn-type-choice` socket is defined in [CoRIM Section 5.1.4.5.4].

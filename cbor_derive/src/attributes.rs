@@ -16,12 +16,15 @@ pub(crate) const ATTR_NAME: &str = "cbor";
 pub(crate) struct TypeAttrs {
     /// Whether the struct has the `non-empty` CDDL constraint.
     pub non_empty: bool,
+    /// Whether to generate a `*Cbor` companion enum (for `EnumToChoice`).
+    pub companion: bool,
 }
 
 impl TypeAttrs {
     /// Parse attributes from a struct definition.
     pub fn parse(attrs: &[Attribute]) -> Self {
         let mut non_empty = None;
+        let mut companion = None;
         let mut parsed_attrs = Vec::new();
         AttrNameValue::from_attributes(attrs, &mut parsed_attrs);
         for attr in parsed_attrs {
@@ -30,16 +33,22 @@ impl TypeAttrs {
                     abort!(attr.name, "duplicate cbor `non_empty` attribute");
                 }
                 non_empty = Some(val);
+            } else if let Some(val) = attr.parse_value::<bool>("companion") {
+                if companion.is_some() {
+                    abort!(attr.name, "duplicate cbor `companion` attribute");
+                }
+                companion = Some(val);
             } else {
                 abort!(
                     attr.name,
                     "unknown struct-level `cbor` attribute \
-                    (valid options are `non_empty`)",
+                    (valid options are `non_empty`, `companion`)",
                 );
             }
         }
         Self {
             non_empty: non_empty.unwrap_or(false),
+            companion: companion.unwrap_or(false),
         }
     }
 }

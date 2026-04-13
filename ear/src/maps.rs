@@ -25,14 +25,12 @@ use serde::{
 use ar4si::choices::TrustworthinessTier;
 use ar4si::maps::{TrustworthinessVector, TrustworthinessVectorCbor, VerifierId, VerifierIdCbor};
 use cbor_derive::StructToMap;
+use common::GeneralProfile;
 use common::tuple::Tuple;
 #[allow(unused_imports)]
 use common::tuple::TupleCbor;
 use common::*;
-use corim::choices::ProfileTypeChoice;
 #[allow(unused_imports)]
-use corim::choices::ProfileTypeChoiceCbor;
-
 /// JSON encoding/decoding of `EAR`, see [EAR Section 4].
 ///
 /// Use [`EarCbor`] for CBOR-encoded EARs.
@@ -118,7 +116,7 @@ pub struct Ear {
 pub struct EarAppraisal {
     #[cbor(tag = "265")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub profile: Option<ProfileTypeChoice>,
+    pub profile: Option<GeneralProfile>,
     #[cbor(tag = "1000")]
     pub status: TrustworthinessTier,
     #[cbor(tag = "1001", value = "Map", cbor = "true")]
