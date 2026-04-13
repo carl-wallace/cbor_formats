@@ -1,5 +1,6 @@
 //! EAR (EAT Attestation Result) create, display, sign, verify, and extract operations.
 
+use base64ct::{Base64UrlUnpadded, Encoding};
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
 use ciborium::value::Value;
@@ -9,6 +10,9 @@ use cose::maps::HeaderMap;
 use cose_crypto::jwk::{algorithm_from_jwk, signer_from_jwk, verifier_from_jwk};
 use cose_crypto::sign::{CoseSign1Builder, verify_sign1};
 use ear::maps::*;
+use jose::header::JoseHeader;
+use jose::jwk::Jwk;
+use jose::jws::{JwsBuilder, verify_compact};
 use std::fs;
 use std::fs::File;
 use std::io::Write;
@@ -17,7 +21,7 @@ use std::path::Path;
 use crate::utils::find_files;
 use crate::{
     DisplaySubcommand, EarCommand, EarCreateSubcommand, EarExtractSubcommand, EarSignSubcommand,
-    EarSubCommands, EarVerifySubcommand,
+    EarSubCommands, EarVerifySubcommand, SigningFormat,
 };
 
 /// Dispatch EAR subcommands.
@@ -226,8 +230,16 @@ fn write_tagged_sign1(sign1: &CoseSign1Cbor, path: &Path) -> Result<(), String> 
 
 // ── Sign ──
 
-/// Sign an unsigned EAR with a JWK key, producing a COSE Sign1 wrapped in CBOR tag #18.
+/// Sign an unsigned EAR with a JWK key.
 fn ear_sign(args: &EarSignSubcommand) {
+    match args.format {
+        SigningFormat::Cose => ear_sign_cose(args),
+        SigningFormat::Jws => ear_sign_jws(args),
+    }
+}
+
+/// Sign an unsigned EAR producing a COSE Sign1 wrapped in CBOR tag #18.
+fn ear_sign_cose(args: &EarSignSubcommand) {
     // Read unsigned EAR
     let ear_bytes = match fs::read(&args.ear_file) {
         Ok(b) => b,
@@ -306,20 +318,16 @@ fn ear_sign(args: &EarSignSubcommand) {
     println!("Signed EAR written to {:?}", output_path);
 }
 
-// ── Verify ──
-
-/// Verify the COSE Sign1 signature on a signed EAR using a JWK key.
-fn ear_verify(args: &EarVerifySubcommand) {
-    // Read signed EAR
-    let sign1 = match read_signed_ear(&args.signed_ear_file) {
-        Ok(s) => s,
+/// Sign an unsigned EAR producing a JWS compact serialization.
+fn ear_sign_jws(args: &EarSignSubcommand) {
+    let ear_bytes = match fs::read(&args.ear_file) {
+        Ok(b) => b,
         Err(e) => {
-            println!("Failed to read signed EAR: {}", e);
+            println!("Failed to read EAR file {}: {}", args.ear_file, e);
             return;
         }
     };
 
-    // Read JWK key
     let key_bytes = match fs::read(&args.key_file) {
         Ok(b) => b,
         Err(e) => {
@@ -328,27 +336,80 @@ fn ear_verify(args: &EarVerifySubcommand) {
         }
     };
 
-    // Create verifier
-    let verifier = match verifier_from_jwk(&key_bytes) {
-        Ok(v) => v,
+    let algorithm = match algorithm_from_jwk(&key_bytes) {
+        Ok(a) => a,
         Err(e) => {
-            println!("Failed to create verifier from JWK: {}", e);
+            println!("Failed to determine algorithm from JWK: {}", e);
             return;
         }
     };
 
-    // Verify
-    match verify_sign1(&sign1, verifier.as_ref(), &[]) {
-        Ok(()) => println!("Verification successful"),
-        Err(e) => println!("Verification failed: {}", e),
+    let jwk = match Jwk::from_json(&key_bytes) {
+        Ok(j) => j,
+        Err(e) => {
+            println!("Failed to parse JWK: {}", e);
+            return;
+        }
+    };
+
+    let signer = match jwk.to_signer() {
+        Ok(s) => s,
+        Err(e) => {
+            println!("Failed to create signer from JWK: {}", e);
+            return;
+        }
+    };
+
+    let mut header = JoseHeader::new(algorithm.to_jose_alg());
+    header.set_typ("JWT");
+    header.set_cty("application/eat-jwt; eat_profile=\"tag:ietf.org,2026:rats/ear#03\"");
+
+    let compact = match JwsBuilder::new(header)
+        .payload(&ear_bytes)
+        .sign_compact(signer.as_ref())
+    {
+        Ok(c) => c,
+        Err(e) => {
+            println!("Failed to sign EAR as JWS: {}", e);
+            return;
+        }
+    };
+
+    let ear_path = Path::new(&args.ear_file);
+    let stem = ear_path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("signed-ear");
+    let output_path = Path::new(&args.output_dir).join(format!("signed-{stem}.jws"));
+
+    match File::create(&output_path) {
+        Ok(mut f) => {
+            if let Err(e) = f.write_all(compact.as_bytes()) {
+                println!("Failed to write JWS: {}", e);
+                return;
+            }
+        }
+        Err(e) => {
+            println!("Failed to create output file {:?}: {}", output_path, e);
+            return;
+        }
+    }
+
+    println!("Signed EAR (JWS) written to {:?}", output_path);
+}
+
+// ── Verify ──
+
+/// Verify the signature on a signed EAR using a JWK key.
+fn ear_verify(args: &EarVerifySubcommand) {
+    match args.format {
+        SigningFormat::Cose => ear_verify_cose(args),
+        SigningFormat::Jws => ear_verify_jws(args),
     }
 }
 
-// ── Extract ──
-
-/// Extract the payload from a signed EAR and write it as an unsigned EAR file.
-fn ear_extract(args: &EarExtractSubcommand) {
-    // Read signed EAR
+/// Verify a COSE Sign1 signed EAR.
+fn ear_verify_cose(args: &EarVerifySubcommand) {
     let sign1 = match read_signed_ear(&args.signed_ear_file) {
         Ok(s) => s,
         Err(e) => {
@@ -357,7 +418,88 @@ fn ear_extract(args: &EarExtractSubcommand) {
         }
     };
 
-    // Extract payload
+    let key_bytes = match fs::read(&args.key_file) {
+        Ok(b) => b,
+        Err(e) => {
+            println!("Failed to read key file {}: {}", args.key_file, e);
+            return;
+        }
+    };
+
+    let verifier = match verifier_from_jwk(&key_bytes) {
+        Ok(v) => v,
+        Err(e) => {
+            println!("Failed to create verifier from JWK: {}", e);
+            return;
+        }
+    };
+
+    match verify_sign1(&sign1, verifier.as_ref(), &[]) {
+        Ok(()) => println!("Verification successful"),
+        Err(e) => println!("Verification failed: {}", e),
+    }
+}
+
+/// Verify a JWS compact signed EAR.
+fn ear_verify_jws(args: &EarVerifySubcommand) {
+    let compact = match fs::read_to_string(&args.signed_ear_file) {
+        Ok(s) => s,
+        Err(e) => {
+            println!("Failed to read JWS file {}: {}", args.signed_ear_file, e);
+            return;
+        }
+    };
+
+    let key_bytes = match fs::read(&args.key_file) {
+        Ok(b) => b,
+        Err(e) => {
+            println!("Failed to read key file {}: {}", args.key_file, e);
+            return;
+        }
+    };
+
+    let jwk = match Jwk::from_json(&key_bytes) {
+        Ok(j) => j,
+        Err(e) => {
+            println!("Failed to parse JWK: {}", e);
+            return;
+        }
+    };
+
+    let verifier = match jwk.to_verifier() {
+        Ok(v) => v,
+        Err(e) => {
+            println!("Failed to create verifier from JWK: {}", e);
+            return;
+        }
+    };
+
+    match verify_compact(compact.trim(), verifier.as_ref()) {
+        Ok(_) => println!("Verification successful"),
+        Err(e) => println!("Verification failed: {}", e),
+    }
+}
+
+// ── Extract ──
+
+/// Extract the payload from a signed EAR.
+fn ear_extract(args: &EarExtractSubcommand) {
+    match args.format {
+        SigningFormat::Cose => ear_extract_cose(args),
+        SigningFormat::Jws => ear_extract_jws(args),
+    }
+}
+
+/// Extract the payload from a COSE Sign1 signed EAR.
+fn ear_extract_cose(args: &EarExtractSubcommand) {
+    let sign1 = match read_signed_ear(&args.signed_ear_file) {
+        Ok(s) => s,
+        Err(e) => {
+            println!("Failed to read signed EAR: {}", e);
+            return;
+        }
+    };
+
     let payload = match &sign1.payload {
         BinaryOrNil::Binary(p) => p,
         BinaryOrNil::Nil => {
@@ -374,7 +516,6 @@ fn ear_extract(args: &EarExtractSubcommand) {
         }
     }
 
-    // Derive output filename from input
     let input_path = Path::new(&args.signed_ear_file);
     let stem = input_path
         .file_stem()
@@ -385,6 +526,61 @@ fn ear_extract(args: &EarExtractSubcommand) {
     match File::create(&output_path) {
         Ok(mut f) => {
             if let Err(e) = f.write_all(payload) {
+                println!("Failed to write payload: {}", e);
+                return;
+            }
+        }
+        Err(e) => {
+            println!("Failed to create output file {:?}: {}", output_path, e);
+            return;
+        }
+    }
+
+    println!("Extracted EAR payload to {:?}", output_path);
+}
+
+/// Extract the payload from a JWS compact signed EAR (without verification).
+fn ear_extract_jws(args: &EarExtractSubcommand) {
+    let compact = match fs::read_to_string(&args.signed_ear_file) {
+        Ok(s) => s,
+        Err(e) => {
+            println!("Failed to read JWS file {}: {}", args.signed_ear_file, e);
+            return;
+        }
+    };
+
+    let parts: Vec<&str> = compact.trim().splitn(3, '.').collect();
+    if parts.len() != 3 {
+        println!("Invalid JWS compact serialization");
+        return;
+    }
+
+    let payload = match Base64UrlUnpadded::decode_vec(parts[1]) {
+        Ok(p) => p,
+        Err(e) => {
+            println!("Failed to decode JWS payload: {}", e);
+            return;
+        }
+    };
+
+    let output_dir = Path::new(&args.output_dir);
+    if !output_dir.exists() {
+        if let Err(e) = fs::create_dir_all(output_dir) {
+            println!("Failed to create output directory {:?}: {}", output_dir, e);
+            return;
+        }
+    }
+
+    let input_path = Path::new(&args.signed_ear_file);
+    let stem = input_path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("ear");
+    let output_path = output_dir.join(format!("{stem}-payload.cbor"));
+
+    match File::create(&output_path) {
+        Ok(mut f) => {
+            if let Err(e) = f.write_all(&payload) {
                 println!("Failed to write payload: {}", e);
                 return;
             }

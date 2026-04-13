@@ -50,6 +50,18 @@ development.
 
 - `pqc` enables ML-DSA-44, ML-DSA-65, and ML-DSA-87 post-quantum signing and verification per [draft-ietf-cose-dilithium-11](https://datatracker.ietf.org/doc/html/draft-ietf-cose-dilithium-11), using the `ml-dsa` crate. This feature is not enabled by default.
 
+## Examples
+
+### Key Generation
+
+The `gen_keys` example generates sample JWK key files (ES256, ES384, EdDSA) for use with `cfcli` sign/verify commands:
+
+```sh
+cargo run --example gen_keys -p cose_crypto
+```
+
+Output is a set of key-value pairs that can be assembled into JWK JSON files. See `cfcli/tests/data/keys/` for pre-generated samples.
+
 ## Minimum Supported Rust Version
 
 This crate requires **Rust 1.85** at a minimum.

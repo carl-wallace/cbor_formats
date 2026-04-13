@@ -91,6 +91,28 @@ impl CoseAlgorithm {
         }
     }
 
+    /// Convert to JOSE algorithm name (RFC 7518).
+    pub fn to_jose_alg(self) -> &'static str {
+        match self {
+            Self::Es256 => "ES256",
+            Self::Es384 => "ES384",
+            Self::Eddsa => "EdDSA",
+            Self::Hs256_64 => "HS256",
+            Self::Hs256 => "HS256",
+            Self::Hs384 => "HS384",
+            Self::Hs512 => "HS512",
+            Self::A128Gcm => "A128GCM",
+            Self::A192Gcm => "A192GCM",
+            Self::A256Gcm => "A256GCM",
+            #[cfg(feature = "pqc")]
+            Self::MlDsa44 => "ML-DSA-44",
+            #[cfg(feature = "pqc")]
+            Self::MlDsa65 => "ML-DSA-65",
+            #[cfg(feature = "pqc")]
+            Self::MlDsa87 => "ML-DSA-87",
+        }
+    }
+
     /// Returns the symmetric key size in bytes, if applicable.
     pub fn key_size(self) -> Option<usize> {
         match self {

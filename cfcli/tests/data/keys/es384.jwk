@@ -1,0 +1,8 @@
+{
+    "kty": "EC",
+    "crv": "P-384",
+    "alg": "ES384",
+    "x": "7kmfh-c7JIi-CjHHcVyT7pS5tQP_uSn_FLf8OID4aSMGkvjZsHDbjS8wiXER5Dgc",
+    "y": "8etFPbQRbNm0KqbOyPbNvMnrh_s0gQzlybeKbD7HtGy73c8VcjPgqkKQBJStqlE-",
+    "d": "Y7QHtKbMdj07AB2-xM4XwLWaTVNNW7R7tEbqN-uWYDdtax-_m1E1Dbn5jJIAVtgK"
+}

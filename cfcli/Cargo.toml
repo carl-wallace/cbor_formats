@@ -18,6 +18,8 @@ cose_crypto = { version = "0.1.1", path = "../cose_crypto" }
 coswid = { version = "0.1.1", path = "../coswid" }
 cots = { version = "0.1.1", path = "../cots" }
 eat = { version = "0.1.1", path = "../eat" }
+jose = { version = "0.1.1", path = "../jose" }
+base64ct = { version = "1.7", features = ["alloc"] }
 clap = {version = "4.6.0", default-features = false, features=["std", "derive", "help", "usage", "error-context"]}
 walkdir = { version = "2"}
 ciborium = "0.2.2"

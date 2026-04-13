@@ -17,6 +17,7 @@ members = [
     "eat",
     "epoch_markers",
     "etime",
+    "jose",
     "webauthn_asf"
 ]
 
