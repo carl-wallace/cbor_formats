@@ -38,6 +38,8 @@ pub enum Commands {
     Ear(EarCommand),
     /// Create, display, sign, verify, and extract EAT (Entity Attestation Token) objects
     Eat(EatCommand),
+    /// Convert between CBOR binary and diagnostic notation
+    Diag(DiagCommand),
 }
 
 //----------------------------------------------------------
@@ -560,6 +562,39 @@ pub struct EatExtractSubcommand {
     /// signing format: cose (default) or jws
     #[clap(long, value_enum, default_value_t = SigningFormat::Cose)]
     pub format: SigningFormat,
+}
+
+//----------------------------------------------------------
+// Diag
+//----------------------------------------------------------
+/// CBOR diagnostic notation conversions
+#[derive(Args, Debug)]
+pub struct DiagCommand {
+    #[clap(subcommand)]
+    pub command: DiagSubCommands,
+}
+#[derive(Subcommand, Debug)]
+pub enum DiagSubCommands {
+    /// Convert CBOR diagnostic notation to binary CBOR
+    ToCbor(DiagToCborSubcommand),
+    /// Convert binary CBOR to diagnostic notation
+    ToDiag(DiagToDiagSubcommand),
+}
+#[derive(Args, Debug)]
+pub struct DiagToCborSubcommand {
+    /// input file containing CBOR diagnostic notation (or - for stdin)
+    #[clap(short, long)]
+    pub input: String,
+
+    /// output file for binary CBOR
+    #[clap(short, long)]
+    pub output: String,
+}
+#[derive(Args, Debug)]
+pub struct DiagToDiagSubcommand {
+    /// input file containing binary CBOR
+    #[clap(short, long)]
+    pub input: String,
 }
 
 /// CLI utility for creating, displaying, signing, and verifying CBOR-encoded RATS and SCITT objects

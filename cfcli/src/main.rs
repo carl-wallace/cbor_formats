@@ -23,6 +23,8 @@ mod corim;
 mod coserv;
 mod coswid;
 mod cots;
+mod diag;
+mod diag_parse;
 mod ear;
 mod eat;
 mod key_utils;
@@ -33,6 +35,7 @@ use crate::corim::corim_main;
 use crate::coserv::coserv_main;
 use crate::coswid::coswid_main;
 use crate::cots::cots_main;
+use crate::diag::diag_main;
 use crate::ear::ear_main;
 use crate::eat::eat_main;
 use args::*;
@@ -57,5 +60,6 @@ fn main() {
         Commands::Cots(c) => cots_main(c),
         Commands::Ear(c) => ear_main(c),
         Commands::Eat(c) => eat_main(c),
+        Commands::Diag(c) => diag_main(c),
     }
 }
