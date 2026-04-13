@@ -42,6 +42,7 @@ ml-dsa = { version = "0.1.0-rc.8", optional = true }
 rand = "0.10"
 
 [dev-dependencies]
+hex = "0.4"
 hex-literal = "1.1.0"
 p256 = { version = "0.14.0-rc.8", features = ["ecdsa"] }
 p384 = { version = "0.14.0-rc.8", features = ["ecdsa"] }

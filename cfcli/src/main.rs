@@ -24,6 +24,7 @@ mod coswid;
 mod cots;
 mod ear;
 mod eat;
+mod key_utils;
 mod utils;
 
 use crate::comid::comid_main;

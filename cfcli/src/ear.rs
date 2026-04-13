@@ -7,7 +7,8 @@ use ciborium::value::Value;
 use common::{BinaryOrNil, TextOrInt};
 use cose::arrays::CoseSign1Cbor;
 use cose::maps::HeaderMap;
-use cose_crypto::jwk::{algorithm_from_jwk, signer_from_jwk, verifier_from_jwk};
+use crate::key_utils::{algorithm_from_key, signer_from_key, verifier_from_key};
+use cose_crypto::jwk::algorithm_from_jwk;
 use cose_crypto::sign::{CoseSign1Builder, verify_sign1};
 use ear::maps::*;
 use jose::header::JoseHeader;
@@ -258,20 +259,20 @@ fn ear_sign_cose(args: &EarSignSubcommand) {
         }
     };
 
-    // Get algorithm from JWK
-    let algorithm = match algorithm_from_jwk(&key_bytes) {
+    // Get algorithm from key (JWK or COSE Key)
+    let algorithm = match algorithm_from_key(&key_bytes) {
         Ok(a) => a,
         Err(e) => {
-            println!("Failed to determine algorithm from JWK: {}", e);
+            println!("Failed to determine algorithm from key: {}", e);
             return;
         }
     };
 
     // Create signer
-    let signer = match signer_from_jwk(&key_bytes) {
+    let signer = match signer_from_key(&key_bytes) {
         Ok(s) => s,
         Err(e) => {
-            println!("Failed to create signer from JWK: {}", e);
+            println!("Failed to create signer from key: {}", e);
             return;
         }
     };
@@ -426,10 +427,10 @@ fn ear_verify_cose(args: &EarVerifySubcommand) {
         }
     };
 
-    let verifier = match verifier_from_jwk(&key_bytes) {
+    let verifier = match verifier_from_key(&key_bytes) {
         Ok(v) => v,
         Err(e) => {
-            println!("Failed to create verifier from JWK: {}", e);
+            println!("Failed to create verifier from key: {}", e);
             return;
         }
     };

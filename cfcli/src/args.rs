@@ -85,9 +85,9 @@ pub enum CorimSubCommands {
     Create(CorimCreateSubcommand),
     /// Decode and display a CBOR-encoded CoRIM
     Display(DisplaySubcommand),
-    /// Sign a CoRIM using a COSE Sign1 structure with a JWK key
+    /// Sign a CoRIM using a COSE Sign1 structure
     Sign(CorimSignSubcommand),
-    /// Verify the signature on a signed CoRIM using a JWK key
+    /// Verify the signature on a signed CoRIM
     Verify(CorimVerifySubcommand),
     /// Extract the payload and tags from a signed CoRIM
     Extract(CorimExtractSubcommand),
@@ -128,7 +128,7 @@ pub struct CorimSignSubcommand {
     #[clap(short, long)]
     pub corim_file: String,
 
-    /// a JWK key file (in JSON format)
+    /// a key file (JWK JSON or COSE Key CBOR)
     #[clap(short, long)]
     pub key_file: String,
 
@@ -146,7 +146,7 @@ pub struct CorimVerifySubcommand {
     #[clap(short = 'f', long)]
     pub signed_corim_file: String,
 
-    /// a JWK key file (in JSON format)
+    /// a key file (JWK JSON or COSE Key CBOR)
     #[clap(short, long)]
     pub key_file: String,
 }
@@ -322,9 +322,9 @@ pub enum CoservSubCommands {
     Create(CoservCreateSubcommand),
     /// Decode and display a CBOR-encoded CoSERV
     Display(DisplaySubcommand),
-    /// Sign a CoSERV using a COSE Sign1 structure with a JWK key
+    /// Sign a CoSERV using a COSE Sign1 structure
     Sign(CoservSignSubcommand),
-    /// Verify the signature on a signed CoSERV using a JWK key
+    /// Verify the signature on a signed CoSERV
     Verify(CoservVerifySubcommand),
     /// Extract the payload from a signed CoSERV
     Extract(CoservExtractSubcommand),
@@ -353,7 +353,7 @@ pub struct CoservSignSubcommand {
     #[clap(short = 'f', long)]
     pub coserv_file: String,
 
-    /// a JWK key file (in JSON format)
+    /// a key file (JWK JSON or COSE Key CBOR)
     #[clap(short, long)]
     pub key_file: String,
 
@@ -367,7 +367,7 @@ pub struct CoservVerifySubcommand {
     #[clap(short = 'f', long)]
     pub signed_coserv_file: String,
 
-    /// a JWK key file (in JSON format)
+    /// a key file (JWK JSON or COSE Key CBOR)
     #[clap(short, long)]
     pub key_file: String,
 }
@@ -397,9 +397,9 @@ pub enum EarSubCommands {
     Create(EarCreateSubcommand),
     /// Decode and display a CBOR-encoded EAR
     Display(DisplaySubcommand),
-    /// Sign an EAR using a COSE Sign1 structure with a JWK key
+    /// Sign an EAR using a COSE Sign1 structure or JWS
     Sign(EarSignSubcommand),
-    /// Verify the signature on a signed EAR using a JWK key
+    /// Verify the signature on a signed EAR
     Verify(EarVerifySubcommand),
     /// Extract the payload from a signed EAR
     Extract(EarExtractSubcommand),
@@ -424,7 +424,7 @@ pub struct EarSignSubcommand {
     #[clap(short = 'f', long)]
     pub ear_file: String,
 
-    /// a JWK key file (in JSON format)
+    /// a key file (JWK JSON or COSE Key CBOR)
     #[clap(short, long)]
     pub key_file: String,
 
@@ -442,7 +442,7 @@ pub struct EarVerifySubcommand {
     #[clap(short = 'f', long)]
     pub signed_ear_file: String,
 
-    /// a JWK key file (in JSON format)
+    /// a key file (JWK JSON or COSE Key CBOR)
     #[clap(short, long)]
     pub key_file: String,
 
@@ -480,9 +480,9 @@ pub enum EatSubCommands {
     Create(EatCreateSubcommand),
     /// Decode and display a CBOR-encoded EAT
     Display(DisplaySubcommand),
-    /// Sign an EAT using a COSE Sign1 structure or JWS with a JWK key
+    /// Sign an EAT using a COSE Sign1 structure or JWS
     Sign(EatSignSubcommand),
-    /// Verify the signature on a signed EAT using a JWK key
+    /// Verify the signature on a signed EAT
     Verify(EatVerifySubcommand),
     /// Extract the payload from a signed EAT
     Extract(EatExtractSubcommand),
@@ -507,7 +507,7 @@ pub struct EatSignSubcommand {
     #[clap(short = 'f', long)]
     pub eat_file: String,
 
-    /// a JWK key file (in JSON format)
+    /// a key file (JWK JSON or COSE Key CBOR)
     #[clap(short, long)]
     pub key_file: String,
 
@@ -525,7 +525,7 @@ pub struct EatVerifySubcommand {
     #[clap(short = 'f', long)]
     pub signed_eat_file: String,
 
-    /// a JWK key file (in JSON format)
+    /// a key file (JWK JSON or COSE Key CBOR)
     #[clap(short, long)]
     pub key_file: String,
 
