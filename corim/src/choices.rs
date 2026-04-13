@@ -30,13 +30,12 @@
 use alloc::format;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
-use ciborium::value::{Integer, Value};
+use cbor_derive::EnumToChoice;
+use ciborium::value::Value;
 use common::*;
 use core::fmt;
 use serde::de::Visitor;
 use serde::{Deserialize, Serialize};
-use serde_repr::Deserialize_repr;
-use serde_repr::Serialize_repr;
 
 use ciborium::tag::Required;
 
@@ -223,12 +222,15 @@ impl TryFrom<&ClassIdTypeChoiceCbor> for ClassIdTypeChoice {
 }
 
 /// CBOR-encodable counterpart of [`ClassIdTypeChoice`].
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum ClassIdTypeChoiceCbor {
+    #[cbor(tag = "111", cbor = "true")]
     Oid(TaggedOidTypeCbor),
+    #[cbor(tag = "37", cbor = "true")]
     Uuid(TaggedUuidType),
+    #[cbor(tag = "560", cbor = "true")]
     Bytes(TaggedBytes),
 }
 impl TryFrom<ClassIdTypeChoice> for ClassIdTypeChoiceCbor {
@@ -251,58 +253,6 @@ impl TryFrom<&ClassIdTypeChoice> for ClassIdTypeChoiceCbor {
         }
     }
 }
-impl TryFrom<Value> for ClassIdTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Tag(111, b) => Ok(Self::Oid(TaggedOidTypeCbor {
-                0: OidType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => return Err("Failed to parse OID value as bytes".to_string()),
-                }),
-            })),
-            Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => return Err("Failed to parse UUID value as bytes".to_string()),
-                }),
-            })),
-            Value::Tag(560, b) => Ok(Self::Bytes(TaggedBytes {
-                0: BytesType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => return Err("Failed to parse tagged bytes value".to_string()),
-                }),
-            })),
-            _ => Err("Failed to parse value as a ClassIdTypeChoiceCbor".to_string()),
-        }
-    }
-}
-impl TryFrom<&Value> for ClassIdTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Tag(111, b) => Ok(Self::Oid(TaggedOidTypeCbor {
-                0: OidType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => return Err("Failed to parse OID value as bytes".to_string()),
-                }),
-            })),
-            Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => return Err("Failed to parse UUID value as bytes".to_string()),
-                }),
-            })),
-            Value::Tag(560, b) => Ok(Self::Bytes(TaggedBytes {
-                0: BytesType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => return Err("Failed to parse tagged bytes value".to_string()),
-                }),
-            })),
-            _ => Err("Failed to parse value as a ClassIdTypeChoiceCbor".to_string()),
-        }
-    }
-}
 
 /// The `corim-id-type-choice` socket is defined in [CoRIM Section 4.1.1].
 ///
@@ -312,28 +262,14 @@ impl TryFrom<&Value> for ClassIdTypeChoiceCbor {
 /// ```
 ///
 /// [CoRIM Section 4.1.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-4.1.1
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum CorimIdTypeChoice {
+    #[cbor(value = "Text")]
     Str(String),
+    #[cbor(value = "Bytes")]
     Uuid(UuidType),
-}
-impl TryFrom<Value> for CorimIdTypeChoice {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        CorimIdTypeChoice::try_from(&value)
-    }
-}
-impl TryFrom<&Value> for CorimIdTypeChoice {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Text(s) => Ok(Self::Str(s.clone())),
-            Value::Bytes(b) => Ok(Self::Uuid(UuidType(b.clone()))),
-            _ => Err("Failed to parse value as a CorimIdTypeChoice".to_string()),
-        }
-    }
 }
 
 // impl<'de> _serde::Deserialize<'de> for CorimIdTypeChoice {
@@ -456,75 +392,53 @@ pub enum CorimRoleTypeChoice {
 impl TryFrom<CorimRoleTypeChoice> for CorimRoleTypeChoiceCbor {
     type Error = String;
     fn try_from(value: CorimRoleTypeChoice) -> Result<Self, Self::Error> {
-        match value {
-            CorimRoleTypeChoice::ManifestCreator => {
-                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
-            }
-            CorimRoleTypeChoice::ManifestSigner => {
-                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
-            }
-            CorimRoleTypeChoice::TagCreator => {
-                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::TagCreator))
-            }
-            CorimRoleTypeChoice::Creator => {
-                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
-            }
-            CorimRoleTypeChoice::Maintainer => {
-                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
-            }
-            CorimRoleTypeChoice::other(s) => Ok(Self::Extensions(match s.parse::<i8>() {
-                Ok(i) => i,
-                Err(e) => return Err(e.to_string()),
-            })),
-        }
+        Self::try_from(&value)
     }
 }
 
 impl TryFrom<CorimRoleTypeChoiceCbor> for CorimRoleTypeChoice {
     type Error = String;
     fn try_from(value: CorimRoleTypeChoiceCbor) -> Result<Self, Self::Error> {
-        match value {
-            CorimRoleTypeChoiceCbor::Known(v) => match v {
-                CorimRoleTypeChoiceKnownCbor::ManifestCreator => Ok(Self::ManifestCreator),
-                CorimRoleTypeChoiceKnownCbor::ManifestSigner => Ok(Self::ManifestSigner),
-                CorimRoleTypeChoiceKnownCbor::TagCreator => Ok(Self::TagCreator),
-            },
-            CorimRoleTypeChoiceCbor::Extensions(e) => Ok(Self::other(e.to_string())),
-        }
+        Self::try_from(&value)
     }
 }
 
 /// CBOR-encodable counterpart of [`CorimRoleTypeChoice`].
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+///
+/// Carries the raw integer value from the wire. Known values are available as
+/// associated constants for comparison. The `$` socket in CDDL means any
+/// integer is valid — unknown values are extensions, not errors.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum CorimRoleTypeChoiceCbor {
-    Known(CorimRoleTypeChoiceKnownCbor),
-    Extensions(i8),
+    #[cbor(value = "Integer")]
+    Value(i8),
 }
+
+impl CorimRoleTypeChoiceCbor {
+    /// `&(tag-creator: 0)` — both `$corim-role-type-choice` and `$comid-role-type-choice`
+    pub const TAG_CREATOR: i8 = 0;
+    /// `&(manifest-creator: 1)` / `&(creator: 1)`
+    pub const MANIFEST_CREATOR: i8 = 1;
+    /// `&(manifest-signer: 2)` / `&(maintainer: 2)`
+    pub const MANIFEST_SIGNER: i8 = 2;
+}
+
 impl TryFrom<&CorimRoleTypeChoice> for CorimRoleTypeChoiceCbor {
     type Error = String;
     fn try_from(value: &CorimRoleTypeChoice) -> Result<Self, Self::Error> {
         match value {
-            CorimRoleTypeChoice::ManifestCreator => {
-                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
+            CorimRoleTypeChoice::TagCreator => Ok(Self::Value(Self::TAG_CREATOR)),
+            CorimRoleTypeChoice::ManifestCreator | CorimRoleTypeChoice::Creator => {
+                Ok(Self::Value(Self::MANIFEST_CREATOR))
             }
-            CorimRoleTypeChoice::ManifestSigner => {
-                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
+            CorimRoleTypeChoice::ManifestSigner | CorimRoleTypeChoice::Maintainer => {
+                Ok(Self::Value(Self::MANIFEST_SIGNER))
             }
-            CorimRoleTypeChoice::TagCreator => {
-                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::TagCreator))
+            CorimRoleTypeChoice::other(s) => {
+                Ok(Self::Value(s.parse::<i8>().map_err(|e| e.to_string())?))
             }
-            CorimRoleTypeChoice::Creator => {
-                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
-            }
-            CorimRoleTypeChoice::Maintainer => {
-                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
-            }
-            CorimRoleTypeChoice::other(s) => Ok(Self::Extensions(match s.parse::<i8>() {
-                Ok(i) => i,
-                Err(e) => return Err(e.to_string()),
-            })),
         }
     }
 }
@@ -533,81 +447,14 @@ impl TryFrom<&CorimRoleTypeChoiceCbor> for CorimRoleTypeChoice {
     type Error = String;
     fn try_from(value: &CorimRoleTypeChoiceCbor) -> Result<Self, Self::Error> {
         match value {
-            CorimRoleTypeChoiceCbor::Known(v) => match v {
-                CorimRoleTypeChoiceKnownCbor::ManifestCreator => Ok(Self::ManifestCreator),
-                CorimRoleTypeChoiceKnownCbor::ManifestSigner => Ok(Self::ManifestSigner),
-                CorimRoleTypeChoiceKnownCbor::TagCreator => Ok(Self::TagCreator),
+            CorimRoleTypeChoiceCbor::Value(v) => match *v {
+                CorimRoleTypeChoiceCbor::TAG_CREATOR => Ok(Self::TagCreator),
+                CorimRoleTypeChoiceCbor::MANIFEST_CREATOR => Ok(Self::ManifestCreator),
+                CorimRoleTypeChoiceCbor::MANIFEST_SIGNER => Ok(Self::ManifestSigner),
+                other => Ok(Self::other(other.to_string())),
             },
-            CorimRoleTypeChoiceCbor::Extensions(e) => Ok(Self::other(e.to_string())),
         }
     }
-}
-
-impl TryFrom<Value> for CorimRoleTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Integer(i) => {
-                if i.eq(&Integer::from(0)) {
-                    Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::TagCreator))
-                } else if i.eq(&Integer::from(1)) {
-                    Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
-                } else if i.eq(&Integer::from(2)) {
-                    Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
-                } else {
-                    Ok(Self::Extensions(match Integer::try_into(i) {
-                        Ok(i) => i,
-                        Err(e) => return Err(e.to_string()),
-                    }))
-                }
-            }
-            _ => Err("Failed to parse value as an integer for CorimRoleTypeChoiceCbor".to_string()),
-        }
-    }
-}
-
-impl TryFrom<&Value> for CorimRoleTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Integer(i) => {
-                if i.eq(&Integer::from(0)) {
-                    Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::TagCreator))
-                } else if i.eq(&Integer::from(1)) {
-                    Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
-                } else if i.eq(&Integer::from(2)) {
-                    Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
-                } else {
-                    Ok(Self::Extensions(match Integer::try_into(*i) {
-                        Ok(i) => i,
-                        Err(e) => return Err(e.to_string()),
-                    }))
-                }
-            }
-            _ => Err("Failed to parse value as an integer for CorimRoleTypeChoiceCbor".to_string()),
-        }
-    }
-}
-
-/// CBOR-encodable enumeration of known role values.
-///
-/// Includes both `$corim-role-type-choice` and `$comid-role-type-choice` values
-/// because [`EntityMap`] is shared between both entity
-/// map instantiations.
-///
-/// Note: `Creator` (1) and `ManifestCreator` (1) share the same CBOR value,
-/// as do `Maintainer` (2) and `ManifestSigner` (2). When decoding from CBOR,
-/// the CoRIM names are preferred.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr)]
-#[allow(missing_docs)]
-#[repr(i8)]
-pub enum CorimRoleTypeChoiceKnownCbor {
-    TagCreator = 0,
-    ManifestCreator = 1,
-    ManifestSigner = 2,
-    // Creator = 1 and Maintainer = 2 share values with ManifestCreator
-    // and ManifestSigner respectively; they are handled via the JSON enum
-    // variants and map to the same CBOR integers.
 }
 
 /// The `crypto-key-type-choice` socket is defined in [CoRIM Section 5.1.4.6].
@@ -625,18 +472,27 @@ pub enum CorimRoleTypeChoiceKnownCbor {
 /// $crypto-key-type-choice /= tagged-cert-path-thumbprint-type  ; 561
 /// $crypto-key-type-choice /= tagged-pkix-asn1-der-cert-type    ; 562
 /// ```
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum CryptoKeyTypeChoice {
+    #[cbor(tag = "554", cbor = "true")]
     Key(TaggedPkixBase64KeyType),
+    #[cbor(tag = "555", cbor = "true")]
     Cert(TaggedPkixBase64CertType),
+    #[cbor(tag = "556", cbor = "true")]
     Path(TaggedPkixBase64CertPathType),
+    #[cbor(tag = "557", cbor = "true")]
     KeyThumbprint(TaggedKeyThumbprintType),
+    #[cbor(tag = "558", cbor = "true")]
     CoseKey(TaggedCoseKeyType),
+    #[cbor(tag = "559", cbor = "true")]
     CertThumbprint(TaggedCertThumbprintType),
+    #[cbor(tag = "560", cbor = "true")]
     Bytes(TaggedBytes),
+    #[cbor(tag = "561", cbor = "true")]
     CertPathThumbprint(TaggedCertPathThumbprintType),
+    #[cbor(tag = "562", cbor = "true")]
     DerCert(TaggedPkixAsn1DerCertType),
 }
 
@@ -650,85 +506,6 @@ impl TryFrom<&CryptoKeyTypeChoice> for CryptoKeyTypeChoice {
     }
 }
 
-fn parse_tagged_hash_entry(b: &Value) -> Result<arrays::HashEntry, String> {
-    match b.as_array() {
-        Some(arr) if arr.len() == 2 => {
-            let alg = match arr[0].as_integer() {
-                Some(i) => match i.try_into() {
-                    Ok(v) => v,
-                    Err(e) => return Err(format!("Failed to parse hash alg id: {}", e)),
-                },
-                None => return Err("Failed to parse hash alg id as integer".to_string()),
-            };
-            let val = match arr[1].as_bytes() {
-                Some(b) => b.clone(),
-                None => return Err("Failed to parse hash value as bytes".to_string()),
-            };
-            Ok(arrays::HashEntry {
-                hash_alg_id: alg,
-                hash_value: val,
-            })
-        }
-        _ => Err("Failed to parse hash-entry as a 2-element array".to_string()),
-    }
-}
-
-impl TryFrom<Value> for CryptoKeyTypeChoice {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        CryptoKeyTypeChoice::try_from(&value)
-    }
-}
-impl TryFrom<&Value> for CryptoKeyTypeChoice {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Tag(554, b) => Ok(Self::Key(Required(match b.as_text() {
-                Some(t) => t.to_string(),
-                None => {
-                    return Err("Failed to parse CryptoKeyTypeChoice tag 554 as text".to_string());
-                }
-            }))),
-            Value::Tag(555, b) => Ok(Self::Cert(Required(match b.as_text() {
-                Some(t) => t.to_string(),
-                None => {
-                    return Err("Failed to parse CryptoKeyTypeChoice tag 555 as text".to_string());
-                }
-            }))),
-            Value::Tag(556, b) => Ok(Self::Path(Required(match b.as_text() {
-                Some(t) => t.to_string(),
-                None => {
-                    return Err("Failed to parse CryptoKeyTypeChoice tag 556 as text".to_string());
-                }
-            }))),
-            Value::Tag(557, b) => Ok(Self::KeyThumbprint(Required(parse_tagged_hash_entry(b)?))),
-            Value::Tag(558, b) => Ok(Self::CoseKey(Required(BytesType(match b.as_bytes() {
-                Some(b) => b.clone(),
-                None => {
-                    return Err("Failed to parse CryptoKeyTypeChoice tag 558 as bytes".to_string());
-                }
-            })))),
-            Value::Tag(559, b) => Ok(Self::CertThumbprint(Required(parse_tagged_hash_entry(b)?))),
-            Value::Tag(560, b) => Ok(Self::Bytes(Required(BytesType(match b.as_bytes() {
-                Some(b) => b.clone(),
-                None => {
-                    return Err("Failed to parse CryptoKeyTypeChoice tag 560 as bytes".to_string());
-                }
-            })))),
-            Value::Tag(561, b) => Ok(Self::CertPathThumbprint(Required(parse_tagged_hash_entry(
-                b,
-            )?))),
-            Value::Tag(562, b) => Ok(Self::DerCert(Required(BytesType(match b.as_bytes() {
-                Some(b) => b.clone(),
-                None => {
-                    return Err("Failed to parse CryptoKeyTypeChoice tag 562 as bytes".to_string());
-                }
-            })))),
-            _ => Err("Failed to parse value as a CryptoKeyTypeChoice".to_string()),
-        }
-    }
-}
-
 /// The `domain-type-choice` socket is defined in [CoRIM Section 5.1.11].
 ///
 /// ```text
@@ -738,53 +515,16 @@ impl TryFrom<&Value> for CryptoKeyTypeChoice {
 /// ```
 ///
 /// [CoRIM Section 5.1.11]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.11
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum DomainTypeChoice {
+    #[cbor(value = "Integer")]
     U64(u64),
+    #[cbor(value = "Text")]
     Text(String),
+    #[cbor(tag = "37", cbor = "true")]
     Uuid(TaggedUuidType),
-}
-impl TryFrom<Value> for DomainTypeChoice {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Integer(i) => Ok(Self::U64(match Integer::try_into(i) {
-                Ok(i) => i,
-                Err(e) => return Err(e.to_string()),
-            })),
-            Value::Text(s) => Ok(Self::Text(s)),
-            Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => {
-                        return Err("Failed to parse UUID value as a DomainTypeChoice".to_string());
-                    }
-                }),
-            })),
-            _ => Err("Failed to parse value as a DomainTypeChoice".to_string()),
-        }
-    }
-}
-impl TryFrom<&Value> for DomainTypeChoice {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Integer(i) => Ok(Self::U64(match Integer::try_into(*i) {
-                Ok(b) => b,
-                Err(e) => return Err(e.to_string()),
-            })),
-            Value::Text(s) => Ok(Self::Text(s.clone())),
-            Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => return Err("Failed to parse UUID as a DomainTypeChoice".to_string()),
-                }),
-            })),
-            _ => Err("Failed to parse value as a DomainTypeChoice".to_string()),
-        }
-    }
 }
 
 /// The `entity-name-type-choice` socket is defined in [CoRIM Section 7.2].
@@ -795,68 +535,25 @@ impl TryFrom<&Value> for DomainTypeChoice {
 /// $entity-name-type-choice /= text
 /// $entity-name-type-choice /= tagged-oid-type
 /// ```
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum EntityNameTypeChoice {
+    #[cbor(value = "Text")]
     Text(String),
+    #[cbor(tag = "111", cbor = "true")]
     Oid(TaggedOidTypeCbor),
-}
-impl TryFrom<&Value> for EntityNameTypeChoice {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Text(s) => Ok(EntityNameTypeChoice::Text(s.to_string())),
-            Value::Tag(111, b) => Ok(EntityNameTypeChoice::Oid(TaggedOidTypeCbor {
-                0: OidType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => return Err("Failed to parse OID in EntityNameTypeChoice".to_string()),
-                }),
-            })),
-            _ => Err("Failed to parse value as a EntityNameTypeChoice".to_string()),
-        }
-    }
 }
 
 /// $group-id-type-choice /= tagged-uuid-type / tagged-bytes
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum GroupIdTypeChoice {
+    #[cbor(tag = "37", cbor = "true")]
     Uuid(TaggedUuidType),
+    #[cbor(tag = "560", cbor = "true")]
     Bytes(TaggedBytes),
-}
-impl TryFrom<Value> for GroupIdTypeChoice {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        GroupIdTypeChoice::try_from(&value)
-    }
-}
-impl TryFrom<&Value> for GroupIdTypeChoice {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => {
-                        return Err("Failed to parse UUID value as a GroupIdTypeChoice".to_string());
-                    }
-                }),
-            })),
-            Value::Tag(560, b) => Ok(Self::Bytes(TaggedBytes {
-                0: BytesType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => {
-                        return Err(
-                            "Failed to parse tagged bytes value as a GroupIdTypeChoice".to_string()
-                        );
-                    }
-                }),
-            })),
-            _ => Err("Failed to parse value as a GroupIdTypeChoice".to_string()),
-        }
-    }
 }
 
 /// The `instance-id-type-choice` socket is defined in [CoRIM Section 5.1.4.3].
@@ -864,50 +561,15 @@ impl TryFrom<&Value> for GroupIdTypeChoice {
 /// [CoRIM Section 5.1.4.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.3
 ///
 /// Includes tagged-ueid-type, tagged-uuid-type, and all crypto-key-type-choice variants.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum InstanceIdTypeChoice {
+    #[cbor(tag = "550", cbor = "true")]
     Ueid(TaggedUeidType),
+    #[cbor(tag = "37", cbor = "true")]
     Uuid(TaggedUuidType),
     CryptoKey(CryptoKeyTypeChoice),
-}
-impl TryFrom<Value> for InstanceIdTypeChoice {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        InstanceIdTypeChoice::try_from(&value)
-    }
-}
-impl TryFrom<&Value> for InstanceIdTypeChoice {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => {
-                        return Err(
-                            "Failed to parse UUID value as a InstanceIdTypeChoice".to_string()
-                        );
-                    }
-                }),
-            })),
-            Value::Tag(550, b) => Ok(Self::Ueid(TaggedUeidType {
-                0: UeidType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => {
-                        return Err(
-                            "Failed to parse UEID value as a InstanceIdTypeChoice".to_string()
-                        );
-                    }
-                }),
-            })),
-            Value::Tag(t, _) if (554..=562).contains(t) => {
-                Ok(Self::CryptoKey(CryptoKeyTypeChoice::try_from(value)?))
-            }
-            _ => Err("Failed to parse value as a InstanceIdTypeChoice".to_string()),
-        }
-    }
 }
 
 /// The `measured-element-type-choice` socket is defined in [CoRIM Section 5.1.4.5.1].
@@ -1012,14 +674,19 @@ impl TryFrom<&Value> for MeasuredElementTypeChoice {
 }
 
 /// CBOR-encodable counterpart of [`MeasuredElementTypeChoice`].
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum MeasuredElementTypeChoiceCbor {
+    #[cbor(tag = "111", cbor = "true")]
     Oid(TaggedOidTypeCbor),
+    #[cbor(tag = "37", cbor = "true")]
     Uuid(TaggedUuidType),
+    #[cbor(value = "Integer")]
     Uint(u64),
+    #[cbor(value = "Text")]
     Text(String),
+    #[cbor(socket = "true")]
     Other(TupleCbor),
 }
 impl TryFrom<MeasuredElementTypeChoice> for MeasuredElementTypeChoiceCbor {
@@ -1049,49 +716,6 @@ impl TryFrom<&MeasuredElementTypeChoice> for MeasuredElementTypeChoiceCbor {
                 Ok(v) => Ok(Self::Other(v)),
                 Err(e) => Err(e),
             },
-        }
-    }
-}
-impl TryFrom<Value> for MeasuredElementTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        MeasuredElementTypeChoiceCbor::try_from(&value)
-    }
-}
-impl TryFrom<&Value> for MeasuredElementTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Tag(111, b) => Ok(Self::Oid(TaggedOidTypeCbor {
-                0: OidType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => {
-                        return Err("Failed to parse OID value as MeasuredElementTypeChoiceCbor"
-                            .to_string());
-                    }
-                }),
-            })),
-            Value::Tag(37, b) => Ok(Self::Uuid(TaggedUuidType {
-                0: UuidType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => {
-                        return Err(
-                            "Failed to parse UUID value as MeasuredElementTypeChoiceCbor"
-                                .to_string(),
-                        );
-                    }
-                }),
-            })),
-            Value::Integer(i) => Ok(Self::Uint(match (*i).try_into() {
-                Ok(v) => v,
-                Err(e) => return Err(format!("Failed to parse uint: {}", e)),
-            })),
-            Value::Text(s) => Ok(Self::Text(s.clone())),
-            Value::Tag(t, b) => Ok(Self::Other(TupleCbor {
-                key: Value::Integer(Integer::from(*t)),
-                value: *b.clone(),
-            })),
-            _ => Err("Failed to parse value as MeasuredElementTypeChoiceCbor".to_string()),
         }
     }
 }
@@ -1174,14 +798,17 @@ impl TryFrom<&Value> for ProfileTypeChoice {
 }
 
 /// CBOR-encodable counterpart of [`ProfileTypeChoice`].
-//todo the untagged OID field was added to interop with corim repo artifacts (and it raises questions re: use of Tuple for extensibility)
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum ProfileTypeChoiceCbor {
+    #[cbor(value = "Text")]
     Uri(Uri),
+    #[cbor(tag = "111", cbor = "true")]
     Oid(TaggedOidTypeCbor),
+    #[cbor(value = "Bytes")]
     Oid2(OidType),
+    #[cbor(socket = "true")]
     Other(TupleCbor),
 }
 impl TryFrom<ProfileTypeChoice> for ProfileTypeChoiceCbor {
@@ -1212,54 +839,6 @@ impl TryFrom<&ProfileTypeChoice> for ProfileTypeChoiceCbor {
         }
     }
 }
-impl TryFrom<Value> for ProfileTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Text(s) => Ok(Self::Uri(s)),
-            Value::Bytes(s) => Ok(Self::Oid2(OidType(s))),
-            Value::Tag(111, b) => Ok(Self::Oid(TaggedOidTypeCbor {
-                0: OidType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => {
-                        return Err(
-                            "Failed to parse OID value as an ProfileTypeChoiceCbor".to_string()
-                        );
-                    }
-                }),
-            })),
-            Value::Tag(t, b) => Ok(Self::Other(TupleCbor {
-                key: Value::Integer(Integer::from(t)),
-                value: *b,
-            })),
-            _ => Err("Failed to parse value as an ProfileTypeChoiceCbor".to_string()),
-        }
-    }
-}
-impl TryFrom<&Value> for ProfileTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Text(s) => Ok(Self::Uri(s.clone())),
-            Value::Bytes(s) => Ok(Self::Oid2(OidType(s.clone()))),
-            Value::Tag(111, b) => Ok(Self::Oid(TaggedOidTypeCbor {
-                0: OidType(match b.as_bytes() {
-                    Some(b) => b.clone(),
-                    None => {
-                        return Err(
-                            "Failed to parse OID value as an ProfileTypeChoiceCbor".to_string()
-                        );
-                    }
-                }),
-            })),
-            Value::Tag(t, b) => Ok(Self::Other(TupleCbor {
-                key: Value::Integer(Integer::from(*t)),
-                value: *b.clone(),
-            })),
-            _ => Err("Failed to parse value as an ProfileTypeChoiceCbor".to_string()),
-        }
-    }
-}
 
 /// The `svn-type-choice` socket is defined in [CoRIM Section 5.1.4.5.4].
 ///
@@ -1268,80 +847,14 @@ impl TryFrom<&Value> for ProfileTypeChoiceCbor {
 /// ```
 ///
 /// [CoRIM Section 5.1.4.5.4]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5.4
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum SvnTypeChoice {
+    #[cbor(tag = "552", cbor = "true")]
     TaggedSvn(TaggedSvn),
+    #[cbor(tag = "553", cbor = "true")]
     TaggedMinSvn(TaggedMinSvn),
-}
-impl TryFrom<Value> for SvnTypeChoice {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Tag(552, b) => Ok(Self::TaggedSvn(TaggedSvn {
-                0: match b.as_integer() {
-                    Some(i) => match i.try_into() {
-                        Ok(i) => i,
-                        Err(e) => return Err(e.to_string()),
-                    },
-                    None => {
-                        return Err(
-                            "Failed to parse tagged SVN value as an SvnTypeChoice".to_string()
-                        );
-                    }
-                },
-            })),
-            Value::Tag(553, b) => Ok(Self::TaggedMinSvn(TaggedMinSvn {
-                0: match b.as_integer() {
-                    Some(i) => match i.try_into() {
-                        Ok(i) => i,
-                        Err(e) => return Err(e.to_string()),
-                    },
-                    None => {
-                        return Err(
-                            "Failed to parse tagged min SVN value as an SvnTypeChoice".to_string()
-                        );
-                    }
-                },
-            })),
-            _ => Err("Failed to parse value as an SvnTypeChoice".to_string()),
-        }
-    }
-}
-impl TryFrom<&Value> for SvnTypeChoice {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Tag(552, b) => Ok(Self::TaggedSvn(TaggedSvn {
-                0: match b.as_integer() {
-                    Some(i) => match i.try_into() {
-                        Ok(i) => i,
-                        Err(e) => return Err(e.to_string()),
-                    },
-                    None => {
-                        return Err(
-                            "Failed to parse tagged SVN value as an SvnTypeChoice".to_string()
-                        );
-                    }
-                },
-            })),
-            Value::Tag(553, b) => Ok(Self::TaggedMinSvn(TaggedMinSvn {
-                0: match b.as_integer() {
-                    Some(i) => match i.try_into() {
-                        Ok(i) => i,
-                        Err(e) => return Err(e.to_string()),
-                    },
-                    None => {
-                        return Err(
-                            "Failed to parse tagged min SVN value as an SvnTypeChoice".to_string()
-                        );
-                    }
-                },
-            })),
-            _ => Err("Failed to parse value as an SvnTypeChoice".to_string()),
-        }
-    }
 }
 
 /// The `tag-id-type-choice` socket is defined in [CoRIM Section 5.1.1.1].
@@ -1380,11 +893,13 @@ impl TryFrom<&TagIdTypeChoiceCbor> for TagIdTypeChoice {
 }
 
 /// CBOR-encodable counterpart of [`TagIdTypeChoice`].
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum TagIdTypeChoiceCbor {
+    #[cbor(value = "Text")]
     Str(String),
+    #[cbor(value = "Bytes")]
     Uuid(UuidType),
 }
 impl TryFrom<TagIdTypeChoice> for TagIdTypeChoiceCbor {
@@ -1402,22 +917,6 @@ impl TryFrom<&TagIdTypeChoice> for TagIdTypeChoiceCbor {
         match value {
             TagIdTypeChoice::Str(s) => Ok(Self::Str(s.clone())),
             TagIdTypeChoice::Uuid(b) => Ok(Self::Uuid(b.clone())),
-        }
-    }
-}
-impl TryFrom<Value> for TagIdTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        Self::try_from(&value)
-    }
-}
-impl TryFrom<&Value> for TagIdTypeChoiceCbor {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Text(s) => Ok(Self::Str(s.clone())),
-            Value::Bytes(b) => Ok(Self::Uuid(UuidType(b.clone()))),
-            _ => Err("Failed to parse value as a TagIdTypeChoiceCbor".to_string()),
         }
     }
 }
@@ -1458,79 +957,19 @@ impl<'de> Deserialize<'de> for TagIdTypeChoiceCbor {
 /// ```
 ///
 /// [CoRIM Section 5.1.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.3
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum TagRelTypeChoice {
-    Known(TagRelTypeChoiceKnown),
-    Extensions(i8),
+    #[cbor(value = "Integer")]
+    Value(i8),
 }
 
-/// Enumeration of known `tag-rel-type-choice` values (supplements, replaces).
-#[derive(Clone, Debug, Eq, PartialEq, Deserialize)]
-#[allow(missing_docs)]
-pub enum TagRelTypeChoiceKnown {
-    Supplements = 0,
-    Replaces = 1,
-}
-#[doc(hidden)]
-#[allow(non_upper_case_globals, unused_attributes, unused_qualifications)]
-const _: () = {
-    #[allow(unused_extern_crates, clippy::useless_attribute)]
-    extern crate serde as _serde;
-    #[automatically_derived]
-    impl _serde::Serialize for TagRelTypeChoiceKnown {
-        fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
-        where
-            __S: _serde::Serializer,
-        {
-            match *self {
-                TagRelTypeChoiceKnown::Supplements => __serializer.serialize_i8(0),
-                TagRelTypeChoiceKnown::Replaces => __serializer.serialize_i8(1),
-            }
-        }
-    }
-};
-
-impl TryFrom<Value> for TagRelTypeChoice {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Integer(i) => {
-                if i.eq(&Integer::from(0)) {
-                    Ok(Self::Known(TagRelTypeChoiceKnown::Supplements))
-                } else if i.eq(&Integer::from(1)) {
-                    Ok(Self::Known(TagRelTypeChoiceKnown::Replaces))
-                } else {
-                    Ok(Self::Extensions(match Integer::try_into(i) {
-                        Ok(i) => i,
-                        Err(e) => return Err(e.to_string()),
-                    }))
-                }
-            }
-            _ => Err("Failed to parse TagRelTypeChoice as an integer".to_string()),
-        }
-    }
-}
-impl TryFrom<&Value> for TagRelTypeChoice {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Integer(i) => {
-                if i.eq(&Integer::from(0)) {
-                    Ok(Self::Known(TagRelTypeChoiceKnown::Supplements))
-                } else if i.eq(&Integer::from(1)) {
-                    Ok(Self::Known(TagRelTypeChoiceKnown::Replaces))
-                } else {
-                    Ok(Self::Extensions(match Integer::try_into(*i) {
-                        Ok(i) => i,
-                        Err(e) => return Err(e.to_string()),
-                    }))
-                }
-            }
-            _ => Err("Failed to parse TagRelTypeChoice as an integer".to_string()),
-        }
-    }
+impl TagRelTypeChoice {
+    /// `&(supplements: 0)`
+    pub const SUPPLEMENTS: i8 = 0;
+    /// `&(replaces: 1)`
+    pub const REPLACES: i8 = 1;
 }
 
 /// The `tag-version-type` socket is defined in [CoRIM Section 5.1.1.2].
@@ -1543,41 +982,17 @@ impl TryFrom<&Value> for TagRelTypeChoice {
 /// when absent, the semantic value is 0.
 ///
 /// [CoRIM Section 5.1.1.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.1.2
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum TagVersionType {
+    #[cbor(value = "Integer")]
     U64(u64),
 }
 
 impl Default for TagVersionType {
     fn default() -> Self {
         Self::U64(0)
-    }
-}
-
-impl TryFrom<Value> for TagVersionType {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Integer(i) => Ok(TagVersionType::U64(match Integer::try_into(i) {
-                Ok(i) => i,
-                Err(e) => return Err(e.to_string()),
-            })),
-            _ => Err("Failed to parse TagVersionType as an integer".to_string()),
-        }
-    }
-}
-impl TryFrom<&Value> for TagVersionType {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Integer(i) => Ok(TagVersionType::U64(match Integer::try_into(*i) {
-                Ok(i) => i,
-                Err(e) => return Err(e.to_string()),
-            })),
-            _ => Err("Failed to parse TagVersionType as an integer".to_string()),
-        }
     }
 }
 
@@ -1589,11 +1004,13 @@ impl TryFrom<&Value> for TagVersionType {
 /// $raw-value-type-choice /= tagged-bytes          ; #6.560
 /// $raw-value-type-choice /= tagged-masked-raw-value ; #6.563
 /// ```
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum RawValueTypeChoice {
+    #[cbor(tag = "560", cbor = "true")]
     Bytes(TaggedBytes),
+    #[cbor(tag = "563", cbor = "true")]
     MaskedRawValue(TaggedMaskedRawValue),
 }
 /// Type alias for CBOR form (same as non-CBOR form for this type)
@@ -1605,42 +1022,6 @@ impl TryFrom<&RawValueTypeChoice> for RawValueTypeChoice {
         Ok(value.clone())
     }
 }
-impl TryFrom<Value> for RawValueTypeChoice {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        RawValueTypeChoice::try_from(&value)
-    }
-}
-impl TryFrom<&Value> for RawValueTypeChoice {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Tag(560, b) => Ok(Self::Bytes(Required(BytesType(match b.as_bytes() {
-                Some(b) => b.clone(),
-                None => return Err("Failed to parse tag 560 as bytes".to_string()),
-            })))),
-            Value::Tag(563, b) => {
-                let arr = b.as_array().ok_or("Failed to parse tag 563 as array")?;
-                if arr.len() != 2 {
-                    return Err("MaskedRawValue must be a 2-element array".to_string());
-                }
-                let v = arr[0]
-                    .as_bytes()
-                    .ok_or("Failed to parse masked raw value")?
-                    .clone();
-                let m = arr[1]
-                    .as_bytes()
-                    .ok_or("Failed to parse mask value")?
-                    .clone();
-                Ok(Self::MaskedRawValue(Required(arrays::MaskedRawValueCbor {
-                    value: v,
-                    mask: m,
-                })))
-            }
-            _ => Err("Failed to parse value as RawValueTypeChoice".to_string()),
-        }
-    }
-}
 
 /// The `int-range-type-choice` is defined in [CoRIM Section 5.1.4.8].
 ///
@@ -1650,11 +1031,13 @@ impl TryFrom<&Value> for RawValueTypeChoice {
 /// $int-range-type-choice /= int
 /// $int-range-type-choice /= tagged-int-range ; #6.564
 /// ```
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, EnumToChoice)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum IntRangeTypeChoice {
+    #[cbor(value = "Integer")]
     Int(i64),
+    #[cbor(tag = "564", cbor = "true")]
     Range(TaggedIntRange),
 }
 /// Type alias for CBOR form (same as non-CBOR form for this type)
@@ -1664,40 +1047,5 @@ impl TryFrom<&IntRangeTypeChoice> for IntRangeTypeChoice {
     type Error = String;
     fn try_from(value: &IntRangeTypeChoice) -> Result<Self, Self::Error> {
         Ok(value.clone())
-    }
-}
-impl TryFrom<Value> for IntRangeTypeChoice {
-    type Error = String;
-    fn try_from(value: Value) -> Result<Self, Self::Error> {
-        IntRangeTypeChoice::try_from(&value)
-    }
-}
-impl TryFrom<&Value> for IntRangeTypeChoice {
-    type Error = String;
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        match value {
-            Value::Integer(i) => Ok(Self::Int(match (*i).try_into() {
-                Ok(v) => v,
-                Err(e) => return Err(format!("Failed to parse int in IntRangeTypeChoice: {}", e)),
-            })),
-            Value::Tag(564, b) => {
-                let arr = b.as_array().ok_or("Failed to parse tag 564 as array")?;
-                if arr.len() != 2 {
-                    return Err("IntRange must be a 2-element array".to_string());
-                }
-                let min: i64 = arr[0]
-                    .as_integer()
-                    .ok_or("Failed to parse min")?
-                    .try_into()
-                    .map_err(|e| format!("Failed to parse min: {}", e))?;
-                let max: i64 = arr[1]
-                    .as_integer()
-                    .ok_or("Failed to parse max")?
-                    .try_into()
-                    .map_err(|e| format!("Failed to parse max: {}", e))?;
-                Ok(Self::Range(Required(arrays::IntRangeCbor { min, max })))
-            }
-            _ => Err("Failed to parse value as IntRangeTypeChoice".to_string()),
-        }
     }
 }

@@ -317,6 +317,15 @@ pub type TaggedUeidType = Required<UeidType, 550>;
 /// oid-type = bytes
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct OidType(#[serde(with = "serde_bytes")] pub Vec<u8>);
+impl TryFrom<&Value> for OidType {
+    type Error = String;
+    fn try_from(value: &Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Bytes(k) => Ok(Self(k.clone())),
+            _ => Err("Failed to parse value as an OidType".to_string()),
+        }
+    }
+}
 /// The `tagged-oid-type` is defined in [CoRIM Section 7.6].
 ///
 /// ```text

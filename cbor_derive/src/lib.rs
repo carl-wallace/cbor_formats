@@ -25,11 +25,13 @@ fn default_lifetime() -> proc_macro2::TokenStream {
 
 mod attributes;
 mod cbor_derive_utils;
+mod enum_to_choice;
 mod field;
 mod struct_to_array;
 mod struct_to_map;
 mod struct_to_one_or_more;
 
+use crate::enum_to_choice::DeriveEnumToChoice;
 use crate::struct_to_array::DeriveStructToArray;
 use crate::struct_to_map::DeriveStructToMap;
 use crate::struct_to_one_or_more::DeriveStructToOneOrMore;
@@ -154,4 +156,36 @@ pub fn derive_struct_to_array(input: TokenStream) -> TokenStream {
 pub fn derive_struct_to_one_or_more(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     DeriveStructToOneOrMore::new(input).to_tokens().into()
+}
+
+/// The `EnumToChoice` derive macro generates `TryFrom<Value>`, `TryFrom<&Value>`, and `Serialize`
+/// implementations for enums representing CDDL choice types (`/` operator).
+///
+/// Each variant must have exactly one unnamed field. Dispatch is controlled by `#[cbor(...)]`
+/// attributes on each variant:
+///
+/// - `#[cbor(tag = "N")]` — Match on `Value::Tag(N, inner)`, construct variant via `TryFrom` on inner value
+/// - `#[cbor(tag = "N", cbor = "true")]` — Match on tag N, re-serialize/deserialize via ciborium serde (for `Required<T, N>` types)
+/// - `#[cbor(value = "Text")]` — Match on `Value::Text(s)`, etc. (supports Text, Bytes, Integer, Bool, Map, Array)
+/// - `#[cbor(socket = "true")]` — Catch-all for CDDL `$` sockets: matches any unmatched `Value::Tag(t, b)` as a `TupleCbor`
+/// - No attribute — Try `TryFrom<&Value>` on the variant's inner type (fallback)
+///
+/// ```ignore
+/// use cbor_derive::EnumToChoice;
+///
+/// #[derive(EnumToChoice)]
+/// enum ClassIdTypeChoiceCbor {
+///     #[cbor(tag = "111")]
+///     Oid(TaggedOidTypeCbor),
+///     #[cbor(tag = "37")]
+///     Uuid(TaggedUuidType),
+///     #[cbor(tag = "560")]
+///     Bytes(TaggedBytes),
+/// }
+/// ```
+#[proc_macro_derive(EnumToChoice, attributes(cbor))]
+#[proc_macro_error]
+pub fn derive_enum_to_choice(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    DeriveEnumToChoice::new(input).to_tokens().into()
 }

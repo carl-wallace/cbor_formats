@@ -57,6 +57,10 @@ pub(crate) struct FieldAttrs {
     /// Boolean that indicates if the field has CBOR-specific serialization/deserialization
     /// behavior (i.e., if it uses StructToMap or StructToArray).
     pub cbor: Option<bool>,
+
+    /// Boolean that indicates this variant is a catch-all for unmatched CBOR tags
+    /// (used by `EnumToChoice` to generate a `Value::Tag(t, b) => Other(TupleCbor { ... })` arm).
+    pub socket: bool,
 }
 
 impl FieldAttrs {
@@ -65,6 +69,7 @@ impl FieldAttrs {
         let mut tag = None;
         let mut value = None;
         let mut cbor = None;
+        let mut socket = None;
 
         let mut parsed_attrs = Vec::new();
         AttrNameValue::from_attributes(attrs, &mut parsed_attrs);
@@ -90,11 +95,16 @@ impl FieldAttrs {
                 }
 
                 cbor = Some(ty);
+            } else if let Some(val) = attr.parse_value::<bool>("socket") {
+                if socket.is_some() {
+                    abort!(attr.name, "duplicate cbor `socket` attribute");
+                }
+                socket = Some(val);
             } else {
                 abort!(
                     attr.name,
                     "unknown field-level `cbor` attribute \
-                    (valid options are `tag`, `value`, `cbor`)",
+                    (valid options are `tag`, `value`, `cbor`, `socket`)",
                 );
             }
         }
@@ -103,6 +113,7 @@ impl FieldAttrs {
             tag,
             value: value.unwrap_or_default(),
             cbor,
+            socket: socket.unwrap_or(false),
         }
     }
 }

@@ -62,20 +62,20 @@ fn corim_id_type_choice_test() {
 
 #[test]
 fn corim_role_type_choice_test() {
-    let cr = CorimRoleTypeChoiceKnownCbor::ManifestCreator;
+    let cr = CorimRoleTypeChoiceCbor::Value(CorimRoleTypeChoiceCbor::MANIFEST_CREATOR);
     let mut encoded_token = vec![];
     into_writer(&cr, &mut encoded_token).unwrap();
     println!(
         "Encoded CorimRoleTypeChoiceCbor: {:?}",
         buffer_to_hex(encoded_token.as_slice())
     );
-    let cr_d: CorimRoleTypeChoiceKnownCbor = from_reader(encoded_token.clone().as_slice()).unwrap();
+    let cr_d: CorimRoleTypeChoiceCbor = from_reader(encoded_token.clone().as_slice()).unwrap();
     assert_eq!(cr, cr_d);
 
     let vcr = vec![
-        CorimRoleTypeChoiceCbor::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator),
-        CorimRoleTypeChoiceCbor::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner),
-        CorimRoleTypeChoiceCbor::Extensions(55),
+        CorimRoleTypeChoiceCbor::Value(CorimRoleTypeChoiceCbor::MANIFEST_CREATOR),
+        CorimRoleTypeChoiceCbor::Value(CorimRoleTypeChoiceCbor::MANIFEST_SIGNER),
+        CorimRoleTypeChoiceCbor::Value(55),
     ];
     let mut encoded_token2 = vec![];
     into_writer(&vcr, &mut encoded_token2).unwrap();
@@ -311,7 +311,7 @@ fn tag_id_type_choice_test() {
 
 #[test]
 fn tag_rel_type_choice_test() {
-    let rtc = TagRelTypeChoice::Known(TagRelTypeChoiceKnown::Replaces);
+    let rtc = TagRelTypeChoice::Value(TagRelTypeChoice::REPLACES);
     let mut encoded_token = vec![];
     into_writer(&rtc, &mut encoded_token).unwrap();
     assert_eq!([0x01], encoded_token.as_slice());
@@ -325,7 +325,7 @@ fn tag_rel_type_choice_test() {
     into_writer(&rtc_cbor, &mut encoded_token2).unwrap();
     assert_eq!([0x01], encoded_token2.as_slice());
 
-    let rtc2 = TagRelTypeChoice::Extensions(32);
+    let rtc2 = TagRelTypeChoice::Value(32);
     let mut encoded_token = vec![];
     into_writer(&rtc2, &mut encoded_token).unwrap();
     assert_eq!([0x18, 0x20], encoded_token.as_slice());

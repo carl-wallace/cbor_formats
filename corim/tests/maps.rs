@@ -435,8 +435,8 @@ fn entity_map_test() {
             "https://acme.example".to_string(),
         ))),
         roles: vec![
-            CorimRoleTypeChoiceCbor::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator),
-            CorimRoleTypeChoiceCbor::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner),
+            CorimRoleTypeChoiceCbor::Value(CorimRoleTypeChoiceCbor::MANIFEST_CREATOR),
+            CorimRoleTypeChoiceCbor::Value(CorimRoleTypeChoiceCbor::MANIFEST_SIGNER),
         ],
     };
     let mut encoded_token = vec![];
@@ -568,7 +568,7 @@ fn flags_map_test() {
 fn linked_tag_map_test() {
     let ltm = LinkedTagMapCbor {
         linked_tag_id: TagIdTypeChoiceCbor::Str("test-tag-id".to_string()),
-        tag_rel: TagRelTypeChoice::Known(TagRelTypeChoiceKnown::Supplements),
+        tag_rel: TagRelTypeChoice::Value(TagRelTypeChoice::SUPPLEMENTS),
     };
     let mut buf = vec![];
     let _ = into_writer(&ltm, &mut buf);
