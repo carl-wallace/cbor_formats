@@ -27,7 +27,7 @@
 //! | `Selector-For-Deb` | [`SelectorForDeb`] |
 //! | `Submodule` (JSON) | [`Submodule`] |
 
-use alloc::{boxed::Box, string::String};
+use alloc::{boxed::Box, collections::BTreeMap, string::String};
 use core::ops::Deref;
 
 use base64::{Engine, engine::general_purpose::STANDARD};
@@ -35,7 +35,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     arrays::{DetachedEatBundle, DetachedSubmoduleDigest},
-    cbor_specific::{SelectorCbor, SubmoduleCbor},
+    cbor_specific::{SelectorCbor, SubmodsMapCbor, SubmoduleCbor},
     maps::{ClaimsSetClaims, ClaimsSetClaimsCbor},
 };
 
@@ -252,11 +252,39 @@ impl TryFrom<&SubmoduleCbor> for Submodule {
             }
             SubmoduleCbor::SelectorCbor(SelectorCbor::DetachedSubmoduleDigest(dsm)) => {
                 let js = JsonSelector {
-                    token_type: JsonSelectorType::Bundle,
+                    token_type: JsonSelectorType::Digest,
                     nested_token: JsonSelectorValue::DetachedSubmoduleDigest(dsm.try_into()?),
                 };
                 Ok(Submodule::JsonSelector(js))
             }
         }
+    }
+}
+
+/// JSON encoding/decoding of the submods map: `{ + text => Submodule }`.
+///
+/// RFC 9711 Section 4.2.18 defines the submodules claim as a map of named submodules:
+/// ```text
+/// $$Claims-Set-Claims //= (submods-label => { + text => Submodule })
+/// ```
+/// Use [SubmodsMapCbor] for CBOR-encoded EATs.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct SubmodsMap(pub BTreeMap<String, Submodule>);
+
+impl TryFrom<SubmodsMapCbor> for SubmodsMap {
+    type Error = String;
+    fn try_from(value: SubmodsMapCbor) -> Result<Self, Self::Error> {
+        (&value).try_into()
+    }
+}
+impl TryFrom<&SubmodsMapCbor> for SubmodsMap {
+    type Error = String;
+    fn try_from(value: &SubmodsMapCbor) -> Result<Self, Self::Error> {
+        let mut map = BTreeMap::new();
+        for (k, v) in &value.0 {
+            let submod = Submodule::try_from(v)?;
+            map.insert(k.clone(), submod);
+        }
+        Ok(SubmodsMap(map))
     }
 }

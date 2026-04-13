@@ -2,7 +2,7 @@
 name = "cots"
 description = "CBOR-focused encoders/decoders for CoTS structures"
 license = "Apache-2.0 OR MIT"
-repository = "https://github.com/carl-wallace/cbor-formats/tree/main/cbor_derive"
+repository = "https://github.com/carl-wallace/cbor-formats/tree/main/cots"
 categories = ["cryptography", "data-structures", "encoding", "no-std", "parser-implementations"]
 keywords = ["cbor", "json", "corim", "coswid", "eat"]
 readme = "README.md"

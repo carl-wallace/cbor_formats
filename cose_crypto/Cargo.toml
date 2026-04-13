@@ -5,7 +5,7 @@ edition = "2024"
 rust-version = "1.85.0"
 license = "MIT OR Apache-2.0"
 description = "COSE cryptographic operations (signing, verification, MAC, AEAD) built on RFC 9052 structures"
-repository = "https://github.com/carl-wallace/cbor_formats"
+repository = "https://github.com/carl-wallace/cbor-formats/tree/main/cose_crypto"
 
 [features]
 default = []

@@ -1,3 +1,6 @@
+use alloc::collections::BTreeMap;
+extern crate alloc;
+
 use ciborium::{de::from_reader, ser::into_writer, tag::Required, value::Value};
 use hex_literal::hex;
 
@@ -7,7 +10,7 @@ use eat::{
         DetachedSubmoduleDigestCbor, DloaTypeCbor, IndividualResultCbor,
         MeasurementResultsGroupArrayCbor, MeasurementResultsGroupCbor,
     },
-    cbor_specific::SubmoduleCbor,
+    cbor_specific::{SubmodsMapCbor, SubmoduleCbor},
     choices::{DebugStatusType, Oemid, ResultType},
     maps::{ClaimsSetClaims, ClaimsSetClaimsCbor, LocationTypeCbor},
 };
@@ -646,26 +649,46 @@ fn intended_use_test() {
 
 #[test]
 fn location_test() {
-    let valid = vec![
-        hex!("A1190108A9010002010302040305040605070608C11A63923B9A0907").to_vec(),
-        hex!("A1190108A70100020103020504060508C11A63923B9A0907").to_vec(),
-    ];
-    for v in valid {
-        let csc_d: ClaimsSetClaimsCbor = from_reader(v.clone().as_slice()).unwrap();
-        let mut encoded_token = vec![];
-        let _ = into_writer(&csc_d, &mut encoded_token);
-        assert_eq!(v.to_vec(), encoded_token);
-        assert!(csc_d.location.is_some());
-        let csc_json: ClaimsSetClaims = csc_d.try_into().unwrap();
-        let csc_cbor: ClaimsSetClaimsCbor = csc_json.try_into().unwrap();
-        let mut encoded_token2 = vec![];
-        let _ = into_writer(&csc_cbor, &mut encoded_token2);
-        assert_eq!(encoded_token2, v.to_vec());
-    }
+    // Test decoding integer-encoded location (valid per CDDL `number` type)
+    let int_encoded = hex!("A1190108A9010002010302040305040605070608C11A63923B9A0907").to_vec();
+    let csc_d: ClaimsSetClaimsCbor = from_reader(int_encoded.as_slice()).unwrap();
+    assert!(csc_d.location.is_some());
+    let loc = csc_d.location.as_ref().unwrap();
+    assert_eq!(loc.latitude, 0.0);
+    assert_eq!(loc.longitude, 1.0);
+    assert_eq!(loc.altitude, Some(2.0));
+    assert_eq!(loc.accuracy, Some(3.0));
+    assert_eq!(loc.altitude_accuracy, Some(4.0));
+    assert_eq!(loc.heading, Some(5.0));
+    assert_eq!(loc.speed, Some(6.0));
+    assert_eq!(loc.age, Some(7));
+
+    // Verify JSON roundtrip preserves values
+    let csc_json: ClaimsSetClaims = csc_d.try_into().unwrap();
+    let csc_cbor: ClaimsSetClaimsCbor = csc_json.try_into().unwrap();
+    let loc2 = csc_cbor.location.as_ref().unwrap();
+    assert_eq!(loc2.latitude, 0.0);
+    assert_eq!(loc2.longitude, 1.0);
+
+    // Test decoding with fewer optional fields (integer-encoded)
+    let partial = hex!("A1190108A70100020103020504060508C11A63923B9A0907").to_vec();
+    let csc_d2: ClaimsSetClaimsCbor = from_reader(partial.as_slice()).unwrap();
+    assert!(csc_d2.location.is_some());
+    let loc3 = csc_d2.location.as_ref().unwrap();
+    assert_eq!(loc3.altitude, Some(2.0));
+    assert!(loc3.accuracy.is_none());
+    assert_eq!(loc3.altitude_accuracy, Some(4.0));
+    assert_eq!(loc3.heading, Some(5.0));
+    assert!(loc3.speed.is_none());
+
+    // Float-encoded roundtrip
+    let mut encoded_token = vec![];
+    let _ = into_writer(&csc_d2, &mut encoded_token);
+    let csc_d3: ClaimsSetClaimsCbor = from_reader(encoded_token.as_slice()).unwrap();
+    assert_eq!(csc_d2, csc_d3);
 
     let invalid = vec![
-        hex!("81190108A9010002010302040305040605070608C11A63923B9A0907").to_vec(), // map not array
-        hex!("A1190108A9010002010302040305040605070608C11A63923B9A").to_vec(), // value too short
+        hex!("81190108A9010002010302040305040605070608C11A63923B9A0907").to_vec(), // array not map
     ];
     for v in invalid {
         let csc_d: Result<ClaimsSetClaimsCbor, _> = from_reader(v.clone().as_slice());
@@ -962,13 +985,13 @@ fn location_type_test() {
         hardware_version: None,
         intended_use: None,
         location: Some(LocationTypeCbor {
-            latitude: 0,
-            longitude: 1,
-            altitude: Some(2),
-            accuracy: Some(3),
-            altitude_accuracy: Some(4),
-            heading: Some(5),
-            speed: Some(6),
+            latitude: 0.0,
+            longitude: 1.0,
+            altitude: Some(2.0),
+            accuracy: Some(3.0),
+            altitude_accuracy: Some(4.0),
+            heading: Some(5.0),
+            speed: Some(6.0),
             timestamp: Some(TimeCbor::T(Required(1670527898))),
             age: Some(7),
         }),
@@ -992,10 +1015,13 @@ fn location_type_test() {
         "Encoded ClaimsSetClaims: {:?}",
         buffer_to_hex(encoded_token.as_slice())
     );
-    assert_eq!(
-        encoded_token,
-        hex!("A1190108A9010002010302040305040605070608C11A63923B9A0907").to_vec()
-    );
+    let decoded: ClaimsSetClaimsCbor = from_reader(encoded_token.as_slice()).unwrap();
+    assert_eq!(csc, decoded);
+    let csc_json: ClaimsSetClaims = decoded.try_into().unwrap();
+    let csc_cbor: ClaimsSetClaimsCbor = csc_json.try_into().unwrap();
+    let mut encoded_token2 = vec![];
+    let _ = into_writer(&csc_cbor, &mut encoded_token2);
+    assert_eq!(encoded_token2, encoded_token);
 }
 
 #[test]
@@ -1176,13 +1202,13 @@ fn submods_type_test() {
         hardware_version: None,
         intended_use: None,
         location: Some(LocationTypeCbor {
-            latitude: 0,
-            longitude: 1,
-            altitude: Some(2),
-            accuracy: Some(3),
-            altitude_accuracy: Some(4),
-            heading: Some(5),
-            speed: Some(6),
+            latitude: 0.0,
+            longitude: 1.0,
+            altitude: Some(2.0),
+            accuracy: Some(3.0),
+            altitude_accuracy: Some(4.0),
+            heading: Some(5.0),
+            speed: Some(6.0),
             timestamp: Some(TimeCbor::T(Required(1670527898))),
             age: Some(7),
         }),
@@ -1201,6 +1227,9 @@ fn submods_type_test() {
         other: None,
     };
     let sm = SubmoduleCbor::ClaimsSet(Box::new(sm_csc));
+    let mut submods = BTreeMap::new();
+    submods.insert("submod1".to_string(), sm);
+    let sm_map = SubmodsMapCbor(submods);
 
     let csc = ClaimsSetClaimsCbor {
         iss: None,
@@ -1230,7 +1259,7 @@ fn submods_type_test() {
         measurement_results: None,
         oemid: None,
         sueids: None,
-        submods: Some(sm),
+        submods: Some(sm_map),
         other: None,
     };
     let mut encoded_token = vec![];

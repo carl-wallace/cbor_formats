@@ -1,10 +1,14 @@
 [package]
 name = "cfcli"
+description = "CLI utility for working with CBOR-encoded attestation and supply chain integrity formats"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/carl-wallace/cbor-formats/tree/main/cfcli"
+categories = ["command-line-utilities", "cryptography", "encoding"]
+keywords = ["cbor", "corim", "eat", "cose", "cli"]
+readme = "README.md"
 version = "0.1.1"
 edition = "2024"
 rust-version = "1.85.0"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 cbor_derive = { version = "0.1.1", path = "../cbor_derive" }

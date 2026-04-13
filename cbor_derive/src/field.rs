@@ -70,6 +70,13 @@ impl StructField {
                         None => {}
                     };
                 }
+            } else if "Float" == self.attrs.value {
+                quote! {
+                    match &value.#field_ident {
+                        Some(val) => v.push((cval!(#t), val!(Value::Float(*val)))),
+                        None => {}
+                    };
+                }
             } else {
                 quote! {
                     match &value.#field_ident {
@@ -91,6 +98,10 @@ impl StructField {
             // Use the Bytes attribute value to signal this.
             quote! {
                 v.push((cval!(#t), val!(Value::Bytes(value.#field_ident.clone()))));
+            }
+        } else if "Float" == self.attrs.value {
+            quote! {
+                v.push((cval!(#t), val!(Value::Float(value.#field_ident))));
             }
         } else {
             quote! {
@@ -382,6 +393,39 @@ impl StructField {
                     },
                 }
             }
+        } else if "Float" == self.attrs.value {
+            // CDDL `number` accepts both float and integer; try as_float() first, fall back to integer
+            if is_option {
+                quote! {
+                    #field_ident: match m.get(&#t) {
+                        Some(v) => Some(
+                            if let Some(val) = v.as_float() {
+                                val
+                            } else if let Some(i) = v.as_integer() {
+                                let iv: i128 = i.into();
+                                iv as f64
+                            } else {
+                                return Err(format!("Failed to process {} as a number", #field_ident_str))
+                            }),
+                        None => None,
+                    },
+                }
+            } else {
+                quote! {
+                    #field_ident: match m.get(&#t) {
+                        Some(v) =>
+                            if let Some(val) = v.as_float() {
+                                val
+                            } else if let Some(i) = v.as_integer() {
+                                let iv: i128 = i.into();
+                                iv as f64
+                            } else {
+                                return Err(format!("Failed to process {} as a number", #field_ident_str))
+                            },
+                        None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
+                    },
+                }
+            }
         } else if "Bool" == self.attrs.value {
             if is_option {
                 quote! {
@@ -442,6 +486,13 @@ impl StructField {
                         None => {},
                     };
                 }
+            } else if "Float" == self.attrs.value {
+                quote! {
+                    match &value.#f {
+                        Some(val) => v.push(val!(Value::Float(*val))),
+                        None => {},
+                    };
+                }
             } else {
                 quote! {
                     match &value.#f {
@@ -453,6 +504,10 @@ impl StructField {
         } else if "Bytes" == self.attrs.value {
             quote! {
                 v.push(val!(Value::Bytes(value.#f.clone())));
+            }
+        } else if "Float" == self.attrs.value {
+            quote! {
+                v.push(val!(Value::Float(value.#f)));
             }
         } else {
             quote! {
@@ -632,6 +687,39 @@ impl StructField {
                             }
                         },
                         None => return Err(format!("failed to decode field {}", #field_name))
+                    },
+                }
+            }
+        } else if "Float" == self.attrs.value {
+            // CDDL `number` accepts both float and integer; try as_float() first, fall back to integer
+            if is_option {
+                quote! {
+                    #field_ident: match v.get(#index) {
+                        Some(v) => Some(
+                            if let Some(val) = v.as_float() {
+                                val
+                            } else if let Some(i) = v.as_integer() {
+                                let iv: i128 = i.into();
+                                iv as f64
+                            } else {
+                                return Err(format!("failed to decode field {}", #field_name))
+                            }),
+                        None => None
+                    },
+                }
+            } else {
+                quote! {
+                    #field_ident: {
+                        let fv = v.get(#index)
+                            .ok_or_else(|| format!("missing required field {} at index {}", #field_name, #index))?;
+                        if let Some(val) = fv.as_float() {
+                            val
+                        } else if let Some(i) = fv.as_integer() {
+                            let iv: i128 = i.into();
+                            iv as f64
+                        } else {
+                            return Err(format!("failed to decode field {}", #field_name))
+                        }
                     },
                 }
             }

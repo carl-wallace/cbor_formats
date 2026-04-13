@@ -33,7 +33,7 @@ use common::{
     *,
 };
 
-use crate::{arrays::*, cbor_specific::SubmoduleCbor, choices::*, json_specific::Submodule};
+use crate::{arrays::*, cbor_specific::SubmodsMapCbor, choices::*, json_specific::SubmodsMap};
 
 /// JSON encoding/decoding of `Claims-Set-Claims`, see [EAT Section 4.2].
 ///
@@ -223,7 +223,7 @@ pub struct ClaimsSetClaims {
     pub sueids: Option<TupleMap>,
     #[cbor(tag = "266", cbor = "true")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub submods: Option<Submodule>,
+    pub submods: Option<SubmodsMap>,
     #[cbor(value = "Array", cbor = "true")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
@@ -257,28 +257,28 @@ pub struct ClaimsSetClaims {
 /// age               = 9
 /// ```
 /// [EAT Section 4.2.10]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.10
-#[derive(Clone, Debug, Eq, PartialEq, StructToMap, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct LocationType {
-    #[cbor(tag = "1", value = "Integer")]
-    pub latitude: u64,
-    #[cbor(tag = "2", value = "Integer")]
-    pub longitude: u64,
-    #[cbor(tag = "3", value = "Integer")]
+    #[cbor(tag = "1", value = "Float")]
+    pub latitude: f64,
+    #[cbor(tag = "2", value = "Float")]
+    pub longitude: f64,
+    #[cbor(tag = "3", value = "Float")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub altitude: Option<u64>,
-    #[cbor(tag = "4", value = "Integer")]
+    pub altitude: Option<f64>,
+    #[cbor(tag = "4", value = "Float")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub accuracy: Option<u64>,
-    #[cbor(tag = "5", value = "Integer")]
+    pub accuracy: Option<f64>,
+    #[cbor(tag = "5", value = "Float")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub altitude_accuracy: Option<u64>,
-    #[cbor(tag = "6", value = "Integer")]
+    pub altitude_accuracy: Option<f64>,
+    #[cbor(tag = "6", value = "Float")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub heading: Option<u64>,
-    #[cbor(tag = "7", value = "Integer")]
+    pub heading: Option<f64>,
+    #[cbor(tag = "7", value = "Float")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub speed: Option<u64>,
+    pub speed: Option<f64>,
     #[cbor(tag = "8", cbor = "true")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub timestamp: Option<Time>,
@@ -289,7 +289,7 @@ pub struct LocationType {
 
 /// JSON encoding/decoding of `sueids-type`, see [EAT Section 4.2.2].
 ///
-/// Use [SwVersionTypeCbor] for CBOR-encoded EATs.
+/// Use [SueidsTypeCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// sueids-type = {

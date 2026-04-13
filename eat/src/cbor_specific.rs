@@ -44,11 +44,19 @@
 //! |------|------|
 //! | `CBOR-Selector` | [`SelectorCbor`] |
 //! | `Submodule` (CBOR) | [`SubmoduleCbor`] |
+//! | `submods map` | [`SubmodsMapCbor`] |
 //! | `Nested-Token` (CBOR) | [`super::arrays::NestedTokenCbor`] |
 //! | `Wrapped-Claims-Set` (CBOR) | [`super::arrays::WrappedClaimsSetCbor`] |
 //!
 
-use alloc::{boxed::Box, format, string::String, vec, vec::Vec};
+use alloc::{
+    boxed::Box,
+    collections::BTreeMap,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 
 use base64::{Engine, engine::general_purpose::STANDARD};
 use ciborium::{ser::into_writer, value::Value};
@@ -56,7 +64,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     arrays::DetachedSubmoduleDigestCbor,
-    json_specific::{JsonSelectorValue, Submodule},
+    json_specific::{JsonSelectorValue, SubmodsMap, Submodule},
     maps::ClaimsSetClaimsCbor,
 };
 
@@ -103,12 +111,10 @@ pub enum SelectorCbor {
 /// ```text
 /// Submodule = Claims-Set / CBOR-Selector
 /// ```
-/// The SubmoduleEnum uses this alternative definition.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum SubmoduleCbor {
-    //todo consider changing ClaimsSetClaims to be an enum with ClaimsSet accepting duplicates
     ClaimsSet(Box<ClaimsSetClaimsCbor>),
     SelectorCbor(SelectorCbor),
 }
@@ -165,36 +171,7 @@ impl TryFrom<&Value> for SubmoduleCbor {
 impl TryFrom<Submodule> for SubmoduleCbor {
     type Error = String;
     fn try_from(value: Submodule) -> Result<Self, Self::Error> {
-        match value {
-            Submodule::ClaimsSet(b) => {
-                let cs_cbor: ClaimsSetClaimsCbor = (*b).try_into()?;
-                Ok(SubmoduleCbor::ClaimsSet(Box::new(cs_cbor)))
-            }
-            Submodule::JsonSelector(js) => match &js.nested_token {
-                JsonSelectorValue::JwtMessage(v) => Ok(SubmoduleCbor::SelectorCbor(
-                    SelectorCbor::JsonTokenInsideCborToken(v.clone()),
-                )),
-                JsonSelectorValue::CborTokenInsideJsonToken(v) => {
-                    let b = STANDARD
-                        .decode(v)
-                        .map_err(|e| format!("Failed to decode base64: {e}"))?;
-                    Ok(SubmoduleCbor::SelectorCbor(
-                        SelectorCbor::CborTokenInsideCborToken(b),
-                    ))
-                }
-                JsonSelectorValue::DetachedEatBundle(deb) => {
-                    let mut encoded_token = vec![];
-                    into_writer(&deb, &mut encoded_token)
-                        .map_err(|e| format!("Failed to serialize DetachedEatBundle: {e}"))?;
-                    Ok(SubmoduleCbor::SelectorCbor(
-                        SelectorCbor::CborTokenInsideCborToken(encoded_token),
-                    ))
-                }
-                JsonSelectorValue::DetachedSubmoduleDigest(v) => Ok(SubmoduleCbor::SelectorCbor(
-                    SelectorCbor::DetachedSubmoduleDigest(v.try_into()?),
-                )),
-            },
-        }
+        (&value).try_into()
     }
 }
 impl TryFrom<&Submodule> for SubmoduleCbor {
@@ -219,7 +196,7 @@ impl TryFrom<&Submodule> for SubmoduleCbor {
                 }
                 JsonSelectorValue::DetachedEatBundle(deb) => {
                     let mut encoded_token = vec![];
-                    into_writer(&deb, &mut encoded_token)
+                    into_writer(deb, &mut encoded_token)
                         .map_err(|e| format!("Failed to serialize DetachedEatBundle: {e}"))?;
                     Ok(SubmoduleCbor::SelectorCbor(
                         SelectorCbor::CborTokenInsideCborToken(encoded_token),
@@ -230,5 +207,58 @@ impl TryFrom<&Submodule> for SubmoduleCbor {
                 )),
             },
         }
+    }
+}
+
+/// CBOR encoding/decoding of the submods map: `{ + text => Submodule }`.
+///
+/// RFC 9711 Section 4.2.18 defines the submodules claim as a map of named submodules:
+/// ```text
+/// $$Claims-Set-Claims //= (submods-label => { + text => Submodule })
+/// ```
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct SubmodsMapCbor(pub BTreeMap<String, SubmoduleCbor>);
+
+impl TryFrom<Value> for SubmodsMapCbor {
+    type Error = String;
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match &value {
+            Value::Map(entries) => {
+                let mut map = BTreeMap::new();
+                for (k, v) in entries {
+                    let key = match k.as_text() {
+                        Some(s) => s.to_string(),
+                        None => return Err(format!("submods map key must be text, got: {:?}", k)),
+                    };
+                    let submod = SubmoduleCbor::try_from(v.clone())?;
+                    map.insert(key, submod);
+                }
+                Ok(SubmodsMapCbor(map))
+            }
+            _ => Err(format!("Expected CBOR map for submods, got: {:?}", value)),
+        }
+    }
+}
+impl TryFrom<&Value> for SubmodsMapCbor {
+    type Error = String;
+    fn try_from(value: &Value) -> Result<Self, Self::Error> {
+        value.clone().try_into()
+    }
+}
+impl TryFrom<SubmodsMap> for SubmodsMapCbor {
+    type Error = String;
+    fn try_from(value: SubmodsMap) -> Result<Self, Self::Error> {
+        (&value).try_into()
+    }
+}
+impl TryFrom<&SubmodsMap> for SubmodsMapCbor {
+    type Error = String;
+    fn try_from(value: &SubmodsMap) -> Result<Self, Self::Error> {
+        let mut map = BTreeMap::new();
+        for (k, v) in &value.0 {
+            let submod_cbor = SubmoduleCbor::try_from(v)?;
+            map.insert(k.clone(), submod_cbor);
+        }
+        Ok(SubmodsMapCbor(map))
     }
 }

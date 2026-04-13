@@ -1,5 +1,10 @@
 [package]
 name = "jose"
+description = "JWS signing and verification built on COSE cryptographic primitives"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/carl-wallace/cbor-formats/tree/main/jose"
+categories = ["cryptography", "encoding"]
+keywords = ["jose", "jws", "jwt", "cose"]
 version = "0.1.1"
 edition = "2021"
 

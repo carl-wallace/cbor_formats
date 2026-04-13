@@ -55,6 +55,7 @@
 //! | `Detached-Submodule-Digest` | [`arrays::DetachedSubmoduleDigest`] / [`arrays::DetachedSubmoduleDigestCbor`] |
 //! | `CBOR-Selector` | [`cbor_specific::SelectorCbor`] |
 //! | `Submodule` (CBOR) | [`cbor_specific::SubmoduleCbor`] |
+//! | `{ + text => Submodule }` | [`json_specific::SubmodsMap`] / [`cbor_specific::SubmodsMapCbor`] |
 //! | `$JSON-Selector-Type` | [`json_specific::JsonSelectorType`] |
 //! | `$JSON-Selector-Value` | [`json_specific::JsonSelectorValue`] |
 //! | `JSON-Selector` | [`json_specific::JsonSelector`] |

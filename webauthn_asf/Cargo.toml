@@ -1,10 +1,14 @@
 [package]
 name = "webauthn_asf"
+description = "CBOR-focused encoders/decoders for WebAuthn attestation statement formats"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/carl-wallace/cbor-formats/tree/main/webauthn_asf"
+categories = ["cryptography", "data-structures", "encoding", "no-std", "parser-implementations"]
+keywords = ["cbor", "webauthn", "attestation", "fido"]
+readme = "README.md"
 version = "0.1.1"
 edition = "2024"
 rust-version = "1.85.0"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 cbor_derive = { version = "0.1.1", path = "../cbor_derive" }
