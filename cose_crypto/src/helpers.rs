@@ -1,13 +1,14 @@
 //! Internal helper functions for COSE structure construction.
 
-use alloc::string::ToString;
-use alloc::vec::Vec;
-use common::TextOrInt;
-use cose::choices::EmptyOrSerializedMap;
-use cose::maps::{HeaderMap, HeaderMapCbor};
+use alloc::{string::ToString, vec::Vec};
 
-use crate::algorithm::CoseAlgorithm;
-use crate::error::CoseCryptoError;
+use common::TextOrInt;
+use cose::{
+    choices::EmptyOrSerializedMap,
+    maps::{HeaderMap, HeaderMapCbor},
+};
+
+use crate::{algorithm::CoseAlgorithm, error::CoseCryptoError};
 
 /// Serialize a `HeaderMap` into `EmptyOrSerializedMap`.
 /// If the header map has no fields set, returns `Empty`.

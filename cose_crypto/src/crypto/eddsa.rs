@@ -1,16 +1,17 @@
 //! EdDSA signing and verification (Ed25519).
 
-use alloc::string::ToString;
-use alloc::vec::Vec;
+use alloc::{string::ToString, vec::Vec};
 
-use cose::maps::CoseKeyCbor;
 use ed25519_dalek::{Signer, Verifier};
 
-use crate::algorithm::CoseAlgorithm;
-use crate::error::CoseCryptoError;
-use crate::keys::{self, ParsedCoseKey};
+use cose::maps::CoseKeyCbor;
 
 use super::{CoseSigner, CoseVerifier};
+use crate::{
+    algorithm::CoseAlgorithm,
+    error::CoseCryptoError,
+    keys::{self, ParsedCoseKey},
+};
 
 /// Ed25519 signer.
 pub struct Ed25519Signer {

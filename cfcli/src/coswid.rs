@@ -1,15 +1,14 @@
 //! CoSWID (Concise Software Identifier) create and display operations.
 
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use coswid::maps::*;
-use std::fs;
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
+use std::{fs, fs::File, io::Write, path::Path};
 
-use crate::utils::find_files;
-use crate::{CoswidCommand, CoswidCreateSubcommand, CoswidSubCommands, DisplaySubcommand};
+use ciborium::{de::from_reader, ser::into_writer};
+
+use coswid::maps::{ConciseSwidTag, ConciseSwidTagCbor};
+
+use crate::{
+    CoswidCommand, CoswidCreateSubcommand, CoswidSubCommands, DisplaySubcommand, utils::find_files,
+};
 
 /// Dispatch CoSWID subcommands.
 pub fn coswid_main(args: &CoswidCommand) {

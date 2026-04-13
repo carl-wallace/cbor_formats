@@ -17,31 +17,36 @@
 //!
 //! [draft-ietf-rats-coserv-05]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05
 
-use ciborium::{cbor, value::Value};
+use alloc::{
+    collections::BTreeMap,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
-use serde::de::{Error, MapAccess, Visitor};
-use serde::{Deserialize, Deserializer, Serialize};
 
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
+use ciborium::{cbor, tag::Required, value::Value};
+use serde::{
+    Deserialize, Deserializer, Serialize,
+    de::{Error, MapAccess, Visitor},
+    ser::Error as OtherError,
+};
 
 use cbor_derive::StructToMap;
-use ciborium::tag::Required;
 use cmw::arrays::{CborRecord, CborRecordCbor};
 use common::*;
-use corim::arrays::{
-    AttestKeyTripleRecord, AttestKeyTripleRecordCbor, ConditionalEndorsementTripleRecord,
-    ConditionalEndorsementTripleRecordCbor, EndorsedTripleRecord, EndorsedTripleRecordCbor,
-    ReferenceTripleRecord, ReferenceTripleRecordCbor,
+use corim::{
+    arrays::{
+        AttestKeyTripleRecord, AttestKeyTripleRecordCbor, ConditionalEndorsementTripleRecord,
+        ConditionalEndorsementTripleRecordCbor, EndorsedTripleRecord, EndorsedTripleRecordCbor,
+        ReferenceTripleRecord, ReferenceTripleRecordCbor,
+    },
+    choices::CryptoKeyTypeChoice,
 };
-use corim::choices::CryptoKeyTypeChoice;
 use cots::maps::{ConciseTaStoreMap, ConciseTaStoreMapCbor};
-use serde::ser::Error as OtherError;
 
-use crate::arrays::*;
-use crate::choices::*;
+use crate::{arrays::*, choices::*};
 
 // tdate = #6.0(tstr)
 

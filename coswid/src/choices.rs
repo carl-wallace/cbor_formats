@@ -13,16 +13,17 @@
 //!
 //! [RFC 9393]: https://datatracker.ietf.org/doc/html/rfc9393
 
-use ciborium::value::Value;
-use serde::{Deserialize, Serialize};
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
+use ciborium::value::Value;
+use num_enum::TryFromPrimitive;
+use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::maps::{EvidenceEntry, PayloadEntry};
-use num_enum::TryFromPrimitive;
-use serde_repr::Deserialize_repr;
-use serde_repr::Serialize_repr;
 
 // payload-or-evidence //= ( payload => payload-entry )
 // payload-or-evidence //= ( evidence => evidence-entry )

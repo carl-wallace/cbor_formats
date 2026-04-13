@@ -1,7 +1,8 @@
 //! CBOR diagnostic notation formatter (RFC 8949 Section 8).
 
-use ciborium::value::Value;
 use std::fs;
+
+use ciborium::value::Value;
 
 /// Read a CBOR file and print it in diagnostic notation. Returns true if handled.
 pub fn display_diag(path: &str) -> bool {

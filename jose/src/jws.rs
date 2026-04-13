@@ -4,16 +4,19 @@
 //! and JSON flattened serialization (§7.2.2). Algorithm-agnostic: the caller
 //! provides a `CoseSigner`/`CoseVerifier` and the `alg` string in the header.
 
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 
-use base64ct::{Base64UrlUnpadded, Encoding};
-use cose_crypto::crypto::{CoseSigner, CoseVerifier};
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
-use crate::error::JoseError;
-use crate::header::JoseHeader;
+use base64ct::{Base64UrlUnpadded, Encoding};
+
+use cose_crypto::crypto::{CoseSigner, CoseVerifier};
+
+use crate::{error::JoseError, header::JoseHeader};
 
 // ---------------------------------------------------------------------------
 // Decoded JWS

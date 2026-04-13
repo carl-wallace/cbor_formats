@@ -127,7 +127,6 @@ pub mod signed;
 use alloc::vec::Vec;
 
 use ciborium::tag::Required;
-
 use maps::{CorimMapCbor, EntityMap, EntityMapCbor};
 
 /// `tagged-unsigned-corim-map` = `#6.501(unsigned-corim-map)`.

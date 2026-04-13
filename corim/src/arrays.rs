@@ -23,19 +23,15 @@
 //!
 //! [draft-ietf-rats-corim-10]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10
 
-use ciborium::{cbor, value::Value};
+use alloc::{format, string::String, vec, vec::Vec};
 use core::{fmt, marker::PhantomData};
-use serde::ser::Error as OtherError;
-use serde::{Deserialize, Serialize};
-use serde::{de::Error, de::Visitor};
 
-use alloc::{vec, vec::Vec};
+use ciborium::{cbor, value::Value};
+use serde::{Deserialize, Serialize, de::Error, de::Visitor, ser::Error as OtherError};
 
-use crate::choices::*;
-use crate::maps::*;
-use alloc::format;
-use alloc::string::String;
 use cbor_derive::StructToArray;
+
+use crate::{choices::*, maps::*};
 
 /// The `attest-key-triple-record` type is defined in [CoRIM Section 5.1.10].
 ///

@@ -7,8 +7,10 @@
 //!
 //! [draft-ietf-rats-ar4si-09]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-ar4si-09
 
-use alloc::format;
-use alloc::string::{String, ToString};
+use alloc::{
+    format,
+    string::{String, ToString},
+};
 
 use ciborium::value::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};

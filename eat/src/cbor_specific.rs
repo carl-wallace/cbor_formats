@@ -47,18 +47,18 @@
 //! | `Nested-Token` (CBOR) | [`super::arrays::NestedTokenCbor`] |
 //! | `Wrapped-Claims-Set` (CBOR) | [`super::arrays::WrappedClaimsSetCbor`] |
 //!
-use alloc::boxed::Box;
-use alloc::format;
-use alloc::string::String;
-use alloc::{vec, vec::Vec};
+
+use alloc::{boxed::Box, format, string::String, vec, vec::Vec};
 
 use base64::{Engine, engine::general_purpose::STANDARD};
 use ciborium::{ser::into_writer, value::Value};
 use serde::{Deserialize, Serialize};
 
-use crate::arrays::DetachedSubmoduleDigestCbor;
-use crate::json_specific::{JsonSelectorValue, Submodule};
-use crate::maps::ClaimsSetClaimsCbor;
+use crate::{
+    arrays::DetachedSubmoduleDigestCbor,
+    json_specific::{JsonSelectorValue, Submodule},
+    maps::ClaimsSetClaimsCbor,
+};
 
 // EAT-CBOR-Token = $EAT-CBOR-Tagged-Token / $EAT-CBOR-Untagged-Token
 // $EAT-CBOR-Untagged-Token /= CWT-Untagged-Message

@@ -2,18 +2,21 @@
 //!
 //! Implements [draft-ietf-cose-dilithium-11](https://datatracker.ietf.org/doc/html/draft-ietf-cose-dilithium-11).
 
-use alloc::string::ToString;
-use alloc::vec::Vec;
+use alloc::{string::ToString, vec::Vec};
+
+use ml_dsa::{
+    KeyGen,
+    signature::{Signer, Verifier},
+};
 
 use cose::maps::CoseKeyCbor;
-use ml_dsa::KeyGen;
-use ml_dsa::signature::{Signer, Verifier};
-
-use crate::algorithm::CoseAlgorithm;
-use crate::error::CoseCryptoError;
-use crate::keys::{self, ParsedCoseKey};
 
 use super::{CoseSigner, CoseVerifier};
+use crate::{
+    algorithm::CoseAlgorithm,
+    error::CoseCryptoError,
+    keys::{self, ParsedCoseKey},
+};
 
 macro_rules! impl_ml_dsa {
     (

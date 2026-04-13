@@ -1,16 +1,18 @@
 use std::collections::BTreeMap;
 
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::tag::Required;
+use ciborium::{de::from_reader, ser::into_writer, tag::Required};
 
-use cmw::choices::{self, *};
-use cmw::maps::*;
-use cmw::signed::*;
+use cmw::{
+    choices::{self, CborCmw, CborCollectionKey, JsonCmw},
+    maps::{CborCollection, JsonCollection},
+    signed::{CMW_CBOR_CONTENT_FORMAT, CMW_CBOR_CONTENT_TYPE, SignedCborCmw, SignedCmwError},
+};
 use common::{BinaryOrNil, BytesType, TextOrInt};
-use cose::arrays::CoseSign1Cbor;
-use cose::choices::EmptyOrSerializedMap;
-use cose::maps::{HeaderMap, HeaderMapCbor};
+use cose::{
+    arrays::CoseSign1Cbor,
+    choices::EmptyOrSerializedMap,
+    maps::{HeaderMap, HeaderMapCbor},
+};
 
 fn roundtrip_cbor<
     T: serde::Serialize + serde::de::DeserializeOwned + PartialEq + std::fmt::Debug,

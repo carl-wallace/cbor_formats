@@ -5,11 +5,14 @@
 #![allow(clippy::unwrap_used)]
 
 use ciborium::de::from_reader;
+
 use cose::maps::CoseKeyCbor;
-use cose_crypto::algorithm::CoseAlgorithm;
-use cose_crypto::helpers;
-use cose_crypto::keys::{algorithm_from_cose_key, signer_from_cose_key, verifier_from_cose_key};
-use cose_crypto::sign::{CoseSign1Builder, verify_sign1};
+use cose_crypto::{
+    algorithm::CoseAlgorithm,
+    helpers,
+    keys::{algorithm_from_cose_key, signer_from_cose_key, verifier_from_cose_key},
+    sign::{CoseSign1Builder, verify_sign1},
+};
 
 /// Parse a COSE Key from CBOR bytes.
 fn parse_cose_key(cbor: &[u8]) -> CoseKeyCbor {

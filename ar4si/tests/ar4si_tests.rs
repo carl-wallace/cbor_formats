@@ -1,9 +1,10 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
+use ciborium::{de::from_reader, ser::into_writer};
 use hex_literal::hex;
 
-use ar4si::choices::*;
-use ar4si::maps::*;
+use ar4si::{
+    choices::TrustworthinessTier,
+    maps::{TrustworthinessVector, TrustworthinessVectorCbor, VerifierId, VerifierIdCbor},
+};
 
 // ===========================================================================
 // TrustworthinessTier tests

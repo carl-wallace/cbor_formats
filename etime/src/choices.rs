@@ -12,9 +12,8 @@
 //!
 //! [RFC 9581]: https://www.rfc-editor.org/rfc/rfc9581.html
 
-use alloc::collections::BTreeMap;
-use alloc::string::String;
-use alloc::vec::Vec;
+use alloc::{collections::BTreeMap, string::String, vec::Vec};
+
 use serde::{Deserialize, Serialize};
 
 /// Base time value, corresponding to the `$$ETIME-BASETIME` socket in [RFC 9581 Section 3].

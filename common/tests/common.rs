@@ -1,8 +1,10 @@
 extern crate alloc;
+
 use alloc::string::{String, ToString};
+
 use ciborium::value::{Integer, Value};
-use common::tuple::TupleCbor;
-use common::tuple_map::*;
+
+use common::{tuple::TupleCbor, tuple_map::TupleMapCbor};
 
 #[allow(dead_code)]
 #[allow(missing_docs)]

@@ -13,21 +13,25 @@
 //!
 //! [draft-ietf-rats-coserv-05 Section 6.1.1]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-6.1.1
 
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
+use alloc::{
+    collections::BTreeMap,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
+use core::{fmt, marker::PhantomData};
+
+use ciborium::{cbor, value::Value};
+use serde::{
+    Deserialize, Deserializer, Serialize,
+    de::{Error, MapAccess, Visitor},
+    ser::Error as OtherError,
+};
 
 use cbor_derive::StructToMap;
-use ciborium::cbor;
-use ciborium::value::Value;
 use common::TupleCbor;
-use core::fmt;
-use core::marker::PhantomData;
 use cose::maps::{CoseKey, CoseKeyCbor, CoseKeySet};
-use serde::de::{Error, MapAccess, Visitor};
-use serde::ser::Error as OtherError;
-use serde::{Deserialize, Deserializer, Serialize};
 
 /// Media type for CoSERV discovery documents in CBOR format.
 pub const COSERV_DISCOVERY_CBOR_CONTENT_TYPE: &str = "application/coserv-discovery+cbor";

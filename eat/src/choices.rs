@@ -11,8 +11,10 @@
 //!
 //! [RFC 9711]: https://datatracker.ietf.org/doc/html/rfc9711
 
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 
 use ciborium::value::Value;
 use num_enum::TryFromPrimitive;

@@ -1,5 +1,5 @@
 use common::TextOrInt;
-use cose::maps::*;
+use cose::maps::HeaderMap;
 
 #[test]
 fn header_map_validate_iv_only() {

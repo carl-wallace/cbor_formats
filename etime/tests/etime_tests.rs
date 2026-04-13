@@ -1,12 +1,12 @@
 use std::collections::BTreeMap;
 
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::tag::Required;
+use ciborium::{de::from_reader, ser::into_writer, tag::Required};
 use hex_literal::hex;
 
-use etime::choices::*;
-use etime::maps::*;
+use etime::{
+    choices::{BaseTime, EtimeTimescale, SuffixValues},
+    maps::{DurationMapCbor, EtimeMap, EtimeMapCbor, Period, PeriodCbor},
+};
 
 // ---------------------------------------------------------------------------
 // Helper to build a minimal EtimeMap

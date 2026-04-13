@@ -10,14 +10,13 @@
 //!
 //! [draft-ietf-rats-concise-ta-stores]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-concise-ta-stores
 
-use ciborium::value::Value;
-use serde::{Deserialize, Serialize};
-
 use alloc::string::{String, ToString};
 
+use ciborium::value::Value;
 use num_enum::TryFromPrimitive;
-use serde_repr::Deserialize_repr;
-use serde_repr::Serialize_repr;
+use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
+
 // $concise-tag-type-choice /= #6.999(bytes .cbor concise-ta-stores)
 
 // $pkix-ta-type /= tastore.pkix-cert-type

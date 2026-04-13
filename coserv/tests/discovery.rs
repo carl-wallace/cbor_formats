@@ -1,16 +1,17 @@
 // Tests for the discovery module based on examples from
 // draft-ietf-rats-coserv-05 Section 6.1.1.3.
 
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::value::Value;
-
 use std::collections::BTreeMap;
+
+use ciborium::{de::from_reader, ser::into_writer, value::Value};
+use hex_literal::hex;
 
 use common::{TextOrInt, Tuple, TupleCbor};
 use cose::maps::{CoseKey, CoseKeyCbor, CoseKeySet};
-use coserv::discovery::*;
-use hex_literal::hex;
+use coserv::discovery::{
+    ArtifactSupportType, CapabilityMap, CapabilityMapCbor, CoservWellKnownInfoMap,
+    CoservWellKnownInfoMapCbor,
+};
 
 // -- Helper: build the spec CBOR example as a Value tree --
 

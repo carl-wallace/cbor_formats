@@ -1,16 +1,17 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::tag::Required;
-use ciborium::value::Value;
+use ciborium::{de::from_reader, ser::into_writer, tag::Required, value::Value};
 
 use common::{BinaryOrNil, BytesType, TextOrInt};
-use corim::TaggedUnsignedCorimMap;
-use corim::choices::CorimIdTypeChoice;
-use corim::maps::{ComidEntityMapCbor, CorimEntityMapCbor, CorimMapCbor};
-use corim::signed::*;
-use cose::arrays::CoseSign1Cbor;
-use cose::choices::EmptyOrSerializedMap;
-use cose::maps::{HeaderMap, HeaderMapCbor};
+use corim::{
+    TaggedUnsignedCorimMap,
+    choices::CorimIdTypeChoice,
+    maps::{ComidEntityMapCbor, CorimEntityMapCbor, CorimMapCbor},
+    signed::{CORIM_CBOR_CONTENT_TYPE, SignedCorim, SignedCorimError},
+};
+use cose::{
+    arrays::CoseSign1Cbor,
+    choices::EmptyOrSerializedMap,
+    maps::{HeaderMap, HeaderMapCbor},
+};
 
 fn roundtrip_cbor<
     T: serde::Serialize + serde::de::DeserializeOwned + PartialEq + std::fmt::Debug,

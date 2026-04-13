@@ -18,24 +18,28 @@
 //!
 //! [draft-ietf-rats-msg-wrap-23]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23
 
-use ciborium::tag::Required;
-use ciborium::value::Value;
-use serde::de::{self, Deserializer};
-use serde::{Deserialize, Serialize, Serializer};
+use alloc::{
+    boxed::Box,
+    format,
+    string::{String, ToString},
+    vec,
+};
 
-use alloc::boxed::Box;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::vec;
+use ciborium::{tag::Required, value::Value};
+use num_enum::TryFromPrimitive;
+use serde::{
+    Deserialize, Serialize, Serializer,
+    de::{self, Deserializer},
+};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use common::BytesType;
 use cose::arrays::CoseSign1Cbor;
-use num_enum::TryFromPrimitive;
-use serde_repr::Deserialize_repr;
-use serde_repr::Serialize_repr;
 
-use crate::arrays::{CborRecordCbor, JsonRecordCbor};
-use crate::maps::{CborCollection, JsonCollection};
+use crate::{
+    arrays::{CborRecordCbor, JsonRecordCbor},
+    maps::{CborCollection, JsonCollection},
+};
 
 // cmw-indicator = uint .bits cm-type
 // cm-type = &(

@@ -1,9 +1,10 @@
 //! Miscellaneous tests
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::value::Value;
-use common::{OidType, TaggedOidTypeCbor};
+
+use ciborium::{de::from_reader, ser::into_writer, value::Value};
 use hex_literal::hex;
+
+use common::{OidType, TaggedOidTypeCbor};
+
 mod utils;
 use crate::utils::buffer_to_hex;
 

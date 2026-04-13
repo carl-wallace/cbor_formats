@@ -8,18 +8,22 @@
 //!
 //! [draft-ietf-rats-epoch-markers-03]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-epoch-markers-03
 
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
+use alloc::{
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
 
-use cbor_derive::StructToArray;
 use ciborium::{cbor, value::Value};
-use serde::{Deserialize, Serialize};
 use serde::{
+    Deserialize, Serialize,
     de::{Error, Visitor},
     ser::Error as OtherError,
 };
+
+use cbor_derive::StructToArray;
 
 use crate::choices::EpochTick;
 

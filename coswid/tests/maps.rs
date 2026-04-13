@@ -1,8 +1,18 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use coswid::choices::*;
-use coswid::maps::*;
+use ciborium::{de::from_reader, ser::into_writer};
 use hex_literal::hex;
+
+use coswid::{
+    choices::{Rel, RelKnown},
+    maps::{
+        ConciseSwidTag, ConciseSwidTagCbor, DirectoryEntry, DirectoryEntryCbor, EntityEntryCbor,
+        EvidenceEntryCbor, FileEntry, FileEntryCbor, LinkEntry, LinkEntryCbor,
+        OneOrMoreDirectoryEntry, OneOrMoreDirectoryEntryCbor, OneOrMoreFileEntryCbor,
+        OneOrMoreProcessEntryCbor, OneOrMoreResourceEntryCbor, PathElementsGroup,
+        PathElementsGroupCbor, PayloadEntryCbor, ProcessEntry, ProcessEntryCbor,
+        ResourceCollection, ResourceCollectionCbor, ResourceEntry, ResourceEntryCbor,
+        SoftwareMetaEntry, SoftwareMetaEntryCbor,
+    },
+};
 
 #[allow(dead_code)]
 pub fn buffer_to_hex(buffer: &[u8]) -> String {

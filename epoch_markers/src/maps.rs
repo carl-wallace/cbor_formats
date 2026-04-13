@@ -7,23 +7,25 @@
 //!
 //! [draft-ietf-rats-epoch-markers-03]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-epoch-markers-03
 
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
+use alloc::{
+    collections::BTreeMap,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
 
-use cbor_derive::StructToMap;
-use ciborium::tag::Required;
-use ciborium::{cbor, value::Value};
-use serde::{Deserialize, Deserializer, Serialize};
+use ciborium::{cbor, tag::Required, value::Value};
 use serde::{
+    Deserialize, Deserializer, Serialize,
     de::{Error, MapAccess, Visitor},
     ser::Error as OtherError,
 };
 
-use common::OidType;
-use common::tuple::Tuple;
+use cbor_derive::StructToMap;
+use common::{OidType, tuple::Tuple};
+
 #[allow(unused_imports)]
 use common::tuple::TupleCbor;
 use etime::choices::BaseTime;

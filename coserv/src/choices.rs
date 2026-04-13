@@ -10,15 +10,14 @@
 //!
 //! [draft-ietf-rats-coserv-05]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05
 
-use ciborium::value::Value;
-
 use alloc::string::{String, ToString};
-use common::OidType;
-use serde::{Deserialize, Serialize};
 
+use ciborium::value::Value;
 use num_enum::TryFromPrimitive;
-use serde_repr::Deserialize_repr;
-use serde_repr::Serialize_repr;
+use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
+
+use common::OidType;
 
 // profile = comid.oid-type / ~uri
 //

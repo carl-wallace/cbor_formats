@@ -1,8 +1,7 @@
+use std::{fs::File, io::Read, path::Path};
+
 use hex_literal::hex;
 use lazy_static::lazy_static;
-use std::fs::File;
-use std::io::Read;
-use std::path::Path;
 use uuid::{Uuid, uuid};
 
 lazy_static! {

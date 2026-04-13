@@ -9,24 +9,29 @@
 //!
 //! [draft-ietf-rats-ear-03]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-ear-03
 
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
+use alloc::{
+    collections::BTreeMap,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
 
 use ciborium::{cbor, value::Value};
-use serde::{Deserialize, Deserializer, Serialize};
 use serde::{
+    Deserialize, Deserializer, Serialize,
     de::{Error, MapAccess, Visitor},
     ser::Error as OtherError,
 };
 
-use ar4si::choices::TrustworthinessTier;
-use ar4si::maps::{TrustworthinessVector, TrustworthinessVectorCbor, VerifierId, VerifierIdCbor};
+use ar4si::{
+    choices::TrustworthinessTier,
+    maps::{TrustworthinessVector, TrustworthinessVectorCbor, VerifierId, VerifierIdCbor},
+};
 use cbor_derive::StructToMap;
-use common::GeneralProfile;
-use common::tuple::Tuple;
+use common::{GeneralProfile, tuple::Tuple};
+
 #[allow(unused_imports)]
 use common::tuple::TupleCbor;
 use common::*;

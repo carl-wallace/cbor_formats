@@ -24,15 +24,16 @@
 //!
 //! [CoRIM Section 4.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-4.2
 
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 
 use ciborium::value::Value;
-use common::{BinaryOrNil, TextOrInt};
-use cose::arrays::CoseSign1Cbor;
-use cose::choices::EmptyOrSerializedMap;
-use cose::maps::HeaderMapCbor;
 use serde::{Deserialize, Serialize};
+
+use common::{BinaryOrNil, TextOrInt};
+use cose::{arrays::CoseSign1Cbor, choices::EmptyOrSerializedMap, maps::HeaderMapCbor};
 
 use crate::maps::CorimMapCbor;
 

@@ -1,10 +1,13 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::tag::Required;
+use ciborium::{de::from_reader, ser::into_writer, tag::Required};
 
-use corim::choices::{ClassIdTypeChoice, GroupIdTypeChoice, InstanceIdTypeChoice};
-use corim::maps::{ClassMap, MeasurementMap, MeasurementValuesMap};
-use coserv::arrays::*;
+use corim::{
+    choices::{ClassIdTypeChoice, GroupIdTypeChoice, InstanceIdTypeChoice},
+    maps::{ClassMap, MeasurementMap, MeasurementValuesMap},
+};
+use coserv::arrays::{
+    StatefulClass, StatefulClassCbor, StatefulGroup, StatefulGroupCbor, StatefulInstance,
+    StatefulInstanceCbor,
+};
 
 // ── StatefulClass ──
 

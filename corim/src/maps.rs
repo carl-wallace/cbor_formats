@@ -30,22 +30,26 @@
 //!
 //! [draft-ietf-rats-corim-10]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10
 
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
-use ciborium::{cbor, value::Value};
+use alloc::{
+    collections::BTreeMap,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
-use serde::de::{Error, MapAccess, Visitor};
-use serde::{Deserialize, Deserializer, Serialize};
 
-use crate::arrays::*;
-use crate::choices::*;
+use ciborium::{cbor, value::Value};
+use serde::{
+    Deserialize, Deserializer, Serialize,
+    de::{Error, MapAccess, Visitor},
+    ser::Error as OtherError,
+};
+
 use cbor_derive::StructToMap;
-use common::arrays::*;
-use common::choices::*;
-use common::*;
-use serde::ser::Error as OtherError;
+use common::{arrays::*, choices::*, *};
+
+use crate::{arrays::*, choices::*};
 
 /// The `conditions` map used in `attest-key-triple-record` and `identity-triple-record`,
 /// defined in [CoRIM Section 5.1.10].

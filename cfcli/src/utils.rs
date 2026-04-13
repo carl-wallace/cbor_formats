@@ -1,7 +1,7 @@
 //! File discovery and CBOR utilities for cfcli.
 
-use std::ffi::OsStr;
-use std::path::Path;
+use std::{ffi::OsStr, path::Path};
+
 use walkdir::WalkDir;
 
 /// Try to extract the payload bytes from a COSE Sign1 structure (CBOR tag 18).

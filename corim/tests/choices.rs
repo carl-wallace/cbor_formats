@@ -1,11 +1,23 @@
+use ciborium::{
+    de::from_reader,
+    ser::into_writer,
+    tag::Required,
+    value::{Integer, Value},
+};
+
+use common::{
+    OidType, UeidType, UuidType,
+    choices::{VersionScheme, VersionSchemeCbor, VersionSchemeKnownCbor},
+};
+use corim::choices::{
+    ClassIdTypeChoice, ClassIdTypeChoiceCbor, CorimIdTypeChoice, CorimRoleTypeChoiceCbor,
+    CryptoKeyTypeChoice, DomainTypeChoice, EntityNameTypeChoice, GroupIdTypeChoice,
+    InstanceIdTypeChoice, MeasuredElementTypeChoice, MeasuredElementTypeChoiceCbor,
+    ProfileTypeChoice, ProfileTypeChoiceCbor, SvnTypeChoice, TagIdTypeChoice, TagIdTypeChoiceCbor,
+    TagRelTypeChoice, TagVersionType,
+};
+
 use crate::utils::buffer_to_hex;
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::tag::Required;
-use ciborium::value::{Integer, Value};
-use common::choices::*;
-use common::{OidType, UeidType, UuidType};
-use corim::choices::*;
 
 mod utils;
 
@@ -44,7 +56,6 @@ fn class_id_type_choice_test() {
 
 #[test]
 fn corim_id_type_choice_test() {
-    use common::*;
     let mut encoded_token = vec![];
     let citc = CorimIdTypeChoice::Str("bah".to_string());
     into_writer(&citc, &mut encoded_token).unwrap();
@@ -287,7 +298,6 @@ fn svn_type_choice_test() {
 
 #[test]
 fn tag_id_type_choice_test() {
-    use common::*;
     let titc = TagIdTypeChoiceCbor::Str("bah".to_string());
     let mut encoded_token = vec![];
     into_writer(&titc, &mut encoded_token).unwrap();

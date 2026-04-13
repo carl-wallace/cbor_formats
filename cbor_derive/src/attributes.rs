@@ -1,7 +1,6 @@
 //! Attribute processing code adapted from the RustCrypto formats library.
 
-use core::fmt::Debug;
-use core::str::FromStr;
+use core::{fmt::Debug, str::FromStr};
 
 use proc_macro_error2::abort;
 use syn::{Attribute, LitStr, Path};

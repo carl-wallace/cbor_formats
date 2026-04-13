@@ -1,16 +1,15 @@
 //! COSE MAC operations (CoseMac0, CoseMac).
 
-use alloc::string::ToString;
-use alloc::vec::Vec;
+use alloc::{string::ToString, vec::Vec};
 
 use common::{BinaryOrNil, BytesType};
-use cose::arrays::{CoseMac, CoseMac0, CoseMac0Cbor, CoseMacCbor, MacStructure, MacStructureCbor};
-use cose::choices::MacStructureContext;
-use cose::maps::HeaderMap;
+use cose::{
+    arrays::{CoseMac, CoseMac0, CoseMac0Cbor, CoseMacCbor, MacStructure, MacStructureCbor},
+    choices::MacStructureContext,
+    maps::HeaderMap,
+};
 
-use crate::crypto::CoseMacAlgorithm;
-use crate::error::CoseCryptoError;
-use crate::helpers;
+use crate::{crypto::CoseMacAlgorithm, error::CoseCryptoError, helpers};
 
 /// Builder for `COSE_Mac0` messages.
 pub struct CoseMac0Builder {

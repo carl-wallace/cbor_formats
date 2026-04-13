@@ -1,10 +1,22 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::tag::Required;
+use ciborium::{de::from_reader, ser::into_writer, tag::Required};
+
 use common::{UeidType, UuidType};
-use corim::arrays::*;
-use corim::choices::*;
-use corim::maps::*;
+use corim::{
+    arrays::{
+        AttestKeyTripleRecord, AttestKeyTripleRecordCbor, CoswidTripleRecord,
+        CoswidTripleRecordCbor, DomainDependencyTripleRecord, DomainDependencyTripleRecordCbor,
+        EndorsedTripleRecord, EndorsedTripleRecordCbor, IdentityTripleRecord,
+        IdentityTripleRecordCbor, ReferenceTripleRecord, ReferenceTripleRecordCbor,
+    },
+    choices::{
+        ClassIdTypeChoiceCbor, CryptoKeyTypeChoice, DomainTypeChoice, InstanceIdTypeChoice,
+        TagIdTypeChoiceCbor,
+    },
+    maps::{
+        ClassMapCbor, EnvironmentMapCbor, MeasurementMapCbor, MeasurementValuesMapCbor,
+        VersionMapCbor,
+    },
+};
 
 mod utils;
 use utils::*;

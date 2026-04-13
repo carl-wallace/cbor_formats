@@ -5,10 +5,12 @@ use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use syn::{DeriveInput, Ident, Lifetime};
 
-use crate::attributes::TypeAttrs;
-use crate::cbor_derive_utils::{extract_type, is_option, is_option_vec, is_vec};
-use crate::default_lifetime;
-use crate::field::StructField;
+use crate::{
+    attributes::TypeAttrs,
+    cbor_derive_utils::{extract_type, is_option, is_option_vec, is_vec},
+    default_lifetime,
+    field::StructField,
+};
 
 /// Derive the `StructToMap` trait for a struct
 pub(crate) struct DeriveStructToArray {

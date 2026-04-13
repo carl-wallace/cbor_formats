@@ -1,7 +1,8 @@
 //! COSE algorithm registry types and IANA label constants.
 
-use crate::error::CoseCryptoError;
 use common::TextOrInt;
+
+use crate::error::CoseCryptoError;
 
 /// COSE algorithms supported by this crate.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

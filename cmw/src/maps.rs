@@ -13,12 +13,14 @@
 //!
 //! [draft-ietf-rats-msg-wrap-23]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23
 
-use alloc::collections::BTreeMap;
-use alloc::string::String;
+use alloc::{collections::BTreeMap, string::String};
 use core::fmt;
-use serde::de::{self, MapAccess, Visitor};
-use serde::ser::SerializeMap;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+use serde::{
+    Deserialize, Deserializer, Serialize, Serializer,
+    de::{self, MapAccess, Visitor},
+    ser::SerializeMap,
+};
 
 use crate::choices::{CborCmw, CborCollectionKey, JsonCmw};
 

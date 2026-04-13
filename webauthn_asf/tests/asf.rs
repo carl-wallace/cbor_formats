@@ -1,11 +1,9 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::value::Value;
+use std::{fs::File, io::Read, path::Path};
+
+use ciborium::{de::from_reader, ser::into_writer, value::Value};
+
 use common::BytesType;
-use std::fs::File;
-use std::io::Read;
-use std::path::Path;
-use webauthn_asf::*;
+use webauthn_asf::{AppleAssertionObject, AppleAttestationObject, AttestationObject, Supported};
 
 pub fn get_file_as_byte_vec(filename: &Path) -> Vec<u8> {
     match File::open(filename) {

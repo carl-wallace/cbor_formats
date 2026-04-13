@@ -4,16 +4,20 @@
 //! |------|------|
 //! | generic map of key-value pairs | [`TupleMap`] / [`TupleMapCbor`] |
 
-use crate::tuple::*;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
-use ciborium::value::Value;
+use alloc::{
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
-use serde::de::MapAccess;
-use serde::ser::Error as OtherError;
-use serde::ser::SerializeMap;
-use serde::{Deserialize, Serialize};
-use serde::{de::Error, de::Visitor};
+
+use ciborium::value::Value;
+use serde::{
+    Deserialize, Serialize, de::Error, de::MapAccess, de::Visitor, ser::Error as OtherError,
+    ser::SerializeMap,
+};
+
+use crate::tuple::{Tuple, TupleCbor};
 
 /// A collection of [`Tuple`] key-value pairs, representing a generic map structure.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

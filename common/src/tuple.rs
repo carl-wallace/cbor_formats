@@ -4,17 +4,19 @@
 //! |------|------|
 //! | generic key-value pair (tag + value) | [`Tuple`] / [`TupleCbor`] |
 
-use alloc::boxed::Box;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
-use ciborium::value::{Integer, Value};
+use alloc::{
+    boxed::Box,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
-use serde::de::Error;
-use serde::de::VariantAccess;
-use serde::de::Visitor;
-use serde::ser::Error as OtherError;
-use serde::{Deserialize, Serialize, de};
+
+use ciborium::value::{Integer, Value};
+use serde::{
+    Deserialize, Serialize, de, de::Error, de::VariantAccess, de::Visitor, ser::Error as OtherError,
+};
 
 /// A key-value pair represented as two CBOR `Value` items, used for generic tagged entries.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

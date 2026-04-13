@@ -4,15 +4,18 @@
 #![cfg(feature = "pqc")]
 #![allow(clippy::unwrap_used)]
 
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::value::Value;
-use cose::arrays::CoseSign1Cbor;
-use cose::maps::CoseKeyCbor;
-use cose_crypto::algorithm::CoseAlgorithm;
-use cose_crypto::crypto::ml_dsa::*;
-use cose_crypto::sign::verify_sign1;
+use ciborium::{de::from_reader, ser::into_writer, value::Value};
 use serde::Deserialize;
+
+use cose::{arrays::CoseSign1Cbor, maps::CoseKeyCbor};
+use cose_crypto::{
+    algorithm::CoseAlgorithm,
+    crypto::ml_dsa::{
+        MlDsa44Signer, MlDsa44Verifier, MlDsa65Signer, MlDsa65Verifier, MlDsa87Signer,
+        MlDsa87Verifier,
+    },
+    sign::verify_sign1,
+};
 
 #[derive(Deserialize)]
 struct CoseTestVector {

@@ -1,19 +1,20 @@
 //! HMAC implementations (HS256/64, HS256, HS384, HS512).
 
-use alloc::string::ToString;
-use alloc::vec::Vec;
+use alloc::{string::ToString, vec::Vec};
 
 use ::hmac::{Hmac, KeyInit, Mac};
-use cose::maps::CoseKeyCbor;
 use sha2::{Sha256, Sha384, Sha512};
 use subtle::ConstantTimeEq;
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
-use crate::algorithm::CoseAlgorithm;
-use crate::error::CoseCryptoError;
-use crate::keys::{self, ParsedCoseKey};
+use cose::maps::CoseKeyCbor;
 
 use super::CoseMacAlgorithm;
+use crate::{
+    algorithm::CoseAlgorithm,
+    error::CoseCryptoError,
+    keys::{self, ParsedCoseKey},
+};
 
 /// HMAC-SHA-256 key, used for both HS256 (full 32-byte tag) and HS256/64 (truncated 8-byte tag).
 #[derive(Zeroize, ZeroizeOnDrop)]

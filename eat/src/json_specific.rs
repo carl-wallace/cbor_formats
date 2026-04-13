@@ -27,16 +27,17 @@
 //! | `Selector-For-Deb` | [`SelectorForDeb`] |
 //! | `Submodule` (JSON) | [`Submodule`] |
 
-use alloc::boxed::Box;
-use alloc::string::String;
+use alloc::{boxed::Box, string::String};
 use core::ops::Deref;
 
 use base64::{Engine, engine::general_purpose::STANDARD};
 use serde::{Deserialize, Serialize};
 
-use crate::arrays::{DetachedEatBundle, DetachedSubmoduleDigest};
-use crate::cbor_specific::{SelectorCbor, SubmoduleCbor};
-use crate::maps::{ClaimsSetClaims, ClaimsSetClaimsCbor};
+use crate::{
+    arrays::{DetachedEatBundle, DetachedSubmoduleDigest},
+    cbor_specific::{SelectorCbor, SubmoduleCbor},
+    maps::{ClaimsSetClaims, ClaimsSetClaimsCbor},
+};
 
 // EAT-JSON-Token = $EAT-JSON-Token-Formats
 //

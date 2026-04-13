@@ -1,12 +1,10 @@
 use std::collections::BTreeMap;
 
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
+use ciborium::{de::from_reader, ser::into_writer};
 use hex_literal::hex;
 
-use ar4si::choices::TrustworthinessTier;
-use ar4si::maps::TrustworthinessVector;
-use ear::maps::*;
+use ar4si::{choices::TrustworthinessTier, maps::TrustworthinessVector};
+use ear::maps::{AppraisalPolicyIds, Ear, EarAppraisal, EarAppraisalCbor, EarCbor, EarSubmods};
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -1,18 +1,22 @@
 //! COSE signing and verification (CoseSign1, CoseSign).
 
-use alloc::string::ToString;
-use alloc::vec::Vec;
+use alloc::{string::ToString, vec::Vec};
 
 use common::{BinaryOrNil, BytesType};
-use cose::arrays::{
-    CoseSign, CoseSign1, CoseSign1Cbor, CoseSignCbor, CoseSignature, SigStructure, SigStructureCbor,
+use cose::{
+    arrays::{
+        CoseSign, CoseSign1, CoseSign1Cbor, CoseSignCbor, CoseSignature, SigStructure,
+        SigStructureCbor,
+    },
+    choices::SignatureOrSignature1,
+    maps::HeaderMap,
 };
-use cose::choices::SignatureOrSignature1;
-use cose::maps::HeaderMap;
 
-use crate::crypto::{CoseSigner, CoseVerifier};
-use crate::error::CoseCryptoError;
-use crate::helpers;
+use crate::{
+    crypto::{CoseSigner, CoseVerifier},
+    error::CoseCryptoError,
+    helpers,
+};
 
 /// Builder for `COSE_Sign1` messages.
 pub struct CoseSign1Builder {

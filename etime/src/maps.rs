@@ -14,17 +14,18 @@
 //!
 //! [RFC 9581]: https://www.rfc-editor.org/rfc/rfc9581.html
 
-use alloc::string::{String, ToString};
-use alloc::vec;
-use alloc::vec::Vec;
+use alloc::{
+    boxed::Box,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 
-use ciborium::tag::Required;
-use ciborium::value::{Integer, Value};
-use serde::de;
-use serde::ser::SerializeMap;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-
-use alloc::boxed::Box;
+use ciborium::{
+    tag::Required,
+    value::{Integer, Value},
+};
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeMap};
 
 use crate::choices::{BaseTime, EtimeTimescale, SuffixInfoMap, SuffixValues, TimeZoneInfo};
 

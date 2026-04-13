@@ -23,23 +23,23 @@
 //!
 //! [RFC 9711]: https://datatracker.ietf.org/doc/html/rfc9711
 
-use alloc::boxed::Box;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
+use alloc::{
+    boxed::Box,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData, ops::Deref};
 
 use base64::{Engine, engine::general_purpose::STANDARD};
 use ciborium::{cbor, value::Value};
-use serde::ser::Error as OtherError;
-use serde::{Deserialize, Serialize};
-use serde::{de::Error, de::Visitor};
+use serde::{Deserialize, Serialize, de::Error, de::Visitor, ser::Error as OtherError};
 
-use crate::cbor_specific::SelectorCbor;
-use crate::choices::*;
-use crate::json_specific::*;
 use cbor_derive::StructToArray;
 use common::{choices::*, *};
+
+use crate::{cbor_specific::SelectorCbor, choices::*, json_specific::*};
 
 /// JSON encoding/decoding of `JSON-Selector` options suitable for inclusion in a `Detached-EAT-Bundle`
 ///

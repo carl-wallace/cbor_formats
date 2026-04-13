@@ -1,7 +1,6 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::value::Value;
-use coserv::choices::*;
+use ciborium::{de::from_reader, ser::into_writer, value::Value};
+
+use coserv::choices::{ArtifactType, ResultType};
 
 #[test]
 fn artifact_type_roundtrip() {

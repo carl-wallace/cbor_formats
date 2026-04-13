@@ -2,20 +2,25 @@
 //!
 //! Supports EC keys (P-256, P-384) and OKP keys (Ed25519).
 
-use alloc::boxed::Box;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
+use alloc::{
+    boxed::Box,
+    format,
+    string::{String, ToString},
+    vec::Vec,
+};
+
+use serde::Deserialize;
 
 use base64ct::{Base64UrlUnpadded, Encoding};
-use serde::Deserialize;
 use zeroize::Zeroizing;
 
-use crate::algorithm::CoseAlgorithm;
-use crate::crypto::ecdsa::{Es256Signer, Es256Verifier, Es384Signer, Es384Verifier};
-use crate::crypto::eddsa::{Ed25519Signer, Ed25519Verifier};
-use crate::crypto::{CoseSigner, CoseVerifier};
-use crate::error::CoseCryptoError;
+use crate::{
+    algorithm::CoseAlgorithm,
+    crypto::ecdsa::{Es256Signer, Es256Verifier, Es384Signer, Es384Verifier},
+    crypto::eddsa::{Ed25519Signer, Ed25519Verifier},
+    crypto::{CoseSigner, CoseVerifier},
+    error::CoseCryptoError,
+};
 
 /// Minimal JWK structure for EC and OKP key types.
 #[derive(Debug, Deserialize)]

@@ -7,13 +7,12 @@
 //! | `$version-scheme` | [`VersionScheme`] / [`VersionSchemeCbor`] |
 //! | known version scheme values | [`VersionSchemeKnown`] / [`VersionSchemeKnownCbor`] |
 
+use alloc::string::{String, ToString};
+
 use ciborium::value::Value;
 use num_enum::TryFromPrimitive;
 use serde::{Deserialize, Serialize};
-use serde_repr::Deserialize_repr;
-use serde_repr::Serialize_repr;
-
-use alloc::string::{String, ToString};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 /// The `version-scheme` socket is defined in [CoRIM Section 5.1.4.5.3].
 ///

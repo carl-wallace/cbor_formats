@@ -1,9 +1,14 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use cots::arrays::{ConciseTaStoresCbor, TrustAnchorCbor};
+use ciborium::{de::from_reader, ser::into_writer};
 use hex_literal::hex;
 
-use cots::maps::*;
+use cots::{
+    arrays::{ConciseTaStoresCbor, TrustAnchorCbor},
+    maps::{
+        AbbreviatedSwidTagCbor, CasAndTasMapCbor, ConciseTaStoreMap, ConciseTaStoreMapCbor,
+        EnvironmentGroupListMapCbor,
+    },
+};
+
 mod utils;
 use crate::utils::*;
 

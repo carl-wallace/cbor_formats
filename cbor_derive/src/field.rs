@@ -5,8 +5,10 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Field, Ident, Type};
 
-use crate::attributes::FieldAttrs;
-use crate::cbor_derive_utils::*;
+use crate::{
+    attributes::FieldAttrs,
+    cbor_derive_utils::{extract_type, extract_type_from_option, is_option, is_option_vec, is_vec},
+};
 
 pub type TagNumber = i32;
 

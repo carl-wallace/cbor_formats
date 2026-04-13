@@ -21,12 +21,14 @@
 //     COSE_Encrypt_Tagged / COSE_Encrypt0_Tagged /
 //     COSE_Mac_Tagged / COSE_Mac0_Tagged
 
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
+use alloc::{
+    format,
+    string::{String, ToString},
+    vec::Vec,
+};
+
 use ciborium::value::Value;
-use serde::de;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 
 use crate::maps::HeaderMapCbor;
 

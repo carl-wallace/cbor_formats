@@ -27,19 +27,20 @@
 //!
 //! [draft-ietf-rats-corim-10]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10
 
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
-use cbor_derive::EnumToChoice;
-use ciborium::value::Value;
-use common::*;
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 use core::fmt;
-use serde::de::Visitor;
-use serde::{Deserialize, Serialize};
 
-use ciborium::tag::Required;
+use ciborium::{tag::Required, value::Value};
+use serde::{Deserialize, Serialize, de::Visitor};
+
+use cbor_derive::EnumToChoice;
+use common::*;
+use coswid::maps::*;
 
 use crate::maps::*;
-use coswid::maps::*;
 
 /// $concise-tag-type-choice /= #6.505(bytes .cbor concise-swid-tag)
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

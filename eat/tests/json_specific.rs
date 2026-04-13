@@ -1,12 +1,14 @@
-use base64::{Engine, engine::general_purpose::STANDARD};
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use common::TextOrInt;
-use eat::arrays::*;
-use hex_literal::hex;
 use std::path::Path;
 
-use eat::json_specific::*;
+use base64::{Engine, engine::general_purpose::STANDARD};
+use ciborium::{de::from_reader, ser::into_writer};
+use hex_literal::hex;
+
+use common::TextOrInt;
+use eat::{
+    arrays::{DetachedEatBundle, DetachedSubmoduleDigest, NestedToken, WrappedClaimsSet},
+    json_specific::{JsonSelectorForDebValue, JsonSelectorType, JsonSelectorValue, SelectorForDeb},
+};
 
 mod utils;
 use utils::*;

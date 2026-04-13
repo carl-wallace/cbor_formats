@@ -1,11 +1,15 @@
 use std::path::Path;
 
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
+use ciborium::{de::from_reader, ser::into_writer};
 use hex_literal::hex;
 
-use cose::arrays::*;
-use cose::maps::*;
+use cose::{
+    arrays::{
+        CoseSign1Cbor, CoseSignatureCbor, TaggedCoseEncrypt, TaggedCoseEncrypt0, TaggedCoseMac,
+        TaggedCoseMac0, TaggedCoseSign, TaggedCoseSign1,
+    },
+    maps::HeaderMapCbor,
+};
 
 mod utils;
 use utils::*;

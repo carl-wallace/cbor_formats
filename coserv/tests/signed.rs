@@ -1,17 +1,23 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
+use ciborium::{de::from_reader, ser::into_writer};
 use hex_literal::hex;
 
-use common::{BinaryOrNil, BytesType, TextOrInt};
-use cose::arrays::CoseSign1Cbor;
-use cose::choices::EmptyOrSerializedMap;
-use cose::maps::{HeaderMap, HeaderMapCbor};
-use cose_crypto::algorithm::CoseAlgorithm;
-use cose_crypto::crypto::ecdsa::{Es256Signer, Es256Verifier};
-use cose_crypto::sign::{CoseSign1Builder, verify_sign1};
-use coserv::maps::CoservMapCbor;
-use coserv::signed::*;
 use p256::elliptic_curve::Generate;
+
+use common::{BinaryOrNil, BytesType, TextOrInt};
+use cose::{
+    arrays::CoseSign1Cbor,
+    choices::EmptyOrSerializedMap,
+    maps::{HeaderMap, HeaderMapCbor},
+};
+use cose_crypto::{
+    algorithm::CoseAlgorithm,
+    crypto::ecdsa::{Es256Signer, Es256Verifier},
+    sign::{CoseSign1Builder, verify_sign1},
+};
+use coserv::{
+    maps::CoservMapCbor,
+    signed::{COSERV_CBOR_CONTENT_TYPE, SignedCoserv, SignedCoservError},
+};
 
 fn roundtrip_cbor<
     T: serde::Serialize + serde::de::DeserializeOwned + PartialEq + std::fmt::Debug,

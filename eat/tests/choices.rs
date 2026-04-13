@@ -1,6 +1,6 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use eat::choices::*;
+use ciborium::{de::from_reader, ser::into_writer};
+
+use eat::choices::{DebugStatusType, IntendedUseType, ResultType};
 
 #[test]
 fn debug_status_type_test() {

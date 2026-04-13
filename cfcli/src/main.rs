@@ -16,6 +16,7 @@
 #![doc = include_str!("../README.md")]
 
 use clap::Parser;
+
 mod args;
 mod cbor_diag;
 mod comid;
@@ -38,7 +39,17 @@ use crate::cots::cots_main;
 use crate::diag::diag_main;
 use crate::ear::ear_main;
 use crate::eat::eat_main;
-use args::*;
+use args::{
+    CfcliArgs, ComidCommand, ComidCreateSubcommand, ComidSubCommands, Commands, CorimCommand,
+    CorimCreateSubcommand, CorimExtractSubcommand, CorimSignSubcommand, CorimSubCommands,
+    CorimVerifySubcommand, CoservCommand, CoservCreateSubcommand, CoservExtractSubcommand,
+    CoservSignSubcommand, CoservSubCommands, CoservVerifySubcommand, CoswidCommand,
+    CoswidCreateSubcommand, CoswidSubCommands, CotsCommand, CotsCreateSubcommand, CotsSubCommands,
+    DiagCommand, DiagSubCommands, DisplaySubcommand, EarCommand, EarCreateSubcommand,
+    EarExtractSubcommand, EarSignSubcommand, EarSubCommands, EarVerifySubcommand, EatCommand,
+    EatCreateSubcommand, EatExtractSubcommand, EatSignSubcommand, EatSubCommands,
+    EatVerifySubcommand, SigningFormat,
+};
 use clap::CommandFactory;
 use std::env;
 

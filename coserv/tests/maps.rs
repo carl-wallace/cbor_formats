@@ -1,7 +1,7 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use coserv::maps::*;
+use ciborium::{de::from_reader, ser::into_writer};
 use hex_literal::hex;
+
+use coserv::maps::{CoservMap, CoservMapCbor};
 
 mod utils;
 use crate::utils::*;

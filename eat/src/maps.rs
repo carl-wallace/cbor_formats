@@ -10,28 +10,30 @@
 //!
 //! [RFC 9711]: https://datatracker.ietf.org/doc/html/rfc9711
 
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
+use alloc::{
+    collections::BTreeMap,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
 
 use ciborium::{cbor, value::Value};
-use serde::{Deserialize, Deserializer, Serialize};
 use serde::{
+    Deserialize, Deserializer, Serialize,
     de::{Error, MapAccess, Visitor},
     ser::Error as OtherError,
 };
 
 use cbor_derive::StructToMap;
-use common::GeneralProfile;
-use common::tuple_map::{TupleMap, TupleMapCbor};
-use common::*;
+use common::{
+    GeneralProfile,
+    tuple_map::{TupleMap, TupleMapCbor},
+    *,
+};
 
-use crate::arrays::*;
-use crate::cbor_specific::SubmoduleCbor;
-use crate::choices::*;
-use crate::json_specific::Submodule;
+use crate::{arrays::*, cbor_specific::SubmoduleCbor, choices::*, json_specific::Submodule};
 
 /// JSON encoding/decoding of `Claims-Set-Claims`, see [EAT Section 4.2].
 ///

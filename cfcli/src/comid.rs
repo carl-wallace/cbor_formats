@@ -1,14 +1,14 @@
 //! CoMID (Concise Module Identifier) create and display operations.
 
-use crate::utils::find_files;
-use crate::{ComidCommand, ComidCreateSubcommand, ComidSubCommands, DisplaySubcommand};
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use corim::maps::*;
-use std::fs;
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
+use std::{fs, fs::File, io::Write, path::Path};
+
+use ciborium::{de::from_reader, ser::into_writer};
+
+use corim::maps::{ConciseMidTag, ConciseMidTagCbor};
+
+use crate::{
+    ComidCommand, ComidCreateSubcommand, ComidSubCommands, DisplaySubcommand, utils::find_files,
+};
 
 /// Dispatch CoMID subcommands.
 pub fn comid_main(args: &ComidCommand) {

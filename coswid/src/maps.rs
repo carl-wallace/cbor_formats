@@ -22,24 +22,26 @@
 //!
 //! [RFC 9393]: https://datatracker.ietf.org/doc/html/rfc9393
 
-use ciborium::{cbor, value::Value};
+use alloc::{
+    collections::BTreeMap,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
-use serde::de::{Error, MapAccess, Visitor};
-use serde::{Deserialize, Deserializer, Serialize};
 
-//use alloc::boxed::Box;
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
+use ciborium::{cbor, value::Value};
+use serde::{
+    Deserialize, Deserializer, Serialize,
+    de::{Error, MapAccess, Visitor},
+    ser::Error as OtherError,
+};
+
+use cbor_derive::{StructToMap, StructToOneOrMore};
+use common::{arrays::*, choices::*, *};
 
 use crate::choices::*;
-use cbor_derive::StructToMap;
-use cbor_derive::StructToOneOrMore;
-use common::arrays::*;
-use common::choices::*;
-use common::*;
-use serde::ser::Error as OtherError;
 
 // ; concise-swig-tag map indices (culled from global map member)
 // tag-id = 0

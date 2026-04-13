@@ -4,8 +4,7 @@
 
 use base64ct::{Base64UrlUnpadded, Encoding};
 use ed25519_dalek::SigningKey as EdSigningKey;
-use elliptic_curve::Generate;
-use elliptic_curve::sec1::Coordinates;
+use elliptic_curve::{Generate, sec1::Coordinates};
 use p256::ecdsa::SigningKey as P256SigningKey;
 use p384::ecdsa::SigningKey as P384SigningKey;
 

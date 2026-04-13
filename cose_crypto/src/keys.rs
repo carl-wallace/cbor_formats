@@ -1,16 +1,18 @@
 //! COSE key parsing — extracts key material from `CoseKeyCbor` structures.
 
-use alloc::boxed::Box;
-use alloc::format;
-use alloc::string::ToString;
-use alloc::vec::Vec;
+use alloc::{boxed::Box, format, string::ToString, vec::Vec};
+
 use ciborium::value::Value;
-use cose::maps::CoseKeyCbor;
+
 use zeroize::{Zeroize, Zeroizing};
 
-use crate::algorithm::CoseAlgorithm;
-use crate::crypto::{CoseSigner, CoseVerifier};
-use crate::error::CoseCryptoError;
+use cose::maps::CoseKeyCbor;
+
+use crate::{
+    algorithm::CoseAlgorithm,
+    crypto::{CoseSigner, CoseVerifier},
+    error::CoseCryptoError,
+};
 
 /// COSE key type values (kty parameter, label 1).
 const KTY_OKP: i64 = 1;

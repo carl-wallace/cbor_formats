@@ -15,27 +15,29 @@
 //!
 //! [draft-ietf-rats-concise-ta-stores]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-concise-ta-stores
 
-use ciborium::{cbor, value::Value};
+use alloc::{
+    collections::BTreeMap,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
-use serde::de::{Error, MapAccess, Visitor};
-use serde::{Deserialize, Deserializer, Serialize};
 
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
+use ciborium::{cbor, value::Value};
+use serde::{
+    Deserialize, Deserializer, Serialize,
+    de::{Error, MapAccess, Visitor},
+    ser::Error as OtherError,
+};
 
-use crate::arrays::*;
-use crate::choices::TasListPurpose;
 use cbor_derive::StructToMap;
-use common::choices::*;
-use common::*;
-use corim::choices::TagVersionType;
-use corim::maps::*;
+use common::{choices::*, *};
+use corim::{choices::TagVersionType, maps::*};
 use coswid::maps::*;
-use eat::maps::ClaimsSetClaims;
-use eat::maps::*;
-use serde::ser::Error as OtherError;
+use eat::{maps::ClaimsSetClaims, maps::*};
+
+use crate::{arrays::*, choices::TasListPurpose};
 
 /// ```text
 /// abbreviated-swid-tag = {

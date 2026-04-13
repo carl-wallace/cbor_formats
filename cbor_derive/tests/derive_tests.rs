@@ -1,14 +1,16 @@
 // Imports required by generated code from the derive macros
-use ciborium::{cbor, value::Value};
+
 use core::{fmt, marker::PhantomData};
-use serde::de::{Error, MapAccess, Visitor};
-use serde::ser::Error as OtherError;
-use serde::{Deserialize, Deserializer, Serialize};
 use std::collections::BTreeMap;
 
+use ciborium::{cbor, de::from_reader, ser::into_writer, value::Value};
+use serde::{
+    Deserialize, Deserializer, Serialize,
+    de::{Error, MapAccess, Visitor},
+    ser::Error as OtherError,
+};
+
 use cbor_derive::{StructToArray, StructToMap, StructToOneOrMore};
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
 use common::tuple::TupleCbor;
 
 // --- StructToArray tests ---

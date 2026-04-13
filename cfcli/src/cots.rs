@@ -1,15 +1,14 @@
 //! CoTS (Concise Trust Anchor Store) create and display operations.
 
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use cots::arrays::*;
-use std::fs;
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
+use std::{fs, fs::File, io::Write, path::Path};
 
-use crate::utils::find_files;
-use crate::{CotsCommand, CotsCreateSubcommand, CotsSubCommands, DisplaySubcommand};
+use ciborium::{de::from_reader, ser::into_writer};
+
+use cots::arrays::{ConciseTaStores, ConciseTaStoresCbor};
+
+use crate::{
+    CotsCommand, CotsCreateSubcommand, CotsSubCommands, DisplaySubcommand, utils::find_files,
+};
 
 /// Dispatch CoTS subcommands.
 pub fn cots_main(args: &CotsCommand) {

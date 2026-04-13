@@ -8,17 +8,20 @@
 //!
 //! [draft-ietf-rats-epoch-markers-03]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-epoch-markers-03
 
-use alloc::boxed::Box;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
+use alloc::{
+    boxed::Box,
+    format,
+    string::{String, ToString},
+    vec::Vec,
+};
 
-use ciborium::tag::Required;
-use ciborium::value::Value;
+use ciborium::{tag::Required, value::Value};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::arrays::EpochTickList;
-use crate::maps::{ProfiledEtimeCbor, TstInfoCborTimeTagCbor};
+use crate::{
+    arrays::EpochTickList,
+    maps::{ProfiledEtimeCbor, TstInfoCborTimeTagCbor},
+};
 
 /// CBOR time value: `cbor-time = tdate / time / etime`.
 ///

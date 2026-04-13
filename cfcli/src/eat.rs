@@ -1,28 +1,29 @@
 //! EAT (Entity Attestation Token) create, display, sign, verify, and extract operations.
 
-use crate::key_utils::{algorithm_from_key, signer_from_key, verifier_from_key};
-use base64ct::{Base64UrlUnpadded, Encoding};
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::value::Value;
-use common::{BinaryOrNil, TextOrInt};
-use cose::arrays::CoseSign1Cbor;
-use cose::maps::HeaderMap;
-use cose_crypto::jwk::algorithm_from_jwk;
-use cose_crypto::sign::{CoseSign1Builder, verify_sign1};
-use eat::maps::*;
-use jose::header::JoseHeader;
-use jose::jwk::Jwk;
-use jose::jws::{JwsBuilder, verify_compact};
-use std::fs;
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
+use std::{fs, fs::File, io::Write, path::Path};
 
-use crate::utils::find_files;
+use ciborium::{de::from_reader, ser::into_writer, value::Value};
+
+use base64ct::{Base64UrlUnpadded, Encoding};
+
+use common::{BinaryOrNil, TextOrInt};
+use cose::{arrays::CoseSign1Cbor, maps::HeaderMap};
+use cose_crypto::{
+    jwk::algorithm_from_jwk,
+    sign::{CoseSign1Builder, verify_sign1},
+};
+use eat::maps::{ClaimsSetClaims, ClaimsSetClaimsCbor};
+use jose::{
+    header::JoseHeader,
+    jwk::Jwk,
+    jws::{JwsBuilder, verify_compact},
+};
+
 use crate::{
     DisplaySubcommand, EatCommand, EatCreateSubcommand, EatExtractSubcommand, EatSignSubcommand,
     EatSubCommands, EatVerifySubcommand, SigningFormat,
+    key_utils::{algorithm_from_key, signer_from_key, verifier_from_key},
+    utils::find_files,
 };
 
 /// Dispatch EAT subcommands.

@@ -20,11 +20,12 @@ extern crate alloc;
 // ; Every attestation statement format must have the above fields
 // attStmtTemplate .within $$attStmtType
 
-use alloc::string::String;
-use alloc::vec::Vec;
+use alloc::{string::String, vec::Vec};
+
 use ciborium::value::Value;
-use common::BytesType;
 use serde::{Deserialize, Serialize};
+
+use common::BytesType;
 
 /// Represents the `attObj` attestation object from Web Authentication Level 2.
 ///

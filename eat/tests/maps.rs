@@ -1,16 +1,16 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::tag::Required;
-use ciborium::value::Value;
-use common::tuple::*;
-use common::tuple_map::*;
-use common::{TextOrBinary, TimeCbor, UeidType};
-use eat::cbor_specific::SubmoduleCbor;
-use eat::choices::{DebugStatusType, Oemid, ResultType};
+use ciborium::{de::from_reader, ser::into_writer, tag::Required, value::Value};
 use hex_literal::hex;
 
-use eat::arrays::*;
-use eat::maps::*;
+use common::{TextOrBinary, TimeCbor, UeidType, tuple::TupleCbor, tuple_map::TupleMapCbor};
+use eat::{
+    arrays::{
+        DetachedSubmoduleDigestCbor, DloaTypeCbor, IndividualResultCbor,
+        MeasurementResultsGroupArrayCbor, MeasurementResultsGroupCbor,
+    },
+    cbor_specific::SubmoduleCbor,
+    choices::{DebugStatusType, Oemid, ResultType},
+    maps::{ClaimsSetClaims, ClaimsSetClaimsCbor, LocationTypeCbor},
+};
 
 mod utils;
 use utils::*;

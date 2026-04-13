@@ -1,8 +1,11 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use cots::arrays::*;
-use cots::maps::*;
+use ciborium::{de::from_reader, ser::into_writer};
 use hex_literal::hex;
+
+use cots::{
+    arrays::{ConciseTaStores, ConciseTaStoresCbor, EnvironmentGroupListCbor},
+    maps::{ConciseTaStoreMapCbor, EnvironmentGroupListMapCbor},
+};
+
 mod utils;
 use crate::utils::*;
 extern crate alloc;

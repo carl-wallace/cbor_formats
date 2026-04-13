@@ -1,17 +1,17 @@
 //! ECDSA signing and verification (ES256, ES384).
 
-use alloc::string::ToString;
-use alloc::vec::Vec;
+use alloc::{string::ToString, vec::Vec};
 
-use ::ecdsa::signature::Signer;
-use ::ecdsa::signature::Verifier;
+use ::ecdsa::{signature::Signer, signature::Verifier};
+
 use cose::maps::CoseKeyCbor;
 
-use crate::algorithm::CoseAlgorithm;
-use crate::error::CoseCryptoError;
-use crate::keys::{self, ParsedCoseKey};
-
 use super::{CoseSigner, CoseVerifier};
+use crate::{
+    algorithm::CoseAlgorithm,
+    error::CoseCryptoError,
+    keys::{self, ParsedCoseKey},
+};
 
 // ── ES256 (P-256 / NIST P-256) ──
 

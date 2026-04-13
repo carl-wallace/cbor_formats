@@ -3,13 +3,12 @@
 //! `Jwk` is a newtype over `Map<String, Value>` to support all key types
 //! (EC, OKP, AKP, symmetric) without a fixed field set.
 
-use alloc::boxed::Box;
-use alloc::string::String;
-use alloc::vec::Vec;
+use alloc::{boxed::Box, string::String, vec::Vec};
 
-use cose_crypto::crypto::{CoseSigner, CoseVerifier};
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
+
+use cose_crypto::crypto::{CoseSigner, CoseVerifier};
 
 use crate::error::JoseError;
 

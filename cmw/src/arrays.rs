@@ -12,16 +12,17 @@
 //!
 //! [draft-ietf-rats-msg-wrap-23]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-msg-wrap-23
 
-use ciborium::{cbor, value::Value};
+use alloc::{
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
-use serde::ser::Error as OtherError;
-use serde::{Deserialize, Serialize};
-use serde::{de::Error, de::Visitor};
 
-use alloc::{vec, vec::Vec};
+use ciborium::{cbor, value::Value};
+use serde::{Deserialize, Serialize, de::Error, de::Visitor, ser::Error as OtherError};
 
-use alloc::format;
-use alloc::string::{String, ToString};
 use cbor_derive::StructToArray;
 
 use crate::choices::*;

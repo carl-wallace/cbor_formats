@@ -3,8 +3,10 @@
 //! `JoseHeader` is a newtype over `Map<String, Value>` to support all
 //! registered, public, and private header parameters without a fixed field set.
 
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};

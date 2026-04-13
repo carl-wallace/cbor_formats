@@ -5,8 +5,7 @@ use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use syn::{DeriveInput, Ident, Lifetime};
 
-use crate::default_lifetime;
-use crate::field::StructField;
+use crate::{default_lifetime, field::StructField};
 
 /// Derive the `StructToMap` trait for a struct
 pub(crate) struct DeriveStructToOneOrMore {

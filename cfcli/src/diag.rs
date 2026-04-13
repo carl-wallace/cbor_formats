@@ -1,11 +1,11 @@
 //! CBOR diagnostic notation conversion commands.
 
-use std::fs;
-use std::io::{self, Read};
+use std::{
+    fs,
+    io::{self, Read},
+};
 
-use crate::cbor_diag;
-use crate::diag_parse;
-use crate::{DiagCommand, DiagSubCommands};
+use crate::{DiagCommand, DiagSubCommands, cbor_diag, diag_parse};
 
 /// Dispatch diag subcommands.
 pub fn diag_main(args: &DiagCommand) {

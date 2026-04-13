@@ -1,17 +1,14 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
+use std::{collections::BTreeMap, ffi::OsStr, fs::File, io::Read, path::Path};
+
+use ciborium::{de::from_reader, ser::into_writer};
+use serde::{Deserialize, Serialize};
+use walkdir::WalkDir;
+
+use subtle_encoding::hex;
+
 use cose::arrays::{
     TaggedCoseEncrypt, TaggedCoseEncrypt0, TaggedCoseMac, TaggedCoseMac0, TaggedCoseSign,
 };
-use std::ffi::OsStr;
-use std::fs::File;
-use std::io::Read;
-use std::path::Path;
-use subtle_encoding::hex;
-use walkdir::WalkDir;
-
-use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
 
 //todo figure out why this can't be referenced from utils
 #[allow(dead_code)]

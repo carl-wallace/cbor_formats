@@ -1,20 +1,18 @@
 //! AES-GCM AEAD implementations (A128GCM, A256GCM).
 #![allow(deprecated)]
 
-use alloc::string::ToString;
-use alloc::vec::Vec;
+use alloc::{string::ToString, vec::Vec};
 
-use aes_gcm::aead::Aead;
-use aes_gcm::aead::KeyInit;
-use aes_gcm::aead::Payload;
-use aes_gcm::{Aes128Gcm, Aes256Gcm, Nonce};
+use aes_gcm::{Aes128Gcm, Aes256Gcm, Nonce, aead::Aead, aead::KeyInit, aead::Payload};
+
 use cose::maps::CoseKeyCbor;
 
-use crate::algorithm::CoseAlgorithm;
-use crate::error::CoseCryptoError;
-use crate::keys::{self, ParsedCoseKey};
-
 use super::CoseAead;
+use crate::{
+    algorithm::CoseAlgorithm,
+    error::CoseCryptoError,
+    keys::{self, ParsedCoseKey},
+};
 
 /// AES-GCM key supporting 128-bit and 256-bit key sizes.
 pub enum AesGcmKey {

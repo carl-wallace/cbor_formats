@@ -86,14 +86,18 @@ pub mod choices;
 pub mod tuple;
 pub mod tuple_map;
 
-pub use tuple::*;
+use alloc::{
+    format,
+    string::{String, ToString},
+    vec::Vec,
+};
 
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
-use ciborium::tag::Required;
-use ciborium::value::{Integer, Value};
+use ciborium::{
+    tag::Required,
+    value::{Integer, Value},
+};
 use serde::{Deserialize, Serialize};
+pub use tuple::*;
 
 /// Wrapper for a CBOR byte string value.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

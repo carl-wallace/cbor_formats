@@ -23,16 +23,15 @@
 
 use alloc::string::{String, ToString};
 
-#[cfg(feature = "crypto")]
-use alloc::vec::Vec;
-
-use common::{BinaryOrNil, TextOrInt};
-use cose::arrays::CoseSign1Cbor;
-use cose::choices::EmptyOrSerializedMap;
-use cose::maps::HeaderMapCbor;
 use serde::{Deserialize, Serialize};
 
+use common::{BinaryOrNil, TextOrInt};
+use cose::{arrays::CoseSign1Cbor, choices::EmptyOrSerializedMap, maps::HeaderMapCbor};
+
 use crate::maps::CoservMapCbor;
+
+#[cfg(feature = "crypto")]
+use alloc::vec::Vec;
 
 /// Media type for CoSERV CBOR content.
 pub const COSERV_CBOR_CONTENT_TYPE: &str = "application/coserv+cbor";

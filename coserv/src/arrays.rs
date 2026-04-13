@@ -10,20 +10,17 @@
 //!
 //! [draft-ietf-rats-coserv-05]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05
 
-use ciborium::{cbor, value::Value};
+use alloc::{format, string::String, vec, vec::Vec};
 use core::{fmt, marker::PhantomData};
-use serde::ser::Error as OtherError;
-use serde::{Deserialize, Serialize};
-use serde::{de::Error, de::Visitor};
 
-use alloc::{vec, vec::Vec};
+use ciborium::{cbor, value::Value};
+use serde::{Deserialize, Serialize, de::Error, de::Visitor, ser::Error as OtherError};
 
-use alloc::format;
-use alloc::string::String;
 use cbor_derive::StructToArray;
-
-use corim::choices::{GroupIdTypeChoice, InstanceIdTypeChoice};
-use corim::maps::{ClassMap, ClassMapCbor, MeasurementMap, MeasurementMapCbor};
+use corim::{
+    choices::{GroupIdTypeChoice, InstanceIdTypeChoice},
+    maps::{ClassMap, ClassMapCbor, MeasurementMap, MeasurementMapCbor},
+};
 
 // stateful-class = [
 //   class: comid.class-map

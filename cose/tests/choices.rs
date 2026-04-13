@@ -1,7 +1,6 @@
-use ciborium::ser::into_writer;
-use ciborium::value::Value;
+use ciborium::{ser::into_writer, value::Value};
 
-use cose::choices::*;
+use cose::choices::EmptyOrSerializedMap;
 
 #[test]
 fn empty_or_serialized_map_empty() {
@@ -15,7 +14,7 @@ fn empty_or_serialized_map_empty() {
 fn empty_or_serialized_map_valid_header() {
     // Encode a valid header_map: {1: -7} (alg_id = ES256)
     use common::TextOrInt;
-    use cose::maps::*;
+    use cose::maps::HeaderMapCbor;
     let hm = HeaderMapCbor {
         alg_id: Some(TextOrInt::Int(-7)),
         criticality: None,

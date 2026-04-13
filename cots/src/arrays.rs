@@ -10,20 +10,21 @@
 //! | `trust-anchor` | [`TrustAnchor`] / [`TrustAnchorCbor`] |
 //!
 //! [draft-ietf-rats-concise-ta-stores]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-concise-ta-stores
-use alloc::format;
-use alloc::string::{String, ToString};
-use ciborium::{cbor, value::Value};
+
+use alloc::{
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
-use serde::{Deserialize, Serialize};
-use serde::{de::Error, de::Visitor};
 
-use alloc::{vec, vec::Vec};
-use serde::ser::Error as OtherError;
-
-use crate::choices::*;
-use crate::maps::*;
+use ciborium::{cbor, value::Value};
+use serde::{Deserialize, Serialize, de::Error, de::Visitor, ser::Error as OtherError};
 
 use cbor_derive::StructToArray;
+
+use crate::{choices::*, maps::*};
 
 // concise-ta-stores = [+ concise-ta-store-map]
 

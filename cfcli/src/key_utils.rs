@@ -1,10 +1,12 @@
 //! Key format auto-detection: JWK (JSON) or COSE Key (CBOR).
 
-use cose_crypto::algorithm::CoseAlgorithm;
-use cose_crypto::crypto::{CoseSigner, CoseVerifier};
-use cose_crypto::error::CoseCryptoError;
-use cose_crypto::jwk::{algorithm_from_jwk, signer_from_jwk, verifier_from_jwk};
-use cose_crypto::keys::{algorithm_from_cose_key, signer_from_cose_key, verifier_from_cose_key};
+use cose_crypto::{
+    algorithm::CoseAlgorithm,
+    crypto::{CoseSigner, CoseVerifier},
+    error::CoseCryptoError,
+    jwk::{algorithm_from_jwk, signer_from_jwk, verifier_from_jwk},
+    keys::{algorithm_from_cose_key, signer_from_cose_key, verifier_from_cose_key},
+};
 
 /// Try to deserialize `key_bytes` as a COSE Key (CBOR). Returns `None` if
 /// the bytes don't look like valid CBOR for a `CoseKeyCbor`.

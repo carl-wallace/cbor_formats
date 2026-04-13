@@ -2,8 +2,7 @@
 
 use alloc::vec::Vec;
 
-use crate::algorithm::CoseAlgorithm;
-use crate::error::CoseCryptoError;
+use crate::{algorithm::CoseAlgorithm, error::CoseCryptoError};
 
 pub mod aes_gcm;
 pub mod ecdsa;

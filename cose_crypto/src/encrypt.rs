@@ -1,16 +1,15 @@
 //! COSE encryption and decryption (CoseEncrypt0).
 
-use alloc::string::ToString;
-use alloc::vec::Vec;
+use alloc::{string::ToString, vec::Vec};
 
 use common::{BinaryOrNil, BytesType};
-use cose::arrays::{CoseEncrypt0, CoseEncrypt0Cbor, EncStructure, EncStructureCbor};
-use cose::choices::EncStructureContext;
-use cose::maps::{HeaderMap, HeaderMapCbor};
+use cose::{
+    arrays::{CoseEncrypt0, CoseEncrypt0Cbor, EncStructure, EncStructureCbor},
+    choices::EncStructureContext,
+    maps::{HeaderMap, HeaderMapCbor},
+};
 
-use crate::crypto::CoseAead;
-use crate::error::CoseCryptoError;
-use crate::helpers;
+use crate::{crypto::CoseAead, error::CoseCryptoError, helpers};
 
 /// Builder for `COSE_Encrypt0` messages.
 pub struct CoseEncrypt0Builder {

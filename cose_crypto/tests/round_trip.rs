@@ -1,14 +1,17 @@
-use cose_crypto::algorithm::CoseAlgorithm;
-use cose_crypto::crypto::CoseAead;
-use cose_crypto::crypto::aes_gcm::AesGcmKey;
-use cose_crypto::crypto::ecdsa::{Es256Signer, Es256Verifier, Es384Signer, Es384Verifier};
-use cose_crypto::crypto::eddsa::{Ed25519Signer, Ed25519Verifier};
-use cose_crypto::crypto::hmac::{HmacSha256Key, HmacSha384Key, HmacSha512Key};
-use cose_crypto::encrypt::{CoseEncrypt0Builder, decrypt_encrypt0};
-use cose_crypto::helpers;
-use cose_crypto::mac::{CoseMac0Builder, verify_mac0};
-use cose_crypto::sign::{CoseSign1Builder, verify_sign1};
 use p256::elliptic_curve::Generate;
+
+use cose_crypto::{
+    algorithm::CoseAlgorithm,
+    crypto::CoseAead,
+    crypto::aes_gcm::AesGcmKey,
+    crypto::ecdsa::{Es256Signer, Es256Verifier, Es384Signer, Es384Verifier},
+    crypto::eddsa::{Ed25519Signer, Ed25519Verifier},
+    crypto::hmac::{HmacSha256Key, HmacSha384Key, HmacSha512Key},
+    encrypt::{CoseEncrypt0Builder, decrypt_encrypt0},
+    helpers,
+    mac::{CoseMac0Builder, verify_mac0},
+    sign::{CoseSign1Builder, verify_sign1},
+};
 
 // ── ES256 Sign1 round-trip ──
 

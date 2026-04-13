@@ -13,21 +13,23 @@
 //!
 //! [RFC 9052]: https://datatracker.ietf.org/doc/html/rfc9052
 
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
+use alloc::{
+    collections::BTreeMap,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
 
 use ciborium::{cbor, value::Value};
-use serde::{Deserialize, Deserializer, Serialize};
 use serde::{
+    Deserialize, Deserializer, Serialize,
     de::{Error, MapAccess, Visitor},
     ser::Error as OtherError,
 };
 
 use cbor_derive::StructToMap;
-
 use common::{TextOrBinary, TextOrInt, Tuple, TupleCbor};
 
 /// CBOR and JSON encoding/decoding of `Generic_Headers`, see [COSE Section 3].

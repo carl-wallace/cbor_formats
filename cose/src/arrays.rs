@@ -34,23 +34,21 @@
 //     unprotected : header_map
 // )
 
-use alloc::format;
-use alloc::string::String;
-use alloc::{vec, vec::Vec};
+use alloc::{format, string::String, vec, vec::Vec};
 use core::{fmt, marker::PhantomData};
 
-use ciborium::tag::Required;
-use ciborium::{cbor, value::Value};
-use serde::ser::Error as OtherError;
-use serde::{Deserialize, Serialize};
-use serde::{de::Error, de::Visitor};
+use ciborium::{cbor, tag::Required, value::Value};
+use serde::{Deserialize, Serialize, de::Error, de::Visitor, ser::Error as OtherError};
 
-use crate::choices::{
-    EmptyOrSerializedMap, EncStructureContext, MacStructureContext, SignatureOrSignature1,
-};
-use crate::maps::*;
 use cbor_derive::StructToArray;
 use common::{BinaryOrNil, BytesType};
+
+use crate::{
+    choices::{
+        EmptyOrSerializedMap, EncStructureContext, MacStructureContext, SignatureOrSignature1,
+    },
+    maps::*,
+};
 
 /// CBOR and JSON encoding/decoding of `COSE_Sign`, see [COSE Section 4.1].
 ///

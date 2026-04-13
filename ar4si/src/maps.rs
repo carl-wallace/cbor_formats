@@ -8,14 +8,19 @@
 //!
 //! [draft-ietf-rats-ar4si-09]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-ar4si-09
 
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
+use alloc::{
+    collections::BTreeMap,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
 
-use cbor_derive::StructToMap;
 use ciborium::{cbor, value::Value};
+
+use cbor_derive::StructToMap;
+
 #[allow(unused_imports)]
 use common::tuple::TupleCbor;
 use serde::{Deserialize, Deserializer, Serialize};

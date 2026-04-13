@@ -1,11 +1,21 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::tag::Required;
-use ciborium::value::Value;
-use common::{BytesType, TaggedUriTypeCbor, TimeCbor, UeidType, UuidType};
-use corim::choices::*;
-use corim::maps::*;
+use ciborium::{de::from_reader, ser::into_writer, tag::Required, value::Value};
 use hex_literal::hex;
+
+use common::{BytesType, TaggedUriTypeCbor, TimeCbor, UeidType, UuidType};
+use corim::{
+    choices::{
+        ClassIdTypeChoiceCbor, CorimIdTypeChoice, CorimRoleTypeChoiceCbor, EntityNameTypeChoice,
+        GroupIdTypeChoice, InstanceIdTypeChoice, TagIdTypeChoice, TagIdTypeChoiceCbor,
+        TagRelTypeChoice, TagVersionType, TaggedComidCbor,
+    },
+    maps::{
+        ClassMapCbor, ConciseMidTag, ConciseMidTagCbor, CorimMap, CorimMapCbor, CorimMetaMap,
+        CorimMetaMapCbor, CorimSignerMapCbor, EntityMapCbor, EnvironmentMapCbor, LinkedTagMap,
+        LinkedTagMapCbor, MeasurementMap, MeasurementMapCbor, MeasurementValuesMap,
+        MeasurementValuesMapCbor, ProtectedCorimHeaderMapCbor, TagIdentityMap, TagIdentityMapCbor,
+        TriplesMapCbor, ValidityMapCbor, VersionMap, VersionMapCbor,
+    },
+};
 
 mod utils;
 use crate::utils::*;

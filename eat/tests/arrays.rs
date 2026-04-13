@@ -1,10 +1,14 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::value::Value;
-use common::TextOrBinary;
 use std::path::Path;
 
-use eat::arrays::*;
+use ciborium::{de::from_reader, ser::into_writer, value::Value};
+
+use common::TextOrBinary;
+use eat::arrays::{
+    DetachedSubmoduleDigest, DetachedSubmoduleDigestCbor, DloaType, DloaTypeCbor,
+    HardwareVersionType, HardwareVersionTypeCbor, IndividualResult, IndividualResultCbor,
+    ManifestFormat, ManifestFormatCbor, MeasurementResultsGroup, MeasurementResultsGroupCbor,
+    MeasurementsFormat, MeasurementsFormatCbor, SwVersionType, SwVersionTypeCbor,
+};
 
 mod utils;
 use utils::*;
