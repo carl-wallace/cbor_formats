@@ -56,6 +56,14 @@
 //! | CDDL | Rust |
 //! |------|------|
 //! | `signed-coserv` | [`signed::SignedCoserv`] |
+//!
+//! ### Discovery ([Section 6.1.1](https://datatracker.ietf.org/doc/html/draft-ietf-rats-coserv-05#section-6.1.1))
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `coserv-well-known-info` | [`discovery::CoservWellKnownInfoMap`] / [`discovery::CoservWellKnownInfoMapCbor`] |
+//! | `capability` | [`discovery::CapabilityMap`] / [`discovery::CapabilityMapCbor`] |
+//! | `artifact-support` | `Vec<`[`discovery::ArtifactSupportType`]`>` |
 #![allow(clippy::derive_partial_eq_without_eq)]
 #![allow(unexpected_cfgs)]
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -63,5 +71,6 @@ extern crate alloc;
 
 pub mod arrays;
 pub mod choices;
+pub mod discovery;
 pub mod maps;
 pub mod signed;

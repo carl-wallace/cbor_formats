@@ -1,0 +1,13 @@
+{
+  "tag_id": "com.example.acme-roadrunner-sensor",
+  "tag_version": 0,
+  "software_name": "ACME Roadrunner Sensor Firmware",
+  "software_version": "1.0.0",
+  "entity": [
+    {
+      "entity_name": "ACME Ltd.",
+      "reg_id": "https://acme.example",
+      "role": [1]
+    }
+  ]
+}

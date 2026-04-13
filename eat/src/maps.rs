@@ -259,8 +259,7 @@ pub struct LocationType {
 /// }
 /// ```
 /// [EAT Section 4.2.2]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.2
-#[allow(dead_code)]
-pub struct SueidsType(TupleMap);
+pub struct SueidsType(pub TupleMap);
 
 /// CBOR encoding/decoding of `sueids-type`, see [EAT Section 4.2.2].
 ///
@@ -272,5 +271,4 @@ pub struct SueidsType(TupleMap);
 /// }
 /// ```
 /// [EAT Section 4.2.2]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.2
-#[allow(dead_code)]
-pub struct SueidsTypeCbor(TupleMapCbor);
+pub struct SueidsTypeCbor(pub TupleMapCbor);

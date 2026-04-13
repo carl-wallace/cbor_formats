@@ -22,6 +22,7 @@ development.
 | `coswid` | CoSWID (Concise Software Identifier) | [RFC 9393](https://www.rfc-editor.org/rfc/rfc9393) |
 | `cots` | CoTS (Concise Trust Anchor Store) | [draft-ietf-rats-concise-ta-stores](https://datatracker.ietf.org/doc/draft-ietf-rats-concise-ta-stores/) |
 | `coserv` | CoSERV (Concise Service) | [draft-ietf-rats-coserv](https://datatracker.ietf.org/doc/draft-ietf-rats-coserv/) |
+| `ear` | EAR (EAT Attestation Result) | [draft-ietf-rats-ear](https://datatracker.ietf.org/doc/draft-ietf-rats-ear/) |
 | `eat` | EAT (Entity Attestation Token) | [RFC 9711](https://www.rfc-editor.org/rfc/rfc9711) |
 
 ## Usage
@@ -35,6 +36,7 @@ Commands:
   coswid  Create and display CoSWID objects
   cots    Create and display CoTS objects
   coserv  Create, display, sign, verify, and extract CoSERV objects
+  ear     Create, display, sign, verify, and extract EAR objects
   eat     Create and display EAT objects
 ```
 
@@ -103,6 +105,29 @@ cfcli coserv verify \
 # Extract payload from a signed CoSERV
 cfcli coserv extract \
   --signed-coserv-file signed-coserv.cbor \
+  --output-dir out/
+```
+
+### EAR signing and verification
+
+The `ear` command supports signing, verifying, and extracting EAR payloads
+using COSE Sign1 with JWK keys (EC P-256, P-384, and Ed25519).
+
+```sh
+# Sign an EAR
+cfcli ear sign \
+  --ear-file unsigned-ear.cbor \
+  --key-file ec-p256.jwk \
+  --output-dir out/
+
+# Verify a signed EAR
+cfcli ear verify \
+  --signed-ear-file signed-ear.cbor \
+  --key-file ec-p256.jwk
+
+# Extract payload from a signed EAR
+cfcli ear extract \
+  --signed-ear-file signed-ear.cbor \
   --output-dir out/
 ```
 

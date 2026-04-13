@@ -169,100 +169,18 @@ impl TryFrom<&Value> for TaggedComidCbor {
     }
 }
 
-// todo: better to try to handle the types in this enum or just let it be bytes and handle it after parsing?
+/// The `$concise-tag-type-choice` socket.
+///
+/// ```text
 /// $concise-tag-type-choice /= #6.505(bytes .cbor concise-swid-tag)
 /// $concise-tag-type-choice /= #6.506(bytes .cbor concise-mid-tag)
+/// ```
+///
+/// Represented as opaque bytes rather than a typed enum. Tags are embedded as
+/// `bstr` blobs in the CoRIM `tags` array, and parsing them eagerly would
+/// couple the CoRIM parser to the full CoSWID and CoMID schemas. Callers can
+/// decode individual tags on demand using the appropriate crate.
 pub type ConciseTagTypeChoice = BytesType;
-// #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-// #[allow(missing_docs)]
-// #[serde(untagged)]
-// pub enum ConciseTagTypeChoice {
-//     Coswid(TaggedCoswid),
-//     Comid(TaggedComid),
-// }
-// impl TryFrom<ConciseTagTypeChoiceCbor> for ConciseTagTypeChoice {
-//     type Error = String;
-//     fn try_from(value: ConciseTagTypeChoiceCbor) -> Result<Self, Self::Error> {
-//         match value {
-//             ConciseTagTypeChoiceCbor::Coswid(b) => Ok(Self::Coswid(TaggedCoswid(Required(b.0.0.try_into().unwrap())))),
-//             ConciseTagTypeChoiceCbor::Comid(b) => Ok(Self::Comid(TaggedComid(Required(b.0.0.try_into().unwrap())))),
-//         }
-//     }
-// }
-// impl TryFrom<&ConciseTagTypeChoiceCbor> for ConciseTagTypeChoice {
-//     type Error = String;
-//     fn try_from(value: &ConciseTagTypeChoiceCbor) -> Result<Self, Self::Error> {
-//         match value {
-//             ConciseTagTypeChoiceCbor::Coswid(b) => Ok(Self::Coswid(TaggedCoswid(Required(b.0.0.clone().try_into().unwrap())))),
-//             ConciseTagTypeChoiceCbor::Comid(b) => Ok(Self::Comid(TaggedComid(Required(b.0.0.clone().try_into().unwrap())))),
-//         }
-//     }
-// }
-//
-// #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-// #[allow(missing_docs)]
-// #[serde(untagged)]
-// pub enum ConciseTagTypeChoiceCbor {
-//     Coswid(TaggedCoswidCbor),
-//     Comid(TaggedComidCbor),
-// }
-// impl TryFrom<ConciseTagTypeChoice> for ConciseTagTypeChoiceCbor {
-//     type Error = String;
-//     fn try_from(value: ConciseTagTypeChoice) -> Result<Self, Self::Error> {
-//         match value {
-//             ConciseTagTypeChoice::Coswid(b) => Ok(Self::Coswid(TaggedCoswidCbor(Required(b.0.0.try_into().unwrap())))),
-//             ConciseTagTypeChoice::Comid(b) => Ok(Self::Comid(TaggedComidCbor(Required(b.0.0.try_into().unwrap())))),
-//         }
-//     }
-// }
-// impl TryFrom<&ConciseTagTypeChoice> for ConciseTagTypeChoiceCbor {
-//     type Error = String;
-//     fn try_from(value: &ConciseTagTypeChoice) -> Result<Self, Self::Error> {
-//         match value {
-//             ConciseTagTypeChoice::Coswid(b) => Ok(Self::Coswid(TaggedCoswidCbor(Required(b.0.0.clone().try_into().unwrap())))),
-//             ConciseTagTypeChoice::Comid(b) => Ok(Self::Comid(TaggedComidCbor(Required(b.0.0.clone().try_into().unwrap())))),
-//         }
-//     }
-// }
-//
-// impl TryFrom<Value> for ConciseTagTypeChoiceCbor {
-//     type Error = String;
-//     fn try_from(value: Value) -> Result<Self, Self::Error> {
-//         match &value {
-//             Value::Bytes(b) => {
-//                 let r : Result<TaggedComidCbor, _> = from_reader(b.as_slice());
-//                 if r.is_ok() {
-//                     return Ok(Self::Comid(r.unwrap()));
-//                 }
-//                 let r : Result<TaggedCoswidCbor, _> = from_reader(b.as_slice());
-//                 if r.is_ok() {
-//                     return Ok(Self::Coswid(r.unwrap()));
-//                 }
-//                 return Err(format!("Failed to parse value as ConciseTagTypeChoiceCbor: {:?}", value).to_string());
-//             }
-//             _ => {return Err(format!("Failed to parse value as ConciseTagTypeChoiceCbor: {:?}", value).to_string())}
-//         }
-//     }
-// }
-// impl TryFrom<&Value> for ConciseTagTypeChoiceCbor {
-//     type Error = String;
-//     fn try_from(value: &Value) -> Result<Self, Self::Error> {
-//         match &value {
-//             Value::Bytes(b) => {
-//                 let r : Result<TaggedComidCbor, _> = from_reader(b.as_slice());
-//                 if r.is_ok() {
-//                     return Ok(Self::Comid(r.unwrap()));
-//                 }
-//                 let r : Result<TaggedCoswidCbor, _> = from_reader(b.as_slice());
-//                 if r.is_ok() {
-//                     return Ok(Self::Coswid(r.unwrap()));
-//                 }
-//                 return Err(format!("Failed to parse value as ConciseTagTypeChoiceCbor: {:?}", value).to_string());
-//             }
-//             _ => {return Err(format!("Failed to parse value as ConciseTagTypeChoiceCbor: {:?}", value).to_string())}
-//         }
-//     }
-// }
 
 /// The `class-id-type-choice` socket is defined in [CoRIM Section 5.1.4.2].
 ///
@@ -501,6 +419,15 @@ impl<'de> Deserialize<'de> for CorimIdTypeChoice {
 /// $corim-role-type-choice /= &(manifest-creator: 1)
 /// $corim-role-type-choice /= &(manifest-signer: 2)
 /// ```
+///
+/// Also includes `$comid-role-type-choice` variants because [`EntityMap`]
+/// is shared between CoRIM and CoMID entity maps:
+///
+/// ```text
+/// $comid-role-type-choice /= &(tag-creator: 0)
+/// $comid-role-type-choice /= &(creator: 1)
+/// $comid-role-type-choice /= &(maintainer: 2)
+/// ```
 #[derive(
     Clone,
     Debug,
@@ -516,6 +443,12 @@ pub enum CorimRoleTypeChoice {
     ManifestCreator,
     #[serde(rename = "manifestSigner")]
     ManifestSigner,
+    #[serde(rename = "tagCreator")]
+    TagCreator,
+    #[serde(rename = "creator")]
+    Creator,
+    #[serde(rename = "maintainer")]
+    Maintainer,
     #[serde(other)]
     other(String),
 }
@@ -528,6 +461,15 @@ impl TryFrom<CorimRoleTypeChoice> for CorimRoleTypeChoiceCbor {
                 Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
             }
             CorimRoleTypeChoice::ManifestSigner => {
+                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
+            }
+            CorimRoleTypeChoice::TagCreator => {
+                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::TagCreator))
+            }
+            CorimRoleTypeChoice::Creator => {
+                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
+            }
+            CorimRoleTypeChoice::Maintainer => {
                 Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
             }
             CorimRoleTypeChoice::other(s) => Ok(Self::Extensions(match s.parse::<i8>() {
@@ -545,6 +487,7 @@ impl TryFrom<CorimRoleTypeChoiceCbor> for CorimRoleTypeChoice {
             CorimRoleTypeChoiceCbor::Known(v) => match v {
                 CorimRoleTypeChoiceKnownCbor::ManifestCreator => Ok(Self::ManifestCreator),
                 CorimRoleTypeChoiceKnownCbor::ManifestSigner => Ok(Self::ManifestSigner),
+                CorimRoleTypeChoiceKnownCbor::TagCreator => Ok(Self::TagCreator),
             },
             CorimRoleTypeChoiceCbor::Extensions(e) => Ok(Self::other(e.to_string())),
         }
@@ -569,6 +512,15 @@ impl TryFrom<&CorimRoleTypeChoice> for CorimRoleTypeChoiceCbor {
             CorimRoleTypeChoice::ManifestSigner => {
                 Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
             }
+            CorimRoleTypeChoice::TagCreator => {
+                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::TagCreator))
+            }
+            CorimRoleTypeChoice::Creator => {
+                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
+            }
+            CorimRoleTypeChoice::Maintainer => {
+                Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
+            }
             CorimRoleTypeChoice::other(s) => Ok(Self::Extensions(match s.parse::<i8>() {
                 Ok(i) => i,
                 Err(e) => return Err(e.to_string()),
@@ -584,6 +536,7 @@ impl TryFrom<&CorimRoleTypeChoiceCbor> for CorimRoleTypeChoice {
             CorimRoleTypeChoiceCbor::Known(v) => match v {
                 CorimRoleTypeChoiceKnownCbor::ManifestCreator => Ok(Self::ManifestCreator),
                 CorimRoleTypeChoiceKnownCbor::ManifestSigner => Ok(Self::ManifestSigner),
+                CorimRoleTypeChoiceKnownCbor::TagCreator => Ok(Self::TagCreator),
             },
             CorimRoleTypeChoiceCbor::Extensions(e) => Ok(Self::other(e.to_string())),
         }
@@ -595,7 +548,9 @@ impl TryFrom<Value> for CorimRoleTypeChoiceCbor {
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
             Value::Integer(i) => {
-                if i.eq(&Integer::from(1)) {
+                if i.eq(&Integer::from(0)) {
+                    Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::TagCreator))
+                } else if i.eq(&Integer::from(1)) {
                     Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
                 } else if i.eq(&Integer::from(2)) {
                     Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
@@ -616,7 +571,9 @@ impl TryFrom<&Value> for CorimRoleTypeChoiceCbor {
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
             Value::Integer(i) => {
-                if i.eq(&Integer::from(1)) {
+                if i.eq(&Integer::from(0)) {
+                    Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::TagCreator))
+                } else if i.eq(&Integer::from(1)) {
                     Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestCreator))
                 } else if i.eq(&Integer::from(2)) {
                     Ok(Self::Known(CorimRoleTypeChoiceKnownCbor::ManifestSigner))
@@ -632,13 +589,25 @@ impl TryFrom<&Value> for CorimRoleTypeChoiceCbor {
     }
 }
 
-/// CBOR-encodable enumeration of known `corim-role-type-choice` values.
+/// CBOR-encodable enumeration of known role values.
+///
+/// Includes both `$corim-role-type-choice` and `$comid-role-type-choice` values
+/// because [`EntityMap`] is shared between both entity
+/// map instantiations.
+///
+/// Note: `Creator` (1) and `ManifestCreator` (1) share the same CBOR value,
+/// as do `Maintainer` (2) and `ManifestSigner` (2). When decoding from CBOR,
+/// the CoRIM names are preferred.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr)]
 #[allow(missing_docs)]
 #[repr(i8)]
 pub enum CorimRoleTypeChoiceKnownCbor {
+    TagCreator = 0,
     ManifestCreator = 1,
     ManifestSigner = 2,
+    // Creator = 1 and Maintainer = 2 share values with ManifestCreator
+    // and ManifestSigner respectively; they are handled via the JSON enum
+    // variants and map to the same CBOR integers.
 }
 
 /// The `crypto-key-type-choice` socket is defined in [CoRIM Section 5.1.4.6].
@@ -1564,12 +1533,14 @@ impl TryFrom<&Value> for TagRelTypeChoice {
     }
 }
 
-// todo defaults
 /// The `tag-version-type` socket is defined in [CoRIM Section 5.1.1.2].
 ///
 /// ```text
 /// tag-version-type = uint .default 0
 /// ```
+///
+/// The CDDL `.default 0` means the field may be omitted on the wire;
+/// when absent, the semantic value is 0.
 ///
 /// [CoRIM Section 5.1.1.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.1.2
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -1577,6 +1548,12 @@ impl TryFrom<&Value> for TagRelTypeChoice {
 #[allow(missing_docs)]
 pub enum TagVersionType {
     U64(u64),
+}
+
+impl Default for TagVersionType {
+    fn default() -> Self {
+        Self::U64(0)
+    }
 }
 
 impl TryFrom<Value> for TagVersionType {

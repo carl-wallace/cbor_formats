@@ -22,6 +22,7 @@ mod corim;
 mod coserv;
 mod coswid;
 mod cots;
+mod ear;
 mod eat;
 mod utils;
 
@@ -30,6 +31,7 @@ use crate::corim::corim_main;
 use crate::coserv::coserv_main;
 use crate::coswid::coswid_main;
 use crate::cots::cots_main;
+use crate::ear::ear_main;
 use crate::eat::eat_main;
 use args::*;
 use clap::CommandFactory;
@@ -51,6 +53,7 @@ fn main() {
         Commands::Coserv(c) => coserv_main(c),
         Commands::Coswid(c) => coswid_main(c),
         Commands::Cots(c) => cots_main(c),
+        Commands::Ear(c) => ear_main(c),
         Commands::Eat(c) => eat_main(c),
     }
 }

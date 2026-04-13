@@ -1,6 +1,16 @@
 //! Arguments for the cfcli utility
 
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
+
+/// Signing format: COSE (CWT) or JWS (JWT).
+#[derive(Clone, Debug, Default, ValueEnum)]
+pub enum SigningFormat {
+    /// COSE Sign1 (CWT) — default
+    #[default]
+    Cose,
+    /// JWS Compact Serialization (JWT)
+    Jws,
+}
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
@@ -14,7 +24,9 @@ pub enum Commands {
     Cots(CotsCommand),
     /// Create, display, sign, verify, and extract CoSERV (Concise Service) objects
     Coserv(CoservCommand),
-    /// Create and display EAT (Entity Attestation Token) objects
+    /// Create, display, sign, verify, and extract EAR (EAT Attestation Result) objects
+    Ear(EarCommand),
+    /// Create, display, sign, verify, and extract EAT (Entity Attestation Token) objects
     Eat(EatCommand),
 }
 
@@ -316,6 +328,10 @@ pub enum CoservSubCommands {
     Verify(CoservVerifySubcommand),
     /// Extract the payload from a signed CoSERV
     Extract(CoservExtractSubcommand),
+    /// Create a CBOR-encoded CoSERV discovery document from a JSON template
+    CreateDiscovery(CoservCreateSubcommand),
+    /// Decode and display a CBOR-encoded CoSERV discovery document
+    DisplayDiscovery(DisplaySubcommand),
 }
 #[derive(Args, Debug)]
 pub struct CoservCreateSubcommand {
@@ -367,6 +383,89 @@ pub struct CoservExtractSubcommand {
 }
 
 //----------------------------------------------------------
+// EAR
+//----------------------------------------------------------
+/// EAR operations
+#[derive(Args, Debug)]
+pub struct EarCommand {
+    #[clap(subcommand)]
+    pub command: EarSubCommands,
+}
+#[derive(Subcommand, Debug)]
+pub enum EarSubCommands {
+    /// Create a CBOR-encoded EAR from a JSON template
+    Create(EarCreateSubcommand),
+    /// Decode and display a CBOR-encoded EAR
+    Display(DisplaySubcommand),
+    /// Sign an EAR using a COSE Sign1 structure with a JWK key
+    Sign(EarSignSubcommand),
+    /// Verify the signature on a signed EAR using a JWK key
+    Verify(EarVerifySubcommand),
+    /// Extract the payload from a signed EAR
+    Extract(EarExtractSubcommand),
+}
+#[derive(Args, Debug)]
+pub struct EarCreateSubcommand {
+    /// an EAR template file (in JSON format)
+    #[clap(short, long)]
+    pub template: Option<String>,
+
+    /// a directory containing EAR template files
+    #[clap(short = 'T', long)]
+    pub template_dir: Option<String>,
+
+    /// directory where the created files are stored
+    #[clap(short, long, default_value = ".")]
+    pub output_dir: String,
+}
+#[derive(Args, Debug)]
+pub struct EarSignSubcommand {
+    /// an unsigned EAR file (in CBOR format)
+    #[clap(short = 'f', long)]
+    pub ear_file: String,
+
+    /// a JWK key file (in JSON format)
+    #[clap(short, long)]
+    pub key_file: String,
+
+    /// directory where the signed file is stored
+    #[clap(short, long, default_value = ".")]
+    pub output_dir: String,
+
+    /// signing format: cose (default) or jws
+    #[clap(long, value_enum, default_value_t = SigningFormat::Cose)]
+    pub format: SigningFormat,
+}
+#[derive(Args, Debug)]
+pub struct EarVerifySubcommand {
+    /// a signed EAR file (COSE Sign1 or JWS compact)
+    #[clap(short = 'f', long)]
+    pub signed_ear_file: String,
+
+    /// a JWK key file (in JSON format)
+    #[clap(short, long)]
+    pub key_file: String,
+
+    /// signing format: cose (default) or jws
+    #[clap(long, value_enum, default_value_t = SigningFormat::Cose)]
+    pub format: SigningFormat,
+}
+#[derive(Args, Debug)]
+pub struct EarExtractSubcommand {
+    /// a signed EAR file (COSE Sign1 or JWS compact)
+    #[clap(short = 'f', long)]
+    pub signed_ear_file: String,
+
+    /// directory where the extracted payload is stored
+    #[clap(short, long, default_value = ".")]
+    pub output_dir: String,
+
+    /// signing format: cose (default) or jws
+    #[clap(long, value_enum, default_value_t = SigningFormat::Cose)]
+    pub format: SigningFormat,
+}
+
+//----------------------------------------------------------
 // EAT
 //----------------------------------------------------------
 /// EAT operations
@@ -381,6 +480,12 @@ pub enum EatSubCommands {
     Create(EatCreateSubcommand),
     /// Decode and display a CBOR-encoded EAT
     Display(DisplaySubcommand),
+    /// Sign an EAT using a COSE Sign1 structure or JWS with a JWK key
+    Sign(EatSignSubcommand),
+    /// Verify the signature on a signed EAT using a JWK key
+    Verify(EatVerifySubcommand),
+    /// Extract the payload from a signed EAT
+    Extract(EatExtractSubcommand),
 }
 #[derive(Args, Debug)]
 pub struct EatCreateSubcommand {
@@ -395,6 +500,52 @@ pub struct EatCreateSubcommand {
     /// directory where the created files are stored
     #[clap(short, long, default_value = ".")]
     pub output_dir: String,
+}
+#[derive(Args, Debug)]
+pub struct EatSignSubcommand {
+    /// an unsigned EAT file (in CBOR format)
+    #[clap(short = 'f', long)]
+    pub eat_file: String,
+
+    /// a JWK key file (in JSON format)
+    #[clap(short, long)]
+    pub key_file: String,
+
+    /// directory where the signed file is stored
+    #[clap(short, long, default_value = ".")]
+    pub output_dir: String,
+
+    /// signing format: cose (default) or jws
+    #[clap(long, value_enum, default_value_t = SigningFormat::Cose)]
+    pub format: SigningFormat,
+}
+#[derive(Args, Debug)]
+pub struct EatVerifySubcommand {
+    /// a signed EAT file (COSE Sign1 or JWS compact)
+    #[clap(short = 'f', long)]
+    pub signed_eat_file: String,
+
+    /// a JWK key file (in JSON format)
+    #[clap(short, long)]
+    pub key_file: String,
+
+    /// signing format: cose (default) or jws
+    #[clap(long, value_enum, default_value_t = SigningFormat::Cose)]
+    pub format: SigningFormat,
+}
+#[derive(Args, Debug)]
+pub struct EatExtractSubcommand {
+    /// a signed EAT file (COSE Sign1 or JWS compact)
+    #[clap(short = 'f', long)]
+    pub signed_eat_file: String,
+
+    /// directory where the extracted payload is stored
+    #[clap(short, long, default_value = ".")]
+    pub output_dir: String,
+
+    /// signing format: cose (default) or jws
+    #[clap(long, value_enum, default_value_t = SigningFormat::Cose)]
+    pub format: SigningFormat,
 }
 
 /// CLI utility for creating, displaying, signing, and verifying CBOR-encoded RATS and SCITT objects

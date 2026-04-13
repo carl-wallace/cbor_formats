@@ -8,6 +8,7 @@ use cose::arrays::CoseSign1Cbor;
 use cose::maps::HeaderMap;
 use cose_crypto::jwk::{algorithm_from_jwk, signer_from_jwk, verifier_from_jwk};
 use cose_crypto::sign::{CoseSign1Builder, verify_sign1};
+use coserv::discovery::*;
 use coserv::maps::*;
 use std::fs;
 use std::fs::File;
@@ -28,6 +29,8 @@ pub fn coserv_main(args: &CoservCommand) {
         CoservSubCommands::Sign(c) => coserv_sign(c),
         CoservSubCommands::Verify(c) => coserv_verify(c),
         CoservSubCommands::Extract(c) => coserv_extract(c),
+        CoservSubCommands::CreateDiscovery(c) => coserv_create_discovery(c),
+        CoservSubCommands::DisplayDiscovery(c) => coserv_display_discovery(c),
     }
 }
 
@@ -394,4 +397,162 @@ fn coserv_extract(args: &CoservExtractSubcommand) {
     }
 
     println!("Extracted CoSERV payload to {:?}", output_path);
+}
+
+// ── Discovery ──
+
+/// Create CBOR-encoded CoSERV discovery documents from JSON templates.
+fn coserv_create_discovery(args: &CoservCreateSubcommand) {
+    if args.template.is_none() && args.template_dir.as_ref().is_none_or(|d| d.is_empty()) {
+        println!("No templates supplied");
+        return;
+    }
+
+    let mut files = vec![];
+    if let Some(f) = &args.template {
+        files.push(f.clone());
+    }
+
+    if let Some(f) = args.template_dir.as_ref() {
+        find_files(f, "json", &mut files)
+    }
+
+    let output_dir = Path::new(&args.output_dir);
+
+    for f in &files {
+        discovery_template_to_cbor(f, output_dir);
+    }
+}
+
+/// Convert a single CoSERV discovery JSON template to a CBOR-encoded file.
+fn discovery_template_to_cbor(template_file: &String, output_dir: &Path) {
+    let data = match fs::read_to_string(template_file) {
+        Ok(s) => s,
+        Err(e) => {
+            println!(
+                "Unable to read discovery template from {} with error {}",
+                template_file, e
+            );
+            return;
+        }
+    };
+
+    let json: CoservWellKnownInfoMap = match serde_json::from_str(&data) {
+        Ok(s) => s,
+        Err(e) => {
+            println!(
+                "Unable to parse discovery template from {} with error {}",
+                template_file, e
+            );
+            return;
+        }
+    };
+
+    if let Err(e) = json.validate() {
+        println!(
+            "Discovery template validation failed for {} with error: {}",
+            template_file, e
+        );
+        return;
+    }
+
+    let cbor: CoservWellKnownInfoMapCbor = match (&json).try_into() {
+        Ok(s) => s,
+        Err(e) => {
+            println!(
+                "Unable to convert JSON discovery object to CBOR for template {} with error: {}",
+                template_file, e
+            );
+            return;
+        }
+    };
+
+    let mut encoded = vec![];
+    match into_writer(&cbor, &mut encoded) {
+        Ok(_) => {}
+        Err(e) => {
+            println!(
+                "Unable to generate CBOR-encoded discovery document from template in {} with error {}",
+                template_file, e
+            );
+            return;
+        }
+    };
+
+    let template_path = Path::new(template_file);
+    let template_filename = match template_path.file_name() {
+        Some(s) => s,
+        None => {
+            println!("Failed to read file name from template {}", template_file);
+            return;
+        }
+    };
+
+    let output_path = Path::new(output_dir);
+    let filename_str = match template_filename.to_str() {
+        Some(s) => s,
+        None => {
+            println!("Failed to convert filename to string");
+            return;
+        }
+    };
+    let mut output_pathbuf = output_path.join(filename_str);
+    output_pathbuf.set_extension("cbor");
+
+    let mut output_file = match File::create(&output_pathbuf) {
+        Ok(f) => f,
+        Err(e) => {
+            println!("Failed to create output file {:?}: {}", output_pathbuf, e);
+            return;
+        }
+    };
+    output_file
+        .write_all(encoded.as_slice())
+        .expect("Unable to write discovery document file");
+}
+
+/// Decode and display a CBOR-encoded CoSERV discovery document as JSON.
+fn coserv_display_discovery(args: &DisplaySubcommand) {
+    let data = match fs::read(&args.file_to_display) {
+        Ok(b) => b,
+        Err(e) => {
+            println!(
+                "Unable to read discovery document from {} with error {}",
+                args.file_to_display, e
+            );
+            return;
+        }
+    };
+    let cbor: CoservWellKnownInfoMapCbor = match from_reader(data.as_slice()) {
+        Ok(c) => c,
+        Err(e) => {
+            println!(
+                "Unable to parse data read from {} as a CBOR-encoded discovery document with error {}",
+                args.file_to_display, e
+            );
+            return;
+        }
+    };
+    let json: CoservWellKnownInfoMap = match (&cbor).try_into() {
+        Ok(s) => s,
+        Err(e) => {
+            println!(
+                "Unable to convert CBOR discovery object to JSON for {} with error: {}",
+                args.file_to_display, e
+            );
+            return;
+        }
+    };
+
+    let json = match serde_json::to_string_pretty(&json) {
+        Ok(s) => s,
+        Err(e) => {
+            println!(
+                "Unable to produce JSON discovery document for {} with error: {}",
+                args.file_to_display, e
+            );
+            return;
+        }
+    };
+    println!("{}", json);
 }
