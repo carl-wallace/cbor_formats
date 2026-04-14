@@ -394,8 +394,9 @@ pub struct CorimSignerMap {
     #[cbor(tag = "1", cbor = "true")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reg_id: Option<TaggedUriType>,
-    //todo extensibility
-    //extensions
+    #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub other: Option<Vec<Tuple>>,
 }
 
 /// The `entity-map` type is defined in [CoRIM Section 7.2].
@@ -479,8 +480,6 @@ pub struct EnvironmentMap {
     #[cbor(tag = "2")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub group: Option<GroupIdTypeChoice>,
-    //todo extensibility
-    //extensions
 }
 
 /// The `flags-map` type is defined in [CoRIM Section 5.1.4.5.5].

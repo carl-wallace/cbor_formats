@@ -3,6 +3,8 @@
 use alloc::string::String;
 use core::fmt;
 
+use crate::algorithm::CoseAlgorithm;
+
 /// Errors that can occur during COSE cryptographic operations.
 #[derive(Debug)]
 pub enum CoseCryptoError {
@@ -10,6 +12,13 @@ pub enum CoseCryptoError {
     UnsupportedAlgorithm(i64),
     /// No algorithm was specified in the protected headers.
     MissingAlgorithm,
+    /// The algorithm in the protected header does not match the key/signer algorithm.
+    AlgorithmMismatch {
+        /// Algorithm from the protected header.
+        header: CoseAlgorithm,
+        /// Algorithm from the key/signer/MAC/AEAD.
+        key: CoseAlgorithm,
+    },
     /// The key type does not match the algorithm.
     KeyMismatch(String),
     /// The key material is invalid.
@@ -35,6 +44,10 @@ impl fmt::Display for CoseCryptoError {
         match self {
             Self::UnsupportedAlgorithm(alg) => write!(f, "unsupported algorithm: {alg}"),
             Self::MissingAlgorithm => write!(f, "no algorithm specified in protected headers"),
+            Self::AlgorithmMismatch { header, key } => write!(
+                f,
+                "algorithm mismatch: header specifies {header:?} but key/signer uses {key:?}"
+            ),
             Self::KeyMismatch(msg) => write!(f, "key mismatch: {msg}"),
             Self::InvalidKey(msg) => write!(f, "invalid key: {msg}"),
             Self::VerificationFailed => write!(f, "signature verification failed"),

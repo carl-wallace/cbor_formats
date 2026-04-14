@@ -379,6 +379,7 @@ fn corim_meta_map_full_test() {
             reg_id: Some(TaggedUriTypeCbor::U(Required(
                 "https://acme.example".to_string(),
             ))),
+            other: None,
         },
         validity: Some(ValidityMapCbor {
             not_before: Some(TimeCbor::T(Required(1601424000))),
@@ -424,6 +425,7 @@ fn corim_signer_map_test() {
         reg_id: Some(TaggedUriTypeCbor::U(Required(
             "https://acme.example".to_string(),
         ))),
+        other: None,
     };
     let mut encoded_token2 = vec![];
     let _ = into_writer(&fab, &mut encoded_token2);
@@ -432,6 +434,7 @@ fn corim_signer_map_test() {
     let fab2 = CorimSignerMapCbor {
         entity_name: EntityNameTypeChoice::Text("ACME Ltd.".to_string()),
         reg_id: None,
+        other: None,
     };
     let mut encoded_token3 = vec![];
     let _ = into_writer(&fab2, &mut encoded_token3);
@@ -677,6 +680,7 @@ fn protected_corim_header_map_test() {
             signer: CorimSignerMapCbor {
                 entity_name: EntityNameTypeChoice::Text("Test Signer".to_string()),
                 reg_id: None,
+                other: None,
             },
             validity: None,
         },

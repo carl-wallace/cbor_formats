@@ -154,6 +154,7 @@ let scratch = CorimMetaMapCbor {
         reg_id: Some(TaggedUriTypeCbor::U(Required(
             "https://acme.example".to_string(),
         ))),
+        other: None,
     },
     validity: Some(ValidityMapCbor {
         not_before: Some(TimeCbor::T(Required(1601424000))),

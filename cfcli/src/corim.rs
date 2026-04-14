@@ -352,6 +352,7 @@ fn meta_json_to_cbor(meta: &MetaJson) -> Result<CorimMetaMapCbor, String> {
     let signer = CorimSignerMap {
         entity_name: EntityNameTypeChoice::Text(meta.signer.name.clone()),
         reg_id: meta.signer.uri.clone(),
+        other: None,
     };
 
     let validity = match &meta.validity {

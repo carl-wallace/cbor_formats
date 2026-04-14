@@ -63,8 +63,17 @@ impl CoseEncrypt0Builder {
     /// Encrypt the plaintext and produce a `CoseEncrypt0Cbor`.
     ///
     /// The IV/nonce must be provided in either the protected or unprotected headers.
+    /// Returns an error if the AEAD algorithm does not match the algorithm
+    /// in the protected header.
     pub fn encrypt(self, aead: &dyn CoseAead) -> Result<CoseEncrypt0Cbor, CoseCryptoError> {
         let protected_serialized = helpers::serialize_protected(&self.protected)?;
+        let header_alg = helpers::extract_algorithm(&protected_serialized)?;
+        if header_alg != aead.algorithm() {
+            return Err(CoseCryptoError::AlgorithmMismatch {
+                header: header_alg,
+                key: aead.algorithm(),
+            });
+        }
 
         let unprotected_cbor = HeaderMapCbor::try_from(&self.unprotected)
             .map_err(|e| CoseCryptoError::CborError(e.to_string()))?;

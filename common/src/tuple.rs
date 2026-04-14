@@ -150,9 +150,6 @@ impl Serialize for TupleCbor {
                 return Err(__S::Error::custom(e));
             }
         };
-        // let t: u64 = v[0].as_integer().unwrap().try_into().unwrap();
-        // let val = Value::Tag(t, Box::new(v[1].clone()));
-        // __serializer.serialize_some(&val)
         let i = match v[0].as_integer() {
             Some(i) => i,
             None => {

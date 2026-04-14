@@ -68,8 +68,18 @@ impl CoseSign1Builder {
     }
 
     /// Sign the message and produce a `CoseSign1Cbor`.
+    ///
+    /// Returns an error if the signer's algorithm does not match the algorithm
+    /// in the protected header.
     pub fn sign(self, signer: &dyn CoseSigner) -> Result<CoseSign1Cbor, CoseCryptoError> {
         let protected_serialized = helpers::serialize_protected(&self.protected)?;
+        let header_alg = helpers::extract_algorithm(&protected_serialized)?;
+        if header_alg != signer.algorithm() {
+            return Err(CoseCryptoError::AlgorithmMismatch {
+                header: header_alg,
+                key: signer.algorithm(),
+            });
+        }
 
         let sig_structure = SigStructure {
             context: SignatureOrSignature1::Signature1,
@@ -238,6 +248,13 @@ impl CoseSignBuilder {
         let mut signatures = Vec::new();
         for entry in &self.signers {
             let sign_protected = helpers::serialize_protected(&entry.protected)?;
+            let header_alg = helpers::extract_algorithm(&sign_protected)?;
+            if header_alg != entry.signer.algorithm() {
+                return Err(CoseCryptoError::AlgorithmMismatch {
+                    header: header_alg,
+                    key: entry.signer.algorithm(),
+                });
+            }
 
             let sig_structure = SigStructure {
                 context: SignatureOrSignature1::Signature,

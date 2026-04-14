@@ -61,8 +61,18 @@ impl CoseMac0Builder {
     }
 
     /// Compute the MAC tag and produce a `CoseMac0Cbor`.
+    ///
+    /// Returns an error if the MAC algorithm does not match the algorithm
+    /// in the protected header.
     pub fn tag(self, mac: &dyn CoseMacAlgorithm) -> Result<CoseMac0Cbor, CoseCryptoError> {
         let protected_serialized = helpers::serialize_protected(&self.protected)?;
+        let header_alg = helpers::extract_algorithm(&protected_serialized)?;
+        if header_alg != mac.algorithm() {
+            return Err(CoseCryptoError::AlgorithmMismatch {
+                header: header_alg,
+                key: mac.algorithm(),
+            });
+        }
 
         let mac_structure = MacStructure {
             context: MacStructureContext::Mac0,
@@ -173,8 +183,18 @@ impl CoseMacBuilder {
     }
 
     /// Compute the MAC tag and produce a `CoseMacCbor` (with empty recipients list).
+    ///
+    /// Returns an error if the MAC algorithm does not match the algorithm
+    /// in the protected header.
     pub fn tag(self, mac: &dyn CoseMacAlgorithm) -> Result<CoseMacCbor, CoseCryptoError> {
         let protected_serialized = helpers::serialize_protected(&self.protected)?;
+        let header_alg = helpers::extract_algorithm(&protected_serialized)?;
+        if header_alg != mac.algorithm() {
+            return Err(CoseCryptoError::AlgorithmMismatch {
+                header: header_alg,
+                key: mac.algorithm(),
+            });
+        }
 
         let mac_structure = MacStructure {
             context: MacStructureContext::Mac,
