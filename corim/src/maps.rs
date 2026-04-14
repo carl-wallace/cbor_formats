@@ -144,6 +144,161 @@ pub struct ConciseMidTag {
     pub other: Option<Vec<Tuple>>,
 }
 
+/// `uri / [ + uri ]` — a single URI or an array of one-or-more URIs.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+#[allow(missing_docs)]
+pub enum OneOrMoreUri {
+    One(String),
+    More(Vec<String>),
+}
+
+/// CBOR encoding of `uri / [ + uri ]`.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+#[allow(missing_docs)]
+pub enum OneOrMoreUriCbor {
+    One(String),
+    More(Vec<String>),
+}
+impl TryFrom<&Value> for OneOrMoreUriCbor {
+    type Error = String;
+    fn try_from(value: &Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Text(s) => Ok(Self::One(s.clone())),
+            Value::Array(a) => {
+                let uris: Result<Vec<String>, _> = a
+                    .iter()
+                    .map(|v| match v.as_text() {
+                        Some(s) => Ok(s.to_string()),
+                        None => Err(format!("Expected text URI in array, got: {:?}", v)),
+                    })
+                    .collect();
+                Ok(Self::More(uris?))
+            }
+            _ => Err(format!("Expected text or array for uri, got: {:?}", value)),
+        }
+    }
+}
+impl TryFrom<Value> for OneOrMoreUriCbor {
+    type Error = String;
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        (&value).try_into()
+    }
+}
+impl TryFrom<&OneOrMoreUri> for OneOrMoreUriCbor {
+    type Error = String;
+    fn try_from(value: &OneOrMoreUri) -> Result<Self, Self::Error> {
+        match value {
+            OneOrMoreUri::One(s) => Ok(Self::One(s.clone())),
+            OneOrMoreUri::More(v) => Ok(Self::More(v.clone())),
+        }
+    }
+}
+impl TryFrom<OneOrMoreUri> for OneOrMoreUriCbor {
+    type Error = String;
+    fn try_from(value: OneOrMoreUri) -> Result<Self, Self::Error> {
+        (&value).try_into()
+    }
+}
+impl TryFrom<&OneOrMoreUriCbor> for OneOrMoreUri {
+    type Error = String;
+    fn try_from(value: &OneOrMoreUriCbor) -> Result<Self, Self::Error> {
+        match value {
+            OneOrMoreUriCbor::One(s) => Ok(Self::One(s.clone())),
+            OneOrMoreUriCbor::More(v) => Ok(Self::More(v.clone())),
+        }
+    }
+}
+impl TryFrom<OneOrMoreUriCbor> for OneOrMoreUri {
+    type Error = String;
+    fn try_from(value: OneOrMoreUriCbor) -> Result<Self, Self::Error> {
+        (&value).try_into()
+    }
+}
+
+/// `eatmc.digest / [ eatmc.digest ]` — a single digest or array of digests.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+#[allow(missing_docs)]
+pub enum OneOrMoreDigest {
+    One(HashEntry),
+    More(Vec<HashEntry>),
+}
+
+/// CBOR encoding of `eatmc.digest / [ eatmc.digest ]`.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+#[allow(missing_docs)]
+pub enum OneOrMoreDigestCbor {
+    One(HashEntryCbor),
+    More(Vec<HashEntryCbor>),
+}
+impl TryFrom<&Value> for OneOrMoreDigestCbor {
+    type Error = String;
+    fn try_from(value: &Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Array(a) => {
+                // An array could be a single HashEntry [alg, digest] or an array of them
+                // [[alg, digest], [alg, digest], ...]. Distinguish by checking if first
+                // element is an integer (single hash-entry) or an array (multiple).
+                if a.len() == 2 && matches!(a.first(), Some(Value::Integer(_))) {
+                    Ok(Self::One(HashEntryCbor::try_from(value.clone())?))
+                } else {
+                    let digests: Result<Vec<HashEntryCbor>, _> = a
+                        .iter()
+                        .map(|v| HashEntryCbor::try_from(v.clone()))
+                        .collect();
+                    Ok(Self::More(digests?))
+                }
+            }
+            _ => Err(format!("Expected array for digest, got: {:?}", value)),
+        }
+    }
+}
+impl TryFrom<Value> for OneOrMoreDigestCbor {
+    type Error = String;
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        (&value).try_into()
+    }
+}
+impl TryFrom<&OneOrMoreDigest> for OneOrMoreDigestCbor {
+    type Error = String;
+    fn try_from(value: &OneOrMoreDigest) -> Result<Self, Self::Error> {
+        match value {
+            OneOrMoreDigest::One(h) => Ok(Self::One(h.try_into()?)),
+            OneOrMoreDigest::More(v) => {
+                let items: Result<Vec<_>, _> = v.iter().map(HashEntryCbor::try_from).collect();
+                Ok(Self::More(items?))
+            }
+        }
+    }
+}
+impl TryFrom<OneOrMoreDigest> for OneOrMoreDigestCbor {
+    type Error = String;
+    fn try_from(value: OneOrMoreDigest) -> Result<Self, Self::Error> {
+        (&value).try_into()
+    }
+}
+impl TryFrom<&OneOrMoreDigestCbor> for OneOrMoreDigest {
+    type Error = String;
+    fn try_from(value: &OneOrMoreDigestCbor) -> Result<Self, Self::Error> {
+        match value {
+            OneOrMoreDigestCbor::One(h) => Ok(Self::One(h.try_into()?)),
+            OneOrMoreDigestCbor::More(v) => {
+                let items: Result<Vec<_>, _> = v.iter().map(HashEntry::try_from).collect();
+                Ok(Self::More(items?))
+            }
+        }
+    }
+}
+impl TryFrom<OneOrMoreDigestCbor> for OneOrMoreDigest {
+    type Error = String;
+    fn try_from(value: OneOrMoreDigestCbor) -> Result<Self, Self::Error> {
+        (&value).try_into()
+    }
+}
+
 /// The `corim-locator-map` type is defined in [CoRIM Section 4.1.3].
 ///
 /// ```text
@@ -157,12 +312,11 @@ pub struct ConciseMidTag {
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct CorimLocatorMap {
-    //todo is taggeduri right?
     #[cbor(tag = "0", cbor = "true")]
-    pub href: TaggedUriType,
+    pub href: OneOrMoreUri,
     #[cbor(tag = "1", cbor = "true")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub thumbprint: Option<HashEntry>,
+    pub thumbprint: Option<OneOrMoreDigest>,
 }
 
 /// The `corim-map` type is defined in [CoRIM Section 4.1].
@@ -426,6 +580,88 @@ pub struct MeasurementMap {
     pub authorized_by: Option<Vec<CryptoKeyTypeChoice>>,
 }
 
+/// JSON encoding of `integrity-registers`, see [CoRIM Section 5.1.4.7].
+///
+/// ```text
+/// integrity-registers = { + $measured-element-type-choice => digests-type }
+/// ```
+///
+/// Keys can be text or integer (via `TextOrInt`), values are `DigestsType` (arrays of hash entries).
+///
+/// [CoRIM Section 5.1.4.7]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.7
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct IntegrityRegisters(pub Vec<(TextOrInt, DigestsType)>);
+
+/// CBOR encoding of `integrity-registers`, see [CoRIM Section 5.1.4.7].
+///
+/// Use [IntegrityRegisters] for JSON-encoded CoRIMs.
+///
+/// [CoRIM Section 5.1.4.7]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.7
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct IntegrityRegistersCbor(pub Vec<(TextOrInt, Vec<HashEntryCbor>)>);
+
+impl TryFrom<Vec<(Value, Value)>> for IntegrityRegistersCbor {
+    type Error = String;
+    fn try_from(entries: Vec<(Value, Value)>) -> Result<Self, Self::Error> {
+        let mut result = Vec::new();
+        for (k, v) in entries {
+            let key = TextOrInt::try_from(&k)?;
+            let digests = match v.as_array() {
+                Some(arr) => {
+                    let items: Result<Vec<HashEntryCbor>, _> = arr
+                        .iter()
+                        .map(|e| HashEntryCbor::try_from(e.clone()))
+                        .collect();
+                    items?
+                }
+                None => {
+                    return Err(format!(
+                        "integrity-registers value must be an array, got: {:?}",
+                        v
+                    ));
+                }
+            };
+            result.push((key, digests));
+        }
+        Ok(IntegrityRegistersCbor(result))
+    }
+}
+impl TryFrom<&IntegrityRegisters> for IntegrityRegistersCbor {
+    type Error = String;
+    fn try_from(value: &IntegrityRegisters) -> Result<Self, Self::Error> {
+        let mut result = Vec::new();
+        for (k, v) in &value.0 {
+            let digests: Result<Vec<HashEntryCbor>, _> =
+                v.iter().map(HashEntryCbor::try_from).collect();
+            result.push((k.clone(), digests?));
+        }
+        Ok(IntegrityRegistersCbor(result))
+    }
+}
+impl TryFrom<IntegrityRegisters> for IntegrityRegistersCbor {
+    type Error = String;
+    fn try_from(value: IntegrityRegisters) -> Result<Self, Self::Error> {
+        (&value).try_into()
+    }
+}
+impl TryFrom<&IntegrityRegistersCbor> for IntegrityRegisters {
+    type Error = String;
+    fn try_from(value: &IntegrityRegistersCbor) -> Result<Self, Self::Error> {
+        let mut result = Vec::new();
+        for (k, v) in &value.0 {
+            let digests: Result<Vec<HashEntry>, _> = v.iter().map(HashEntry::try_from).collect();
+            result.push((k.clone(), digests?));
+        }
+        Ok(IntegrityRegisters(result))
+    }
+}
+impl TryFrom<IntegrityRegistersCbor> for IntegrityRegisters {
+    type Error = String;
+    fn try_from(value: IntegrityRegistersCbor) -> Result<Self, Self::Error> {
+        (&value).try_into()
+    }
+}
+
 /// The `measurement-values-map` type is defined in [CoRIM Section 5.1.4.5.2].
 ///
 /// [CoRIM Section 5.1.4.5.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5.2
@@ -493,8 +729,9 @@ pub struct MeasurementValuesMap {
     #[cbor(tag = "13", value = "Array", cbor = "true")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cryptokeys: Option<Vec<CryptoKeyTypeChoice>>,
-    // #[cbor(tag = "14", value = "Map")]
-    // pub integrity_registers: Option<IntegrityRegisters>,
+    #[cbor(tag = "14", value = "Map", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub integrity_registers: Option<IntegrityRegisters>,
     #[cbor(tag = "15")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub int_range: Option<IntRangeTypeChoice>,
@@ -521,7 +758,7 @@ pub struct ProtectedCorimHeaderMap {
     #[cbor(tag = "0", value = "Integer")]
     pub alg_id: u64,
     #[cbor(tag = "3", value = "Text")]
-    content_type: String,
+    pub content_type: String,
     #[cbor(tag = "8", value = "Map", cbor = "true")]
     pub meta: CorimMetaMap,
 }

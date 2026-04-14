@@ -66,6 +66,7 @@
 //! | `measurement-map` | [`maps::MeasurementMap`] / [`maps::MeasurementMapCbor`] |
 //! | `$measured-element-type-choice` | [`choices::MeasuredElementTypeChoice`] / [`choices::MeasuredElementTypeChoiceCbor`] |
 //! | `measurement-values-map` | [`maps::MeasurementValuesMap`] / [`maps::MeasurementValuesMapCbor`] |
+//! | `integrity-registers` | [`maps::IntegrityRegisters`] / [`maps::IntegrityRegistersCbor`] |
 //! | `version-map` | [`maps::VersionMap`] / [`maps::VersionMapCbor`] |
 //! | `$svn-type-choice` | [`choices::SvnTypeChoice`] |
 //! | `flags-map` | [`maps::FlagsMap`] / [`maps::FlagsMapCbor`] |
@@ -110,7 +111,7 @@
 //! | `validity-map` | [`maps::ValidityMap`] / [`maps::ValidityMapCbor`] |
 //!
 //! Additional CoRIM-defined types are in the [`common`] crate:
-//! `digests-type`, `integrity-registers`, `tagged-masked-raw-value`,
+//! `digests-type`, `tagged-masked-raw-value`,
 //! and the various `tagged-*` key/cert types. See the
 //! [`common` crate docs](common) for the full list.
 #![allow(clippy::derive_partial_eq_without_eq)]

@@ -4,6 +4,7 @@
 //! and optionally a `*Cbor` companion enum with `Required<T, N>` wrappers for
 //! tagged variants, plus bidirectional `TryFrom` conversions between the two.
 
+use proc_macro_error2::abort;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use syn::{Data, DeriveInput, Fields, Ident};
@@ -45,7 +46,7 @@ impl DeriveEnumToChoice {
         let ident = input.ident;
         let data = match input.data {
             Data::Enum(e) => e,
-            _ => panic!("EnumToChoice can only be derived for enums"),
+            _ => abort!(ident, "EnumToChoice can only be derived for enums"),
         };
 
         let variants: Vec<_> = data

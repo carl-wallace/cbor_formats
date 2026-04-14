@@ -1,5 +1,14 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
+//!
+//! ## Type Mapping
+//!
+//! | WebAuthn Structure | Rust |
+//! |--------------------|------|
+//! | `attObj` | [`AttestationObject`] |
+//! | Apple App Attest `attStmt` | [`AppleAttestationObject`] |
+//! | Apple App Attest assertion | [`AppleAssertionObject`] |
+//! | `$$attStmtType` dispatch | [`Supported`] |
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 #![allow(unexpected_cfgs)]

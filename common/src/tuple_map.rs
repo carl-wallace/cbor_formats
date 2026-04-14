@@ -66,9 +66,9 @@ impl TryFrom<Value> for TupleMapCbor {
         match value {
             Value::Array(s) => match Self::try_from(s) {
                 Ok(val) => Ok(val),
-                Err(_) => Err("Failed to parse TupleCbor".to_string()),
+                Err(_) => Err("Failed to parse TupleMapCbor".to_string()),
             },
-            _ => Err("Failed to parse TupleCbor".to_string()),
+            _ => Err("Failed to parse TupleMapCbor".to_string()),
         }
     }
 }
@@ -78,9 +78,9 @@ impl TryFrom<&Value> for TupleMapCbor {
         match value {
             Value::Array(s) => match Self::try_from(s.clone()) {
                 Ok(val) => Ok(val),
-                Err(_) => Err("Failed to parse TupleCbor".to_string()),
+                Err(_) => Err("Failed to parse TupleMapCbor".to_string()),
             },
-            _ => Err("Failed to parse TupleCbor".to_string()),
+            _ => Err("Failed to parse TupleMapCbor".to_string()),
         }
     }
 }
@@ -94,12 +94,12 @@ impl TryFrom<&TupleMapCbor> for Vec<(Value, Value)> {
             let key_res = ::ciborium::value::Value::serialized(&i.key);
             let v1 = match key_res {
                 Ok(v) => v,
-                Err(_) => return Err("Failed to parse TupleCbor".to_string()),
+                Err(_) => return Err("Failed to parse TupleMapCbor".to_string()),
             };
             let val_res = ::ciborium::value::Value::serialized(&i.value);
             let v2 = match val_res {
                 Ok(v) => v,
-                Err(_) => return Err("Failed to parse TupleCbor".to_string()),
+                Err(_) => return Err("Failed to parse TupleMapCbor".to_string()),
             };
             v.push((v1, v2));
         }

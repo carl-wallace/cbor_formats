@@ -68,6 +68,7 @@ fn stateful_class_with_measurements_roundtrip() {
                 name: Some("test-measurement".to_string()),
                 cryptokeys: None,
                 int_range: None,
+                integrity_registers: None,
                 other: None,
             },
             authorized_by: None,

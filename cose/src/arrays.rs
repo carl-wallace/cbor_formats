@@ -244,15 +244,15 @@ pub struct EncStructure {
     pub external_aad: BytesType,
 }
 
-/// CBOR and JSON encoding/decoding of `COSE_Mac0`, see [COSE Section 6.1].
+/// CBOR and JSON encoding/decoding of `COSE_Mac`, see [COSE Section 6.1].
 ///
 /// ```text
 /// COSE_Mac = [
-//    Headers,
-//    payload : bstr / nil,
-//    tag : bstr,
-//    recipients : [+COSE_recipient]
-// ]
+///    Headers,
+///    payload : bstr / nil,
+///    tag : bstr,
+///    recipients : [+COSE_recipient]
+/// ]
 /// ```
 /// [COSE Section 6.1]: https://datatracker.ietf.org/doc/html/rfc9052#name-maced-message-with-recipien
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]

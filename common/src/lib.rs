@@ -75,7 +75,6 @@
 //! | `tagged-pkix-asn1-der-cert-type = #6.562(bytes)` | [`TaggedPkixAsn1DerCertType`] | CoRIM §5.1.4.6 |
 //! | `tagged-cert-path-thumbprint-type = #6.561(hash-entry)` | [`TaggedCertPathThumbprintType`] | CoRIM §5.1.4.6 |
 //! | `digests-type = [ + hash-entry ]` | [`DigestsType`] | CoRIM §7.7 |
-//! | `integrity-registers` | [`IntegrityRegisters`] | CoRIM §5.1.4.7 |
 //! | `coap-content-format = uint .le 65535` | [`CoapContentFormat`] | RFC 7252 |
 #![allow(unexpected_cfgs)]
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -204,17 +203,6 @@ pub type TaggedIntRange = Required<arrays::IntRangeCbor, 564>;
 ///
 /// [CoRIM Section 7.7]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-7.7
 pub type DigestsType = Vec<arrays::HashEntry>;
-
-/// The `integrity-registers` type is defined in [CoRIM Section 5.1.4.7].
-///
-/// ```text
-/// integrity-registers = { + $measured-element-type-choice => digests-type }
-/// ```
-///
-/// Represented as a Vec of (Value, Value) pairs since keys can be uint or text.
-///
-/// [CoRIM Section 5.1.4.7]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.7
-pub type IntegrityRegisters = Vec<(TextOrInt, DigestsType)>;
 
 /// Represents a nonce as either a single byte string or an array of byte strings, each 8 to 64 bytes.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -645,7 +633,7 @@ impl TryFrom<&Value> for TextOrBinary {
         match value {
             Value::Text(k) => Ok(Self::Text(k.clone())),
             Value::Bytes(k) => Ok(Self::Binary(k.clone())),
-            _ => Err("Failed to parse value as a TextOrBinary".to_string()),
+            _ => Err("Failed to parse value as a BinaryOrNil".to_string()),
         }
     }
 }
@@ -655,7 +643,7 @@ impl TryFrom<Value> for TextOrBinary {
         match value {
             Value::Text(k) => Ok(Self::Text(k)),
             Value::Bytes(k) => Ok(Self::Binary(k)),
-            _ => Err("Failed to parse value as a TextOrBinary".to_string()),
+            _ => Err("Failed to parse value as a BinaryOrNil".to_string()),
         }
     }
 }
@@ -676,7 +664,7 @@ impl TryFrom<&Value> for BinaryOrNil {
         match value {
             Value::Null => Ok(Self::Nil),
             Value::Bytes(k) => Ok(Self::Binary(k.clone())),
-            _ => Err("Failed to parse value as a TextOrBinary".to_string()),
+            _ => Err("Failed to parse value as a BinaryOrNil".to_string()),
         }
     }
 }
@@ -686,7 +674,7 @@ impl TryFrom<Value> for BinaryOrNil {
         match value {
             Value::Null => Ok(Self::Nil),
             Value::Bytes(k) => Ok(Self::Binary(k)),
-            _ => Err("Failed to parse value as a TextOrBinary".to_string()),
+            _ => Err("Failed to parse value as a BinaryOrNil".to_string()),
         }
     }
 }

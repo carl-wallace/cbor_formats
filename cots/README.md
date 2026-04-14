@@ -5,7 +5,7 @@
 
 CBOR and JSON encoders and decoders for Concise Trust Anchor Store (CoTS)
 structures as defined in
-[draft-ietf-rats-concise-ta-stores](https://datatracker.ietf.org/doc/draft-ietf-rats-concise-ta-stores/).
+[draft-ietf-rats-concise-ta-stores-02](https://datatracker.ietf.org/doc/html/draft-ietf-rats-concise-ta-stores-02).
 CoTS provides a compact format for distributing and managing trust anchors used in
 remote attestation.
 

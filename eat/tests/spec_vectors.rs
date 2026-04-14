@@ -634,10 +634,12 @@ fn submods_map_multiple_entries() {
     assert_eq!(csc, cbor2);
 }
 
-/// SubmodsMapCbor dispatch for all three Submodule variants via Value-based
-/// construction: Claims-Set (map), JWT (text), CBOR token (bytes).
+/// SubmodsMapCbor with all three Submodule variants: Claims-Set (map),
+/// JWT (text), CBOR token (bytes). Tests both Value-based construction
+/// AND serde encode/decode roundtrip (which previously failed for bstr).
 #[test]
 fn submods_map_with_selectors() {
+    // Build via Value-based path
     let submods_map = Value::Map(vec![
         (
             Value::Text("claims".to_string()),
@@ -671,6 +673,57 @@ fn submods_map_with_selectors() {
     if let SubmoduleCbor::ClaimsSet(cs) = &sm.0["claims"] {
         assert_eq!(cs.iss, Some("inner-issuer".to_string()));
     }
+
+    // Now test serde roundtrip: wrap in a ClaimsSetClaimsCbor, encode, decode
+    let csc = ClaimsSetClaimsCbor {
+        iss: None,
+        sub: None,
+        aud: None,
+        exp: None,
+        nbf: None,
+        iat: None,
+        cti: None,
+        nonce: None,
+        boot_count: None,
+        boot_seed: None,
+        debug_status: None,
+        dloas: None,
+        hardware_model: None,
+        hardware_version: None,
+        intended_use: None,
+        location: None,
+        profile: None,
+        oem_boot: None,
+        sw_name: None,
+        sw_version: None,
+        ueid: None,
+        uptime: None,
+        manifests: None,
+        measurements: None,
+        measurement_results: None,
+        oemid: None,
+        sueids: None,
+        submods: Some(sm),
+        other: None,
+    };
+
+    let mut buf = vec![];
+    let _ = into_writer(&csc, &mut buf);
+    let decoded: ClaimsSetClaimsCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(csc, decoded);
+
+    // Verify each variant survived the serde roundtrip
+    let rt_sm = decoded.submods.as_ref().unwrap();
+    assert_eq!(rt_sm.0.len(), 3);
+    assert!(matches!(rt_sm.0["claims"], SubmoduleCbor::ClaimsSet(_)));
+    assert!(matches!(
+        rt_sm.0["jwt"],
+        SubmoduleCbor::SelectorCbor(SelectorCbor::JsonTokenInsideCborToken(_))
+    ));
+    assert!(matches!(
+        rt_sm.0["nested_cbor"],
+        SubmoduleCbor::SelectorCbor(SelectorCbor::CborTokenInsideCborToken(_))
+    ));
 }
 
 /// SubmodsMapCbor rejects non-text keys

@@ -7,7 +7,10 @@
 //! | `$version-scheme` | [`VersionScheme`] / [`VersionSchemeCbor`] |
 //! | known version scheme values | [`VersionSchemeKnown`] / [`VersionSchemeKnownCbor`] |
 
-use alloc::string::{String, ToString};
+use alloc::{
+    format,
+    string::{String, ToString},
+};
 
 use ciborium::value::Value;
 use num_enum::TryFromPrimitive;
@@ -72,9 +75,14 @@ impl TryFrom<Value> for VersionScheme {
                     Ok(val) => Ok(Self::Known(val)),
                     Err(_) => Ok(Self::IntExtensions(vs)),
                 },
-                Err(_) => Err("".to_string()),
+                Err(_) => {
+                    Err("Failed to parse VersionScheme integer: value out of i64 range".to_string())
+                }
             },
-            _ => Err("".to_string()),
+            _ => Err(format!(
+                "Failed to parse VersionScheme: expected text or integer, got {:?}",
+                value
+            )),
         }
     }
 }
@@ -88,9 +96,14 @@ impl TryFrom<&Value> for VersionScheme {
                     Ok(val) => Ok(Self::Known(val)),
                     Err(_) => Ok(Self::IntExtensions(vs)),
                 },
-                Err(_) => Err("".to_string()),
+                Err(_) => {
+                    Err("Failed to parse VersionScheme integer: value out of i64 range".to_string())
+                }
             },
-            _ => Err("".to_string()),
+            _ => Err(format!(
+                "Failed to parse VersionScheme: expected text or integer, got {:?}",
+                value
+            )),
         }
     }
 }
@@ -176,9 +189,14 @@ impl TryFrom<Value> for VersionSchemeCbor {
                     Ok(val) => Ok(Self::Known(val)),
                     Err(_) => Ok(Self::IntExtensions(vs)),
                 },
-                Err(_) => Err("".to_string()),
+                Err(_) => Err(
+                    "Failed to parse VersionSchemeCbor integer: value out of i64 range".to_string(),
+                ),
             },
-            _ => Err("".to_string()),
+            _ => Err(format!(
+                "Failed to parse VersionSchemeCbor: expected text or integer, got {:?}",
+                value
+            )),
         }
     }
 }
@@ -192,9 +210,14 @@ impl TryFrom<&Value> for VersionSchemeCbor {
                     Ok(val) => Ok(Self::Known(val)),
                     Err(_) => Ok(Self::IntExtensions(vs)),
                 },
-                Err(_) => Err("".to_string()),
+                Err(_) => Err(
+                    "Failed to parse VersionSchemeCbor integer: value out of i64 range".to_string(),
+                ),
             },
-            _ => Err("".to_string()),
+            _ => Err(format!(
+                "Failed to parse VersionSchemeCbor: expected text or integer, got {:?}",
+                value
+            )),
         }
     }
 }

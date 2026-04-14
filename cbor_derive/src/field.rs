@@ -170,7 +170,7 @@ impl StructField {
                 quote! {
                     #field_ident: match #try_from_type::try_from(&value.#field_ident) {
                         Ok(val) => val.clone(),
-                        Err(_) => return Err(format!("Failed to to convert {} to {}", #field_ident_str, #field_type_str))
+                        Err(_) => return Err(format!("Failed to convert {} to {}", #field_ident_str, #field_type_str))
                     },
                 }
             }
@@ -182,7 +182,7 @@ impl StructField {
             quote! {
                 #field_ident: match #try_from_type::try_from(&value.#field_ident) {
                     Ok(val) => val.clone(),
-                    Err(_) => return Err(format!("Failed to to convert {} to {}", #field_ident_str, #field_type_str))
+                    Err(_) => return Err(format!("Failed to convert {} to {}", #field_ident_str, #field_type_str))
                 },
             }
         }
@@ -284,11 +284,11 @@ impl StructField {
                         Some(v) => match #f2::try_from(
                             match v.as_map() {
                             Some(val) => val.clone(),
-                            None => return Err(format!("Failed to to process {} as a map: {:?}", #field_ident_str, v))
+                            None => return Err(format!("Failed to process {} as a map: {:?}", #field_ident_str, v))
                         }
                     ) {
                         Ok(val) => Some(val),
-                        Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                        Err(e) => return Err(format!("Failed to process {} with error: {}", #field_ident_str, e))
                     },
                         None => None
                     },
@@ -299,11 +299,11 @@ impl StructField {
                         Some(v) => match #f2::try_from(
                             match v.as_map() {
                             Some(val) => val.clone(),
-                            None => return Err(format!("Failed to to process {} as a map: {:?}", #field_ident_str, v))
+                            None => return Err(format!("Failed to process {} as a map: {:?}", #field_ident_str, v))
                         }
                     ) {
                         Ok(val) => val,
-                        Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                        Err(e) => return Err(format!("Failed to process {} with error: {}", #field_ident_str, e))
                     },
                         None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                     },
@@ -344,7 +344,7 @@ impl StructField {
                         Some(v) => Some(
                             match v.as_text() {
                                 Some(val) => val.to_string(),
-                                None => return Err(format!("Failed to to process {} as text: {:?}", #field_ident_str, v))
+                                None => return Err(format!("Failed to process {} as text: {:?}", #field_ident_str, v))
                             }),
                         None => None,
                     },
@@ -354,7 +354,7 @@ impl StructField {
                     #field_ident: match m.get(&#t) {
                         Some(v) => match v.as_text() {
                             Some(val) => val.to_string(),
-                            None => return Err(format!("Failed to to process {} as text: {:?}", #field_ident_str, v))
+                            None => return Err(format!("Failed to process {} as text: {:?}", #field_ident_str, v))
                         },
                         None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                     },
@@ -369,10 +369,10 @@ impl StructField {
                                 Some(i) => {
                                     match i.try_into() {
                                         Ok(val) => val,
-                                        Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                                        Err(e) => return Err(format!("Failed to process {} with error: {}", #field_ident_str, e))
                                     }
                                 }
-                                None => return Err(format!("Failed to to process {} as an integer", #field_ident_str))
+                                None => return Err(format!("Failed to process {} as an integer", #field_ident_str))
                             }),
                         None => None,
                     },
@@ -384,10 +384,10 @@ impl StructField {
                             Some(i) => {
                                 match i.try_into() {
                                     Ok(val) => val,
-                                    Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                                    Err(e) => return Err(format!("Failed to process {} with error: {}", #field_ident_str, e))
                                 }
                             }
-                            None => return Err(format!("Failed to to process {} as an integer", #field_ident_str))
+                            None => return Err(format!("Failed to process {} as an integer", #field_ident_str))
                         },
                         None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                     },
@@ -433,7 +433,7 @@ impl StructField {
                         Some(v) => Some(
                             match v.as_bool() {
                                 Some(val) => val,
-                                None => return Err(format!("Failed to to process {} as a boolean", #field_ident_str))
+                                None => return Err(format!("Failed to process {} as a boolean", #field_ident_str))
                             }),
                         None => None,
                     },
@@ -443,7 +443,7 @@ impl StructField {
                     #field_ident: match m.get(&#t) {
                         Some(v) => match v.as_bool() {
                             Some(val) => val,
-                            None => return Err(format!("Failed to to process {} as a boolean", #field_ident_str))
+                            None => return Err(format!("Failed to process {} as a boolean", #field_ident_str))
                         },
                         None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                     },
@@ -455,7 +455,7 @@ impl StructField {
                     Some(v) => {
                         match #f2::try_from(v) {
                             Ok(val) => Some(val),
-                            Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                            Err(e) => return Err(format!("Failed to process {} with error: {}", #field_ident_str, e))
                         }
                     },
                     None => None,
@@ -466,7 +466,7 @@ impl StructField {
                 #field_ident: match m.get(&#t) {
                     Some(v) => match #f2::try_from(v) {
                         Ok(val) => val,
-                        Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                        Err(e) => return Err(format!("Failed to process {} with error: {}", #field_ident_str, e))
                     },
                     None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                 },

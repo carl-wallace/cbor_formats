@@ -59,8 +59,8 @@ use alloc::{
 };
 
 use base64::{Engine, engine::general_purpose::STANDARD};
-use ciborium::{ser::into_writer, value::Value};
-use serde::{Deserialize, Serialize};
+use ciborium::{de::from_reader, ser::into_writer, value::Value};
+use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::{
     arrays::DetachedSubmoduleDigestCbor,
@@ -91,13 +91,36 @@ use crate::{
 /// ```text
 /// CBOR-Selector = CBOR-Nested-Token / Detached-Submodule-Digest
 /// ```
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum SelectorCbor {
     JsonTokenInsideCborToken(String),
-    CborTokenInsideCborToken(Vec<u8>),
+    CborTokenInsideCborToken(#[serde(with = "serde_bytes")] Vec<u8>),
     DetachedSubmoduleDigest(DetachedSubmoduleDigestCbor),
+}
+impl<'de> Deserialize<'de> for SelectorCbor {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let value = Value::deserialize(deserializer)?;
+        match &value {
+            Value::Text(s) => Ok(SelectorCbor::JsonTokenInsideCborToken(s.clone())),
+            Value::Bytes(b) => Ok(SelectorCbor::CborTokenInsideCborToken(b.clone())),
+            Value::Array(_) => {
+                let mut buf = vec![];
+                into_writer(&value, &mut buf).map_err(serde::de::Error::custom)?;
+                let dsd: DetachedSubmoduleDigestCbor =
+                    from_reader(buf.as_slice()).map_err(serde::de::Error::custom)?;
+                Ok(SelectorCbor::DetachedSubmoduleDigest(dsd))
+            }
+            _ => Err(serde::de::Error::custom(format!(
+                "unexpected CBOR type for SelectorCbor: {:?}",
+                value
+            ))),
+        }
+    }
 }
 
 /// Represents the options available for encoding Submodule claims using CBOR.
@@ -111,12 +134,21 @@ pub enum SelectorCbor {
 /// ```text
 /// Submodule = Claims-Set / CBOR-Selector
 /// ```
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum SubmoduleCbor {
     ClaimsSet(Box<ClaimsSetClaimsCbor>),
     SelectorCbor(SelectorCbor),
+}
+impl<'de> Deserialize<'de> for SubmoduleCbor {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let value = Value::deserialize(deserializer)?;
+        SubmoduleCbor::try_from(value).map_err(serde::de::Error::custom)
+    }
 }
 impl TryFrom<Value> for SubmoduleCbor {
     type Error = String;
@@ -127,7 +159,7 @@ impl TryFrom<Value> for SubmoduleCbor {
                 let mut buf = vec![];
                 into_writer(&value, &mut buf)
                     .map_err(|e| format!("Failed to serialize Value for ClaimsSet: {e}"))?;
-                let cs: ClaimsSetClaimsCbor = ciborium::de::from_reader(buf.as_slice())
+                let cs: ClaimsSetClaimsCbor = from_reader(buf.as_slice())
                     .map_err(|e| format!("Failed to deserialize ClaimsSet: {e}"))?;
                 Ok(SubmoduleCbor::ClaimsSet(Box::new(cs)))
             }
@@ -149,7 +181,7 @@ impl TryFrom<Value> for SubmoduleCbor {
                 into_writer(&value, &mut buf).map_err(|e| {
                     format!("Failed to serialize Value for DetachedSubmoduleDigest: {e}")
                 })?;
-                let dsd: DetachedSubmoduleDigestCbor = ciborium::de::from_reader(buf.as_slice())
+                let dsd: DetachedSubmoduleDigestCbor = from_reader(buf.as_slice())
                     .map_err(|e| format!("Failed to deserialize DetachedSubmoduleDigest: {e}"))?;
                 Ok(SubmoduleCbor::SelectorCbor(
                     SelectorCbor::DetachedSubmoduleDigest(dsd),

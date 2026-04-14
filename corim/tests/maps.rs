@@ -130,6 +130,7 @@ fn concise_mid_tag_roundtrip() {
         name: None,
         cryptokeys: None,
         int_range: None,
+        integrity_registers: None,
         other: None,
     };
     let comid = ConciseMidTagCbor {
@@ -254,6 +255,7 @@ fn corim_map_roundtrip() {
                         name: None,
                         cryptokeys: None,
                         int_range: None,
+                        integrity_registers: None,
                         other: None,
                     },
                     authorized_by: None,
@@ -611,6 +613,7 @@ fn measurement_map_test() {
             name: Some("test-measurement".to_string()),
             cryptokeys: None,
             int_range: None,
+            integrity_registers: None,
             other: None,
         },
         authorized_by: None,
@@ -650,6 +653,7 @@ fn measurement_values_map_test() {
         name: None,
         cryptokeys: None,
         int_range: None,
+        integrity_registers: None,
         other: None,
     };
     let mut buf = vec![];
@@ -735,6 +739,7 @@ fn triples_map_test() {
         name: Some("test".to_string()),
         cryptokeys: None,
         int_range: None,
+        integrity_registers: None,
         other: None,
     };
     let mm = MeasurementMapCbor {

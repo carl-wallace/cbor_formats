@@ -52,29 +52,48 @@ pub fn extract_algorithm(
 }
 
 /// Extract IV from protected and unprotected headers.
+///
+/// Per RFC 9052 Section 3.1, at most one of IV and Partial IV may be present
+/// across the entire security layer (both protected and unprotected headers
+/// combined). This function enforces that constraint and returns an error if
+/// more than one is found.
 pub fn extract_iv(
     protected: &EmptyOrSerializedMap,
     unprotected: &HeaderMapCbor,
 ) -> Result<Vec<u8>, CoseCryptoError> {
-    // Check unprotected first (more common location for IV)
-    if let Some(iv) = &unprotected.iv {
-        return Ok(iv.clone());
+    let prot = deserialize_protected(protected)?;
+
+    // Collect all IV/Partial IV values present across both headers
+    let unp_iv = unprotected.iv.as_ref();
+    let unp_piv = unprotected.partial_iv.as_ref();
+    let prot_iv = prot.as_ref().and_then(|h| h.iv.as_ref());
+    let prot_piv = prot.as_ref().and_then(|h| h.partial_iv.as_ref());
+
+    let count = [
+        unp_iv.is_some(),
+        unp_piv.is_some(),
+        prot_iv.is_some(),
+        prot_piv.is_some(),
+    ]
+    .iter()
+    .filter(|&&b| b)
+    .count();
+
+    if count > 1 {
+        return Err(CoseCryptoError::InvalidProtectedHeader(
+            "at most one of IV and Partial IV is permitted across protected and unprotected headers"
+                .to_string(),
+        ));
     }
-    if let Some(piv) = &unprotected.partial_iv {
-        return Ok(piv.clone());
-    }
-    // Check protected
-    if let Some(hdr) = deserialize_protected(protected)? {
-        if let Some(iv) = hdr.iv {
-            return Ok(iv);
-        }
-        if let Some(piv) = hdr.partial_iv {
-            return Ok(piv);
-        }
-    }
-    Err(CoseCryptoError::MissingField(
-        "IV or Partial IV".to_string(),
-    ))
+
+    unp_iv
+        .or(unp_piv)
+        .or(prot_iv)
+        .or(prot_piv)
+        .cloned()
+        .ok_or(CoseCryptoError::MissingField(
+            "IV or Partial IV".to_string(),
+        ))
 }
 
 /// Get the raw bytes from an `EmptyOrSerializedMap`.

@@ -16,10 +16,10 @@
 //! ## CDDL-to-Rust Type Mapping
 //!
 //! The following table maps CDDL productions from
-//! [draft-ietf-rats-concise-ta-stores Section 4](https://datatracker.ietf.org/doc/html/draft-ietf-rats-concise-ta-stores#section-4)
+//! [draft-ietf-rats-concise-ta-stores-02 Section 4](https://datatracker.ietf.org/doc/html/draft-ietf-rats-concise-ta-stores-02#section-4)
 //! to their Rust implementations.
 //!
-//! ### Concise TA Stores ([Section 4](https://datatracker.ietf.org/doc/html/draft-ietf-rats-concise-ta-stores#section-4))
+//! ### Concise TA Stores ([Section 4](https://datatracker.ietf.org/doc/html/draft-ietf-rats-concise-ta-stores-02#section-4))
 //!
 //! | CDDL | Rust |
 //! |------|------|
