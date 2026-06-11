@@ -25,6 +25,10 @@ pub enum CoseAlgorithm {
     A128Gcm,
     /// AES-GCM 256-bit key (IANA label 3)
     A256Gcm,
+    /// AES Key Wrap 128-bit (IANA label -3, RFC 3394)
+    A128Kw,
+    /// AES Key Wrap 256-bit (IANA label -5, RFC 3394)
+    A256Kw,
     /// ML-DSA-44 (IANA label -48)
     #[cfg(feature = "pqc")]
     MlDsa44,
@@ -49,6 +53,8 @@ impl CoseAlgorithm {
             7 => Ok(Self::Hs512),
             1 => Ok(Self::A128Gcm),
             3 => Ok(Self::A256Gcm),
+            -3 => Ok(Self::A128Kw),
+            -5 => Ok(Self::A256Kw),
             #[cfg(feature = "pqc")]
             -48 => Ok(Self::MlDsa44),
             #[cfg(feature = "pqc")]
@@ -71,6 +77,8 @@ impl CoseAlgorithm {
             Self::Hs512 => 7,
             Self::A128Gcm => 1,
             Self::A256Gcm => 3,
+            Self::A128Kw => -3,
+            Self::A256Kw => -5,
             #[cfg(feature = "pqc")]
             Self::MlDsa44 => -48,
             #[cfg(feature = "pqc")]
@@ -100,6 +108,8 @@ impl CoseAlgorithm {
             Self::Hs512 => "HS512",
             Self::A128Gcm => "A128GCM",
             Self::A256Gcm => "A256GCM",
+            Self::A128Kw => "A128KW",
+            Self::A256Kw => "A256KW",
             #[cfg(feature = "pqc")]
             Self::MlDsa44 => "ML-DSA-44",
             #[cfg(feature = "pqc")]
@@ -117,6 +127,8 @@ impl CoseAlgorithm {
             Self::Hs512 => Some(64),
             Self::A128Gcm => Some(16),
             Self::A256Gcm => Some(32),
+            Self::A128Kw => Some(16),
+            Self::A256Kw => Some(32),
             _ => None,
         }
     }

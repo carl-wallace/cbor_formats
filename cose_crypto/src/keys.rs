@@ -296,14 +296,18 @@ pub fn algorithm_from_cose_key(key: &CoseKeyCbor) -> Result<CoseAlgorithm, CoseC
 /// Create a [`CoseSigner`] from a `CoseKeyCbor`.
 ///
 /// The key must contain private key material.
+#[cfg_attr(not(feature = "ecdsa"), allow(unused_variables))]
 pub fn signer_from_cose_key(key: &CoseKeyCbor) -> Result<Box<dyn CoseSigner>, CoseCryptoError> {
+    #[cfg(feature = "ecdsa")]
     use crate::crypto::ecdsa::{Es256Signer, Es384Signer};
     use crate::crypto::eddsa::Ed25519Signer;
 
     let parsed = Zeroizing::new(parse_cose_key(key)?);
     match &*parsed {
         ParsedCoseKey::EcPrivate { crv, d, .. } => match crv {
+            #[cfg(feature = "ecdsa")]
             &CRV_P256 => Ok(Box::new(Es256Signer::from_bytes(d)?)),
+            #[cfg(feature = "ecdsa")]
             &CRV_P384 => Ok(Box::new(Es384Signer::from_bytes(d)?)),
             other => Err(CoseCryptoError::InvalidKey(format!(
                 "unsupported EC2 curve: {other}"
@@ -337,7 +341,9 @@ pub fn signer_from_cose_key(key: &CoseKeyCbor) -> Result<Box<dyn CoseSigner>, Co
 ///
 /// Uses the public key components. If a private key is present, the public
 /// components are still used for verification.
+#[cfg_attr(not(feature = "ecdsa"), allow(unused_variables))]
 pub fn verifier_from_cose_key(key: &CoseKeyCbor) -> Result<Box<dyn CoseVerifier>, CoseCryptoError> {
+    #[cfg(feature = "ecdsa")]
     use crate::crypto::ecdsa::{Es256Verifier, Es384Verifier};
     use crate::crypto::eddsa::Ed25519Verifier;
 
@@ -345,7 +351,9 @@ pub fn verifier_from_cose_key(key: &CoseKeyCbor) -> Result<Box<dyn CoseVerifier>
     match &*parsed {
         ParsedCoseKey::EcPublic { crv, x, y } | ParsedCoseKey::EcPrivate { crv, x, y, .. } => {
             match crv {
+                #[cfg(feature = "ecdsa")]
                 &CRV_P256 => Ok(Box::new(Es256Verifier::from_xy(x, y)?)),
+                #[cfg(feature = "ecdsa")]
                 &CRV_P384 => Ok(Box::new(Es384Verifier::from_xy(x, y)?)),
                 other => Err(CoseCryptoError::InvalidKey(format!(
                     "unsupported EC2 curve: {other}"

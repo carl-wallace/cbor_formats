@@ -14,9 +14,10 @@ use serde::Deserialize;
 use base64ct::{Base64UrlUnpadded, Encoding};
 use zeroize::Zeroizing;
 
+#[cfg(feature = "ecdsa")]
+use crate::crypto::ecdsa::{Es256Signer, Es256Verifier, Es384Signer, Es384Verifier};
 use crate::{
     algorithm::CoseAlgorithm,
-    crypto::ecdsa::{Es256Signer, Es256Verifier, Es384Signer, Es384Verifier},
     crypto::eddsa::{Ed25519Signer, Ed25519Verifier},
     crypto::{CoseSigner, CoseVerifier},
     error::CoseCryptoError,
@@ -72,6 +73,7 @@ pub fn algorithm_from_jwk(json: &[u8]) -> Result<CoseAlgorithm, CoseCryptoError>
 /// Create a [`CoseSigner`] from JWK JSON bytes.
 ///
 /// The JWK must contain a private key (`d` field).
+#[cfg_attr(not(feature = "ecdsa"), allow(unused_variables))]
 pub fn signer_from_jwk(json: &[u8]) -> Result<Box<dyn CoseSigner>, CoseCryptoError> {
     let jwk: Jwk = serde_json::from_slice(json)
         .map_err(|e| CoseCryptoError::InvalidKey(format!("JWK parse error: {e}")))?;
@@ -84,7 +86,9 @@ pub fn signer_from_jwk(json: &[u8]) -> Result<Box<dyn CoseSigner>, CoseCryptoErr
 
     match jwk.kty.as_str() {
         "EC" => match jwk.crv.as_deref() {
+            #[cfg(feature = "ecdsa")]
             Some("P-256") => Ok(Box::new(Es256Signer::from_bytes(&d_bytes)?)),
+            #[cfg(feature = "ecdsa")]
             Some("P-384") => Ok(Box::new(Es384Signer::from_bytes(&d_bytes)?)),
             Some(other) => Err(CoseCryptoError::InvalidKey(format!(
                 "unsupported EC curve: {other}"
@@ -109,6 +113,7 @@ pub fn signer_from_jwk(json: &[u8]) -> Result<Box<dyn CoseSigner>, CoseCryptoErr
 /// Uses the public key components (`x`, `y` for EC; `x` for OKP).
 /// If a private key is present, the public key is derived from it for EC keys,
 /// or the `x` component is used for OKP keys.
+#[cfg_attr(not(feature = "ecdsa"), allow(unused_variables))]
 pub fn verifier_from_jwk(json: &[u8]) -> Result<Box<dyn CoseVerifier>, CoseCryptoError> {
     let jwk: Jwk = serde_json::from_slice(json)
         .map_err(|e| CoseCryptoError::InvalidKey(format!("JWK parse error: {e}")))?;
@@ -127,7 +132,9 @@ pub fn verifier_from_jwk(json: &[u8]) -> Result<Box<dyn CoseVerifier>, CoseCrypt
             let y_bytes = b64url_decode(y)?;
 
             match jwk.crv.as_deref() {
+                #[cfg(feature = "ecdsa")]
                 Some("P-256") => Ok(Box::new(Es256Verifier::from_xy(&x_bytes, &y_bytes)?)),
+                #[cfg(feature = "ecdsa")]
                 Some("P-384") => Ok(Box::new(Es384Verifier::from_xy(&x_bytes, &y_bytes)?)),
                 Some(other) => Err(CoseCryptoError::InvalidKey(format!(
                     "unsupported EC curve: {other}"
@@ -156,7 +163,7 @@ pub fn verifier_from_jwk(json: &[u8]) -> Result<Box<dyn CoseVerifier>, CoseCrypt
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "ecdsa"))]
 #[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;

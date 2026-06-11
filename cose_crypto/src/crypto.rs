@@ -5,6 +5,8 @@ use alloc::vec::Vec;
 use crate::{algorithm::CoseAlgorithm, error::CoseCryptoError};
 
 pub mod aes_gcm;
+pub mod aes_kw;
+#[cfg(feature = "ecdsa")]
 pub mod ecdsa;
 pub mod eddsa;
 pub mod hmac;
@@ -34,6 +36,19 @@ pub trait CoseMacAlgorithm {
     /// Verify a MAC tag over the given data.
     fn verify(&self, data: &[u8], tag: &[u8]) -> Result<(), CoseCryptoError>;
     /// The algorithm this MAC uses.
+    fn algorithm(&self) -> CoseAlgorithm;
+}
+
+/// A key-wrap algorithm that can wrap and unwrap symmetric keys (RFC 3394 AES Key Wrap).
+///
+/// Unlike AEAD, key wrap has no nonce and no AAD — the wrapped output is self-contained and
+/// includes its own integrity check via the RFC 3394 default IV.
+pub trait CoseKeyWrap {
+    /// Wrap a symmetric key. Input must be a multiple of 8 bytes (typically 16, 24, or 32).
+    fn wrap(&self, key_to_wrap: &[u8]) -> Result<Vec<u8>, CoseCryptoError>;
+    /// Unwrap a previously wrapped key. Output is 8 bytes shorter than input.
+    fn unwrap(&self, wrapped: &[u8]) -> Result<Vec<u8>, CoseCryptoError>;
+    /// The algorithm this key wrap uses.
     fn algorithm(&self) -> CoseAlgorithm;
 }
 
