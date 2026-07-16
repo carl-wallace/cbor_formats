@@ -80,11 +80,9 @@ impl TryFrom<NestedTokenCbor> for NestedToken {
                 let sfd = SelectorForDeb {
                     token_type: JsonSelectorType::Digest,
                     nested_token: {
-                        match dsm.try_into() {
-                            Ok(dsm_value) => {
-                                JsonSelectorForDebValue::DetachedSubmoduleDigest(dsm_value)
-                            }
-                            Err(e) => return Err(e),
+                        {
+                            let dsm_value = dsm.try_into()?;
+                            JsonSelectorForDebValue::DetachedSubmoduleDigest(dsm_value)
                         }
                     },
                 };
@@ -117,11 +115,9 @@ impl TryFrom<&NestedTokenCbor> for NestedToken {
                 let sfd = SelectorForDeb {
                     token_type: JsonSelectorType::Digest,
                     nested_token: {
-                        match dsm.try_into() {
-                            Ok(dsm_value) => {
-                                JsonSelectorForDebValue::DetachedSubmoduleDigest(dsm_value)
-                            }
-                            Err(e) => return Err(e),
+                        {
+                            let dsm_value = dsm.try_into()?;
+                            JsonSelectorForDebValue::DetachedSubmoduleDigest(dsm_value)
                         }
                     },
                 };

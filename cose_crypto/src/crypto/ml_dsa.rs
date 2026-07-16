@@ -4,10 +4,7 @@
 
 use alloc::{string::ToString, vec::Vec};
 
-use ml_dsa::{
-    KeyGen,
-    signature::{Signer, Verifier},
-};
+use ml_dsa::signature::{Signer, Verifier};
 
 use cose::maps::CoseKeyCbor;
 
@@ -33,12 +30,12 @@ macro_rules! impl_ml_dsa {
         }
 
         impl $signer {
-            #[doc = concat!("Create from a 32-byte seed via `KeyGen::from_seed`.")]
+            #[doc = concat!("Create from a 32-byte seed via `SigningKey::from_seed`.")]
             pub fn from_seed(seed: &[u8]) -> Result<Self, CoseCryptoError> {
                 let seed_array = ml_dsa::B32::try_from(seed).map_err(|_| {
                     CoseCryptoError::InvalidKey("seed must be 32 bytes".to_string())
                 })?;
-                let key = <$dsa>::from_seed(&seed_array);
+                let key = ml_dsa::SigningKey::<$dsa>::from_seed(&seed_array);
                 Ok(Self { key })
             }
 

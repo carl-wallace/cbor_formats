@@ -47,8 +47,8 @@ fn simple() {
 
     let value = Value::Bytes(vec![104, 101, 108, 108, 111]);
     let v = value.as_bytes().unwrap();
-    println!("value: {:?}", &value);
-    println!("v: {:?}", &v);
+    println!("value: {:?}", value);
+    println!("v: {:?}", v);
 }
 
 #[test]
