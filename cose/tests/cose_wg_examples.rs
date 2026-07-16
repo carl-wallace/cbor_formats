@@ -362,12 +362,11 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                                     from_reader(buf.as_slice());
                                 match result {
                                     Ok(parsed) => {
-                                        if let Some(some) = ex.fail {
-                                            if some {
-                                                if let Some(failures) = &ex.input.failures {
-                                                    check_failures(failures);
-                                                }
-                                            }
+                                        if let Some(some) = ex.fail
+                                            && some
+                                            && let Some(failures) = &ex.input.failures
+                                        {
+                                            check_failures(failures);
                                         }
                                         let mut encoded = vec![];
                                         let _ = into_writer(&parsed, &mut encoded);
@@ -379,10 +378,10 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                                         }
                                     }
                                     Err(_) => {
-                                        if let Some(some) = ex.fail {
-                                            if !some {
-                                                panic!()
-                                            }
+                                        if let Some(some) = ex.fail
+                                            && !some
+                                        {
+                                            panic!()
                                         }
                                     }
                                 }
@@ -391,12 +390,11 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                                     from_reader(buf.as_slice());
                                 match result {
                                     Ok(parsed) => {
-                                        if let Some(some) = ex.fail {
-                                            if some {
-                                                if let Some(failures) = &ex.input.failures {
-                                                    check_failures(failures);
-                                                }
-                                            }
+                                        if let Some(some) = ex.fail
+                                            && some
+                                            && let Some(failures) = &ex.input.failures
+                                        {
+                                            check_failures(failures);
                                         }
                                         let mut encoded = vec![];
                                         let _ = into_writer(&parsed, &mut encoded);
@@ -408,10 +406,10 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                                         }
                                     }
                                     Err(_) => {
-                                        if let Some(some) = ex.fail {
-                                            if !some {
-                                                panic!()
-                                            }
+                                        if let Some(some) = ex.fail
+                                            && !some
+                                        {
+                                            panic!()
                                         }
                                     }
                                 }
@@ -419,12 +417,11 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                                 let result: Result<TaggedCoseMac, _> = from_reader(buf.as_slice());
                                 match result {
                                     Ok(parsed) => {
-                                        if let Some(some) = ex.fail {
-                                            if some {
-                                                if let Some(failures) = &ex.input.failures {
-                                                    check_failures(failures);
-                                                }
-                                            }
+                                        if let Some(some) = ex.fail
+                                            && some
+                                            && let Some(failures) = &ex.input.failures
+                                        {
+                                            check_failures(failures);
                                         }
                                         let mut encoded = vec![];
                                         let _ = into_writer(&parsed, &mut encoded);
@@ -436,10 +433,10 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                                         }
                                     }
                                     Err(_) => {
-                                        if let Some(some) = ex.fail {
-                                            if !some {
-                                                panic!()
-                                            }
+                                        if let Some(some) = ex.fail
+                                            && !some
+                                        {
+                                            panic!()
                                         }
                                     }
                                 }
@@ -447,12 +444,11 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                                 let result: Result<TaggedCoseMac0, _> = from_reader(buf.as_slice());
                                 match result {
                                     Ok(parsed) => {
-                                        if let Some(some) = ex.fail {
-                                            if some {
-                                                if let Some(failures) = &ex.input.failures {
-                                                    check_failures(failures);
-                                                }
-                                            }
+                                        if let Some(some) = ex.fail
+                                            && some
+                                            && let Some(failures) = &ex.input.failures
+                                        {
+                                            check_failures(failures);
                                         }
                                         let mut encoded = vec![];
                                         let _ = into_writer(&parsed, &mut encoded);
@@ -464,10 +460,10 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                                         }
                                     }
                                     Err(_) => {
-                                        if let Some(some) = ex.fail {
-                                            if !some {
-                                                panic!()
-                                            }
+                                        if let Some(some) = ex.fail
+                                            && !some
+                                        {
+                                            panic!()
                                         }
                                     }
                                 }
@@ -475,12 +471,11 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                                 let result: Result<TaggedCoseSign, _> = from_reader(buf.as_slice());
                                 match result {
                                     Ok(parsed) => {
-                                        if let Some(some) = ex.fail {
-                                            if some {
-                                                if let Some(failures) = &ex.input.failures {
-                                                    check_failures(failures);
-                                                }
-                                            }
+                                        if let Some(some) = ex.fail
+                                            && some
+                                            && let Some(failures) = &ex.input.failures
+                                        {
+                                            check_failures(failures);
                                         }
                                         let mut encoded = vec![];
                                         let _ = into_writer(&parsed, &mut encoded);
@@ -492,10 +487,10 @@ pub fn walk_cose_wg_dir(cose_wg_dir: &str) -> Result<(), String> {
                                         }
                                     }
                                     Err(_) => {
-                                        if let Some(some) = ex.fail {
-                                            if !some {
-                                                panic!()
-                                            }
+                                        if let Some(some) = ex.fail
+                                            && !some
+                                        {
+                                            panic!()
                                         }
                                     }
                                 }

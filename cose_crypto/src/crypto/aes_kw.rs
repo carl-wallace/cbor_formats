@@ -67,7 +67,7 @@ impl AesKwKey {
 
 impl CoseKeyWrap for AesKwKey {
     fn wrap(&self, key_to_wrap: &[u8]) -> Result<Vec<u8>, CoseCryptoError> {
-        if key_to_wrap.is_empty() || key_to_wrap.len() % KW_IV_LEN != 0 {
+        if key_to_wrap.is_empty() || !key_to_wrap.len().is_multiple_of(KW_IV_LEN) {
             return Err(CoseCryptoError::InvalidKey(alloc::format!(
                 "AES-KW input must be a non-zero multiple of 8 bytes, got {}",
                 key_to_wrap.len()
@@ -88,7 +88,7 @@ impl CoseKeyWrap for AesKwKey {
     }
 
     fn unwrap(&self, wrapped: &[u8]) -> Result<Vec<u8>, CoseCryptoError> {
-        if wrapped.len() <= KW_IV_LEN || wrapped.len() % KW_IV_LEN != 0 {
+        if wrapped.len() <= KW_IV_LEN || !wrapped.len().is_multiple_of(KW_IV_LEN) {
             return Err(CoseCryptoError::InvalidKey(alloc::format!(
                 "AES-KW wrapped input must be a multiple of 8 bytes and larger than 8, got {}",
                 wrapped.len()

@@ -674,11 +674,11 @@ fn corim_extract(args: &CorimExtractSubcommand) {
         Value::Map(entries) => {
             let mut tags = None;
             for (k, v) in entries {
-                if let Value::Integer(i) = k {
-                    if i64::try_from(*i) == Ok(1) {
-                        tags = v.as_array();
-                        break;
-                    }
+                if let Value::Integer(i) = k
+                    && i64::try_from(*i) == Ok(1)
+                {
+                    tags = v.as_array();
+                    break;
                 }
             }
             match tags {
@@ -696,11 +696,11 @@ fn corim_extract(args: &CorimExtractSubcommand) {
     };
 
     let output_dir = Path::new(&args.output_dir);
-    if !output_dir.exists() {
-        if let Err(e) = fs::create_dir_all(output_dir) {
-            println!("Failed to create output directory {:?}: {}", output_dir, e);
-            return;
-        }
+    if !output_dir.exists()
+        && let Err(e) = fs::create_dir_all(output_dir)
+    {
+        println!("Failed to create output directory {:?}: {}", output_dir, e);
+        return;
     }
 
     // Each tag in the CoRIM is a bstr containing tagged CBOR:

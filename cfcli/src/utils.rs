@@ -45,13 +45,13 @@ pub(crate) fn find_files(dir: &String, ext: &str, list: &mut Vec<String>) {
             Ok(e) => {
                 let path = e.path();
                 if e.file_type().is_dir() {
-                    if let Some(s) = path.to_str() {
-                        if s != dir {
-                            let count = list.len();
-                            find_files(&s.to_string(), ext, list);
-                            if count == list.len() {
-                                continue;
-                            }
+                    if let Some(s) = path.to_str()
+                        && s != dir
+                    {
+                        let count = list.len();
+                        find_files(&s.to_string(), ext, list);
+                        if count == list.len() {
+                            continue;
                         }
                     }
                     continue;

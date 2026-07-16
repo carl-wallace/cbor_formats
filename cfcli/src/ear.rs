@@ -521,11 +521,11 @@ fn ear_extract_cose(args: &EarExtractSubcommand) {
     };
 
     let output_dir = Path::new(&args.output_dir);
-    if !output_dir.exists() {
-        if let Err(e) = fs::create_dir_all(output_dir) {
-            println!("Failed to create output directory {:?}: {}", output_dir, e);
-            return;
-        }
+    if !output_dir.exists()
+        && let Err(e) = fs::create_dir_all(output_dir)
+    {
+        println!("Failed to create output directory {:?}: {}", output_dir, e);
+        return;
     }
 
     let input_path = Path::new(&args.signed_ear_file);
@@ -576,11 +576,11 @@ fn ear_extract_jws(args: &EarExtractSubcommand) {
     };
 
     let output_dir = Path::new(&args.output_dir);
-    if !output_dir.exists() {
-        if let Err(e) = fs::create_dir_all(output_dir) {
-            println!("Failed to create output directory {:?}: {}", output_dir, e);
-            return;
-        }
+    if !output_dir.exists()
+        && let Err(e) = fs::create_dir_all(output_dir)
+    {
+        println!("Failed to create output directory {:?}: {}", output_dir, e);
+        return;
     }
 
     let input_path = Path::new(&args.signed_ear_file);
