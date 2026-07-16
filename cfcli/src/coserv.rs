@@ -377,11 +377,11 @@ fn coserv_extract(args: &CoservExtractSubcommand) {
     };
 
     let output_dir = Path::new(&args.output_dir);
-    if !output_dir.exists() {
-        if let Err(e) = fs::create_dir_all(output_dir) {
-            println!("Failed to create output directory {:?}: {}", output_dir, e);
-            return;
-        }
+    if !output_dir.exists()
+        && let Err(e) = fs::create_dir_all(output_dir)
+    {
+        println!("Failed to create output directory {:?}: {}", output_dir, e);
+        return;
     }
 
     // Derive output filename from input

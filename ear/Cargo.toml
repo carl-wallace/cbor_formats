@@ -8,7 +8,7 @@ keywords = ["cbor", "json", "ear", "rats", "attestation"]
 readme = "README.md"
 version = "0.1.1"
 edition = "2024"
-rust-version = "1.85.0"
+rust-version = "1.88.0"
 
 [dependencies]
 ar4si = { version = "0.1.1", path = "../ar4si" }
