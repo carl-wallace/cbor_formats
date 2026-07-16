@@ -1,0 +1,61 @@
+[package]
+name = "cose_crypto"
+version = "0.1.1"
+edition = "2024"
+rust-version = "1.85.0"
+license = "MIT OR Apache-2.0"
+description = "COSE cryptographic operations (signing, verification, MAC, AEAD) built on RFC 9052 structures"
+repository = "https://github.com/carl-wallace/cbor-formats/tree/main/cose_crypto"
+
+[features]
+default = ["ecdsa"]
+# ECDSA brings in p256/p384/ecdsa/elliptic-curve, which pin newer RustCrypto pre-release versions
+# than some consumers (e.g. workspaces also using p521 0.14.0-rc.7) can tolerate. Opt out via
+# `default-features = false` when only symmetric/MAC/AEAD/EdDSA algorithms are needed.
+ecdsa = ["dep:p256", "dep:p384", "dep:ecdsa", "dep:elliptic-curve"]
+pqc = ["ml-dsa"]
+
+[dependencies]
+cose = { version = "0.1.1", path = "../cose" }
+common = { version = "0.1.1", path = "../common" }
+ciborium = "0.2.2"
+serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
+serde_json = "1.0"
+base64ct = { version = "1.7", features = ["alloc"] }
+
+# ECDSA — optional, gated by the `ecdsa` feature (default on)
+p256 = { version = "0.14.0-rc.8", default-features = false, features = ["ecdsa"], optional = true }
+p384 = { version = "0.14.0-rc.8", default-features = false, features = ["ecdsa"], optional = true }
+ecdsa = { version = "0.17.0-rc.16", default-features = false, optional = true }
+elliptic-curve = { version = "0.14.0-rc.16", default-features = false, optional = true }
+
+# EdDSA
+ed25519-dalek = { version = "3.0.0-pre.6", features = ["fast", "zeroize", "rand_core"] }
+
+# HMAC
+hmac = "0.13.0"
+sha2 = "0.11.0"
+
+# AES-GCM
+aes-gcm = "0.11.0-rc.3"
+
+# AES Key Wrap (RFC 3394)
+aes-kw = "0.3.0-rc.0"
+
+# ML-DSA (PQC)
+ml-dsa = { version = "0.1.0-rc.8", optional = true }
+
+# Key material safety
+zeroize = { version = "1.8", features = ["derive"] }
+subtle = "2.6"
+
+# Random
+rand = "0.10"
+
+[dev-dependencies]
+hex = "0.4"
+hex-literal = "1.1.0"
+p256 = { version = "0.14.0-rc.8", features = ["ecdsa"] }
+p384 = { version = "0.14.0-rc.8", features = ["ecdsa"] }
+ed25519-dalek = { version = "3.0.0-pre.6", features = ["fast", "zeroize", "rand_core"] }
+rand = "0.10"

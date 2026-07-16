@@ -1,7 +1,17 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
+//!
+//! ## Type Mapping
+//!
+//! | WebAuthn Structure | Rust |
+//! |--------------------|------|
+//! | `attObj` | [`AttestationObject`] |
+//! | Apple App Attest `attStmt` | [`AppleAttestationObject`] |
+//! | Apple App Attest assertion | [`AppleAssertionObject`] |
+//! | `$$attStmtType` dispatch | [`Supported`] |
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
+#![allow(unexpected_cfgs)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;
@@ -19,12 +29,16 @@ extern crate alloc;
 // ; Every attestation statement format must have the above fields
 // attStmtTemplate .within $$attStmtType
 
-use alloc::string::String;
-use alloc::vec::Vec;
+use alloc::{string::String, vec::Vec};
+
 use ciborium::value::Value;
-use common::BytesType;
 use serde::{Deserialize, Serialize};
 
+use common::BytesType;
+
+/// Represents the `attObj` attestation object from Web Authentication Level 2.
+///
+/// Contains authenticator data, a format identifier, and an attestation statement.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs, non_snake_case)]
 pub struct AttestationObject {
@@ -34,6 +48,9 @@ pub struct AttestationObject {
     pub attStmt: Supported,
 }
 
+/// Represents the Apple App Attest attestation statement format.
+///
+/// Contains an X.509 certificate chain and a receipt for attestation verification.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[allow(missing_docs, non_snake_case)]
 pub struct AppleAttestationObject {
@@ -42,6 +59,21 @@ pub struct AppleAttestationObject {
     pub receipt: Vec<u8>,
 }
 
+/// Represents an Apple App Attest assertion object.
+///
+/// Contains a signature and authenticator data for assertion verification.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[allow(missing_docs, non_snake_case)]
+pub struct AppleAssertionObject {
+    #[serde(with = "serde_bytes")]
+    pub signature: Vec<u8>,
+    #[serde(with = "serde_bytes")]
+    pub authenticatorData: Vec<u8>,
+}
+
+/// Represents supported attestation statement formats for Web Authentication.
+///
+/// Currently supports Apple App Attest and a generic fallback for other formats.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]

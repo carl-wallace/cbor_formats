@@ -11,15 +11,11 @@ pub(crate) fn extract_type(ty: &syn::Type) -> Option<String> {
     }
 
     fn extract_last_segment(path: &Path) -> Option<String> {
-        let mut idents_of_path =
-            path.segments
-                .iter()
-                .into_iter()
-                .fold(String::new(), |mut acc, v| {
-                    acc.push_str(&v.ident.to_string());
-                    acc.push('|');
-                    acc
-                });
+        let mut idents_of_path = path.segments.iter().fold(String::new(), |mut acc, v| {
+            acc.push_str(&v.ident.to_string());
+            acc.push('|');
+            acc
+        });
         idents_of_path.pop();
         Some(idents_of_path)
     }
@@ -49,15 +45,11 @@ pub(crate) fn extract_type_from_vec(ty: &syn::Type) -> Option<&syn::Type> {
     }
 
     fn extract_vec_segment(path: &Path) -> Option<&PathSegment> {
-        let idents_of_path = path
-            .segments
-            .iter()
-            .into_iter()
-            .fold(String::new(), |mut acc, v| {
-                acc.push_str(&v.ident.to_string());
-                acc.push('|');
-                acc
-            });
+        let idents_of_path = path.segments.iter().fold(String::new(), |mut acc, v| {
+            acc.push_str(&v.ident.to_string());
+            acc.push('|');
+            acc
+        });
         vec!["Vec|", "std|vec|Vec|", "core|vec|Vec|"]
             .into_iter()
             .find(|s| idents_of_path == *s)
@@ -97,23 +89,15 @@ pub(crate) fn is_vec(ty: &syn::Type) -> bool {
     }
 
     fn extract_option_segment(path: &Path) -> Option<bool> {
-        let idents_of_path = path
-            .segments
-            .iter()
-            .into_iter()
-            .fold(String::new(), |mut acc, v| {
-                acc.push_str(&v.ident.to_string());
-                acc.push('|');
-                acc
-            });
+        let idents_of_path = path.segments.iter().fold(String::new(), |mut acc, v| {
+            acc.push_str(&v.ident.to_string());
+            acc.push('|');
+            acc
+        });
         let b = vec!["Vec|", "std|vec|Vec|", "core|vec|Vec|"]
             .into_iter()
             .any(|s| idents_of_path == s);
-        if b {
-            Some(b)
-        } else {
-            None
-        }
+        if b { Some(b) } else { None }
     }
 
     extract_type_path(ty)
@@ -131,23 +115,15 @@ pub(crate) fn is_option(ty: &syn::Type) -> bool {
     }
 
     fn extract_option_segment(path: &Path) -> Option<bool> {
-        let idents_of_path = path
-            .segments
-            .iter()
-            .into_iter()
-            .fold(String::new(), |mut acc, v| {
-                acc.push_str(&v.ident.to_string());
-                acc.push('|');
-                acc
-            });
+        let idents_of_path = path.segments.iter().fold(String::new(), |mut acc, v| {
+            acc.push_str(&v.ident.to_string());
+            acc.push('|');
+            acc
+        });
         let b = vec!["Option|", "std|option|Option|", "core|option|Option|"]
             .into_iter()
             .any(|s| idents_of_path == s);
-        if b {
-            Some(b)
-        } else {
-            None
-        }
+        if b { Some(b) } else { None }
     }
 
     extract_type_path(ty)
@@ -167,15 +143,11 @@ pub(crate) fn extract_type_from_option(ty: &syn::Type) -> Option<&syn::Type> {
     }
 
     fn extract_option_segment(path: &Path) -> Option<&PathSegment> {
-        let idents_of_path = path
-            .segments
-            .iter()
-            .into_iter()
-            .fold(String::new(), |mut acc, v| {
-                acc.push_str(&v.ident.to_string());
-                acc.push('|');
-                acc
-            });
+        let idents_of_path = path.segments.iter().fold(String::new(), |mut acc, v| {
+            acc.push_str(&v.ident.to_string());
+            acc.push('|');
+            acc
+        });
         vec!["Option|", "std|option|Option|", "core|option|Option|"]
             .into_iter()
             .find(|s| idents_of_path == *s)

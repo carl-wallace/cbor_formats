@@ -1,18 +1,56 @@
 //! Attribute processing code adapted from the RustCrypto formats library.
 
-use core::fmt::Debug;
-use core::str::FromStr;
+use core::{fmt::Debug, str::FromStr};
 
-use proc_macro_error::abort;
-use syn::{self, Attribute, Lit, LitStr, Meta, MetaList, MetaNameValue, NestedMeta, Path};
+use proc_macro_error2::abort;
+use syn::{Attribute, LitStr, Path};
 
 use crate::field::TagNumber;
 
 /// Attribute name.
 pub(crate) const ATTR_NAME: &str = "cbor";
 
-/// Parsing error message.
-const PARSE_ERR_MSG: &str = "error parsing `cbor` attribute";
+/// Struct-level attributes.
+#[derive(Clone, Debug, Default)]
+pub(crate) struct TypeAttrs {
+    /// Whether the struct has the `non-empty` CDDL constraint.
+    pub non_empty: bool,
+    /// Whether to generate a `*Cbor` companion enum (for `EnumToChoice`).
+    pub companion: bool,
+}
+
+impl TypeAttrs {
+    /// Parse attributes from a struct definition.
+    pub fn parse(attrs: &[Attribute]) -> Self {
+        let mut non_empty = None;
+        let mut companion = None;
+        let mut parsed_attrs = Vec::new();
+        AttrNameValue::from_attributes(attrs, &mut parsed_attrs);
+        for attr in parsed_attrs {
+            if let Some(val) = attr.parse_value::<bool>("non_empty") {
+                if non_empty.is_some() {
+                    abort!(attr.name, "duplicate cbor `non_empty` attribute");
+                }
+                non_empty = Some(val);
+            } else if let Some(val) = attr.parse_value::<bool>("companion") {
+                if companion.is_some() {
+                    abort!(attr.name, "duplicate cbor `companion` attribute");
+                }
+                companion = Some(val);
+            } else {
+                abort!(
+                    attr.name,
+                    "unknown struct-level `cbor` attribute \
+                    (valid options are `non_empty`, `companion`)",
+                );
+            }
+        }
+        Self {
+            non_empty: non_empty.unwrap_or(false),
+            companion: companion.unwrap_or(false),
+        }
+    }
+}
 
 /// Field-level attributes.
 #[derive(Clone, Debug, Default)]
@@ -27,6 +65,10 @@ pub(crate) struct FieldAttrs {
     /// Boolean that indicates if the field has CBOR-specific serialization/deserialization
     /// behavior (i.e., if it uses StructToMap or StructToArray).
     pub cbor: Option<bool>,
+
+    /// Boolean that indicates this variant is a catch-all for unmatched CBOR tags
+    /// (used by `EnumToChoice` to generate a `Value::Tag(t, b) => Other(TupleCbor { ... })` arm).
+    pub socket: bool,
 }
 
 impl FieldAttrs {
@@ -35,6 +77,7 @@ impl FieldAttrs {
         let mut tag = None;
         let mut value = None;
         let mut cbor = None;
+        let mut socket = None;
 
         let mut parsed_attrs = Vec::new();
         AttrNameValue::from_attributes(attrs, &mut parsed_attrs);
@@ -60,11 +103,16 @@ impl FieldAttrs {
                 }
 
                 cbor = Some(ty);
+            } else if let Some(val) = attr.parse_value::<bool>("socket") {
+                if socket.is_some() {
+                    abort!(attr.name, "duplicate cbor `socket` attribute");
+                }
+                socket = Some(val);
             } else {
                 abort!(
                     attr.name,
                     "unknown field-level `cbor` attribute \
-                    (valid options are `tag`, `value`, `cbor`)",
+                    (valid options are `tag`, `value`, `cbor`, `socket`)",
                 );
             }
         }
@@ -73,6 +121,7 @@ impl FieldAttrs {
             tag,
             value: value.unwrap_or_default(),
             cbor,
+            socket: socket.unwrap_or(false),
         }
     }
 }
@@ -90,28 +139,19 @@ impl AttrNameValue {
     /// Parse a slice of attributes.
     pub fn from_attributes(attrs: &[Attribute], out: &mut Vec<Self>) {
         for attr in attrs {
-            if !attr.path.is_ident(ATTR_NAME) {
+            if !attr.path().is_ident(ATTR_NAME) {
                 continue;
             }
 
-            let nested = match attr.parse_meta().expect(PARSE_ERR_MSG) {
-                Meta::List(MetaList { nested, .. }) => nested,
-                other => abort!(other, "malformed `cbor` attribute"),
-            };
-
-            for meta in &nested {
-                match meta {
-                    NestedMeta::Meta(Meta::NameValue(MetaNameValue {
-                        path,
-                        lit: Lit::Str(lit_str),
-                        ..
-                    })) => out.push(Self {
-                        name: path.clone(),
-                        value: lit_str.clone(),
-                    }),
-                    _ => abort!(nested, "malformed `cbor` attribute"),
-                }
-            }
+            attr.parse_nested_meta(|meta| {
+                let value: LitStr = meta.value()?.parse()?;
+                out.push(Self {
+                    name: meta.path.clone(),
+                    value,
+                });
+                Ok(())
+            })
+            .unwrap_or_else(|e| abort!(attr, "malformed `cbor` attribute: {}", e));
         }
     }
 

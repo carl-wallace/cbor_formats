@@ -1,16 +1,19 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::tag::Required;
-use ciborium::value::Value;
-use common::tuple::*;
-use common::tuple_map::*;
-use common::{TextOrBinary, TimeCbor, UeidType};
-use eat::cbor_specific::SubmoduleCbor;
-use eat::choices::{DebugStatusType, Oemid, ResultType};
+use alloc::collections::BTreeMap;
+extern crate alloc;
+
+use ciborium::{de::from_reader, ser::into_writer, tag::Required, value::Value};
 use hex_literal::hex;
 
-use eat::arrays::*;
-use eat::maps::*;
+use common::{TextOrBinary, TimeCbor, UeidType, tuple::TupleCbor, tuple_map::TupleMapCbor};
+use eat::{
+    arrays::{
+        DetachedSubmoduleDigestCbor, DloaTypeCbor, IndividualResultCbor,
+        MeasurementResultsGroupArrayCbor, MeasurementResultsGroupCbor,
+    },
+    cbor_specific::{SubmodsMapCbor, SubmoduleCbor},
+    choices::{DebugStatusType, Oemid, ResultType},
+    maps::{ClaimsSetClaims, ClaimsSetClaimsCbor, LocationTypeCbor},
+};
 
 mod utils;
 use utils::*;
@@ -19,7 +22,9 @@ use utils::*;
 fn claims_set_claims_test() {
     // this example from veraison uses different keys for some fields than the current EAT spec. let them
     // be as-is and accumulate in the other bucket to test extensibility support.
-    let expected = hex!("b0016941636d6520496e632e026772722d74726170036941636d6520496e632e04c10005c10006c1000746ffffffffffff0a4800000000000000000b5101deadbeefdeadbeefdeadbeefdeadbeef0c6941636d6520496e632e0d46ffffffffffff0e030ff5100111a201fb4028ae147ae147ae02fb404c63d70a3d70a413183c");
+    let expected = hex!(
+        "b0016941636d6520496e632e026772722d74726170036941636d6520496e632e04c10005c10006c1000746ffffffffffff0a4800000000000000000b5101deadbeefdeadbeefdeadbeefdeadbeef0c6941636d6520496e632e0d46ffffffffffff0e030ff5100111a201fb4028ae147ae147ae02fb404c63d70a3d70a413183c"
+    );
     println!(
         "Encoded ClaimsSetClaims from veraison: {:?}",
         buffer_to_hex(expected.as_slice())
@@ -59,7 +64,9 @@ fn claims_set_claims_test() {
 fn claims_set_claims_with_dup_test() {
     // this example from veraison uses different keys for some fields than the current EAT spec. let them
     // be as-is and accumulate in the other bucket to test extensibility support.
-    let expected = hex!("b1016C466F6F2042617220496E632E016941636d6520496e632e026772722d74726170036941636d6520496e632e04c10005c10006c1000746ffffffffffff0a4800000000000000000b5101deadbeefdeadbeefdeadbeefdeadbeef0c6941636d6520496e632e0d46ffffffffffff0e030ff5100111a201fb4028ae147ae147ae02fb404c63d70a3d70a413183c");
+    let expected = hex!(
+        "b1016C466F6F2042617220496E632E016941636d6520496e632e026772722d74726170036941636d6520496e632e04c10005c10006c1000746ffffffffffff0a4800000000000000000b5101deadbeefdeadbeefdeadbeefdeadbeef0c6941636d6520496e632e0d46ffffffffffff0e030ff5100111a201fb4028ae147ae147ae02fb404c63d70a3d70a413183c"
+    );
     println!(
         "Encoded ClaimsSetClaims from veraison: {:?}",
         buffer_to_hex(expected.as_slice())
@@ -352,7 +359,7 @@ fn nonce_test() {
 
 #[test]
 fn boot_count_test() {
-    let valid = vec![hex!("A119011404").to_vec()];
+    let valid = vec![hex!("A119010B04").to_vec()];
     for v in valid {
         let csc_d: ClaimsSetClaimsCbor = from_reader(v.clone().as_slice()).unwrap();
         let mut encoded_token = vec![];
@@ -367,8 +374,8 @@ fn boot_count_test() {
     }
 
     let invalid = vec![
-        hex!("8119011404").to_vec(), // map not array
-        hex!("A1190114").to_vec(),   // value too short
+        hex!("8119010B04").to_vec(), // map not array
+        hex!("A119010B").to_vec(),   // value too short
     ];
     for v in invalid {
         let csc_d: Result<ClaimsSetClaimsCbor, _> = from_reader(v.clone().as_slice());
@@ -422,7 +429,7 @@ fn debug_status_test() {
         intended_use: None,
         location: None,
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
         ueid: None,
@@ -498,7 +505,7 @@ fn dloas_test() {
         intended_use: None,
         location: None,
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
         ueid: None,
@@ -518,9 +525,9 @@ fn dloas_test() {
         buffer_to_hex(encoded_token.as_slice())
     );
     let valid = vec![
-        hex!("A119010E8183695265676973747261726E506C6174666F726D204C6162656C714170706C69636174696F6E204C6162656C").to_vec(),
-        hex!("A119010E8182695265676973747261726E506C6174666F726D204C6162656C").to_vec(),
-        hex!("A119010E8283695265676973747261726E506C6174666F726D204C6162656C714170706C69636174696F6E204C6162656C826A526567697374726172326F506C6174666F726D204C6162656C32").to_vec(),
+        hex!("A119010D8183695265676973747261726E506C6174666F726D204C6162656C714170706C69636174696F6E204C6162656C").to_vec(),
+        hex!("A119010D8182695265676973747261726E506C6174666F726D204C6162656C").to_vec(),
+        hex!("A119010D8283695265676973747261726E506C6174666F726D204C6162656C714170706C69636174696F6E204C6162656C826A526567697374726172326F506C6174666F726D204C6162656C32").to_vec(),
     ];
     assert_eq!(encoded_token, valid[0]);
     for v in valid {
@@ -537,7 +544,7 @@ fn dloas_test() {
     }
 
     let invalid = vec![
-        hex!("8119010E8183695265676973747261726E506C6174666F726D204C6162656C714170706C69636174696F6E204C6162656C").to_vec(), // map not array
+        hex!("8119010D8183695265676973747261726E506C6174666F726D204C6162656C714170706C69636174696F6E204C6162656C").to_vec(), // map not array
     ];
     for v in invalid {
         let csc_d: Result<ClaimsSetClaimsCbor, _> = from_reader(v.clone().as_slice());
@@ -609,11 +616,11 @@ fn hardware_version_test() {
 #[test]
 fn intended_use_test() {
     let valid = vec![
-        hex!("A119010D01").to_vec(),
-        hex!("A119010D02").to_vec(),
-        hex!("A119010D03").to_vec(),
-        hex!("A119010D04").to_vec(),
-        hex!("A119010D05").to_vec(),
+        hex!("A119011301").to_vec(),
+        hex!("A119011302").to_vec(),
+        hex!("A119011303").to_vec(),
+        hex!("A119011304").to_vec(),
+        hex!("A119011305").to_vec(),
     ];
 
     for v in valid {
@@ -630,9 +637,9 @@ fn intended_use_test() {
     }
 
     let invalid = vec![
-        hex!("8119010D01").to_vec(), // map not array
-        hex!("A119010D").to_vec(),   // value too short
-        hex!("A119010D00").to_vec(), // unknown value
+        hex!("8119011301").to_vec(), // map not array
+        hex!("A1190113").to_vec(),   // value too short
+        hex!("A119011300").to_vec(), // unknown value
     ];
     for v in invalid {
         let csc_d: Result<ClaimsSetClaimsCbor, _> = from_reader(v.clone().as_slice());
@@ -642,26 +649,46 @@ fn intended_use_test() {
 
 #[test]
 fn location_test() {
-    let valid = vec![
-        hex!("A1190108A9010002010302040305040605070608C11A63923B9A0907").to_vec(),
-        hex!("A1190108A70100020103020504060508C11A63923B9A0907").to_vec(),
-    ];
-    for v in valid {
-        let csc_d: ClaimsSetClaimsCbor = from_reader(v.clone().as_slice()).unwrap();
-        let mut encoded_token = vec![];
-        let _ = into_writer(&csc_d, &mut encoded_token);
-        assert_eq!(v.to_vec(), encoded_token);
-        assert!(csc_d.location.is_some());
-        let csc_json: ClaimsSetClaims = csc_d.try_into().unwrap();
-        let csc_cbor: ClaimsSetClaimsCbor = csc_json.try_into().unwrap();
-        let mut encoded_token2 = vec![];
-        let _ = into_writer(&csc_cbor, &mut encoded_token2);
-        assert_eq!(encoded_token2, v.to_vec());
-    }
+    // Test decoding integer-encoded location (valid per CDDL `number` type)
+    let int_encoded = hex!("A1190108A9010002010302040305040605070608C11A63923B9A0907").to_vec();
+    let csc_d: ClaimsSetClaimsCbor = from_reader(int_encoded.as_slice()).unwrap();
+    assert!(csc_d.location.is_some());
+    let loc = csc_d.location.as_ref().unwrap();
+    assert_eq!(loc.latitude, 0.0);
+    assert_eq!(loc.longitude, 1.0);
+    assert_eq!(loc.altitude, Some(2.0));
+    assert_eq!(loc.accuracy, Some(3.0));
+    assert_eq!(loc.altitude_accuracy, Some(4.0));
+    assert_eq!(loc.heading, Some(5.0));
+    assert_eq!(loc.speed, Some(6.0));
+    assert_eq!(loc.age, Some(7));
+
+    // Verify JSON roundtrip preserves values
+    let csc_json: ClaimsSetClaims = csc_d.try_into().unwrap();
+    let csc_cbor: ClaimsSetClaimsCbor = csc_json.try_into().unwrap();
+    let loc2 = csc_cbor.location.as_ref().unwrap();
+    assert_eq!(loc2.latitude, 0.0);
+    assert_eq!(loc2.longitude, 1.0);
+
+    // Test decoding with fewer optional fields (integer-encoded)
+    let partial = hex!("A1190108A70100020103020504060508C11A63923B9A0907").to_vec();
+    let csc_d2: ClaimsSetClaimsCbor = from_reader(partial.as_slice()).unwrap();
+    assert!(csc_d2.location.is_some());
+    let loc3 = csc_d2.location.as_ref().unwrap();
+    assert_eq!(loc3.altitude, Some(2.0));
+    assert!(loc3.accuracy.is_none());
+    assert_eq!(loc3.altitude_accuracy, Some(4.0));
+    assert_eq!(loc3.heading, Some(5.0));
+    assert!(loc3.speed.is_none());
+
+    // Float-encoded roundtrip
+    let mut encoded_token = vec![];
+    let _ = into_writer(&csc_d2, &mut encoded_token);
+    let csc_d3: ClaimsSetClaimsCbor = from_reader(encoded_token.as_slice()).unwrap();
+    assert_eq!(csc_d2, csc_d3);
 
     let invalid = vec![
-        hex!("81190108A9010002010302040305040605070608C11A63923B9A0907").to_vec(), // map not array
-        hex!("A1190108A9010002010302040305040605070608C11A63923B9A").to_vec(), // value too short
+        hex!("81190108A9010002010302040305040605070608C11A63923B9A0907").to_vec(), // array not map
     ];
     for v in invalid {
         let csc_d: Result<ClaimsSetClaimsCbor, _> = from_reader(v.clone().as_slice());
@@ -717,7 +744,7 @@ fn profile_test() {
 }
 
 #[test]
-fn secboot_test() {
+fn oem_boot_test() {
     let valid = vec![hex!("A1190106F5").to_vec(), hex!("A1190106F4").to_vec()];
     for v in valid {
         let csc_d: ClaimsSetClaimsCbor = from_reader(v.clone().as_slice()).unwrap();
@@ -746,7 +773,7 @@ fn secboot_test() {
 
 #[test]
 fn sw_name_test() {
-    let valid = vec![hex!("A119010F6C537472696E672056616C7565").to_vec()];
+    let valid = vec![hex!("A119010E6C537472696E672056616C7565").to_vec()];
     for v in valid {
         let csc_d: ClaimsSetClaimsCbor = from_reader(v.clone().as_slice()).unwrap();
         let mut encoded_token = vec![];
@@ -761,8 +788,8 @@ fn sw_name_test() {
     }
 
     let invalid = vec![
-        hex!("8119010F6C537472696E672056616C7565").to_vec(), // map not array
-        hex!("A119010F6C537472696E672056616C75").to_vec(),   // value too short
+        hex!("8119010E6C537472696E672056616C7565").to_vec(), // map not array
+        hex!("A119010E6C537472696E672056616C75").to_vec(),   // value too short
     ];
     for v in invalid {
         let csc_d: Result<ClaimsSetClaimsCbor, _> = from_reader(v.clone().as_slice());
@@ -773,14 +800,14 @@ fn sw_name_test() {
 #[test]
 fn sw_version_test() {
     let valid = vec![
-        hex!("A11901108265312E312E3101").to_vec(),
-        hex!("A11901108165312E312E31").to_vec(),
-        hex!("A11901108266312E312E316102").to_vec(),
-        hex!("A11901108268414243312E312E3103").to_vec(),
-        hex!("A119011082613104").to_vec(),
-        hex!("A11901108265312E322E33194000").to_vec(),
-        hex!("A11901108263466F6F63426172").to_vec(),
-        hex!("A11901108263466F6F1863").to_vec(),
+        hex!("A119010F8265312E312E3101").to_vec(),
+        hex!("A119010F8165312E312E31").to_vec(),
+        hex!("A119010F8266312E312E316102").to_vec(),
+        hex!("A119010F8268414243312E312E3103").to_vec(),
+        hex!("A119010F82613104").to_vec(),
+        hex!("A119010F8265312E322E33194000").to_vec(),
+        hex!("A119010F8263466F6F63426172").to_vec(),
+        hex!("A119010F8263466F6F1863").to_vec(),
     ];
     for v in valid {
         let csc_d: ClaimsSetClaimsCbor = from_reader(v.clone().as_slice()).unwrap();
@@ -796,8 +823,8 @@ fn sw_version_test() {
     }
 
     let invalid = vec![
-        hex!("811901108265312E312E3101").to_vec(), // map not array
-        hex!("A11901108165312E312E").to_vec(),     // value too short
+        hex!("8119010F8265312E312E3101").to_vec(), // map not array
+        hex!("A119010F8165312E312E").to_vec(),     // value too short
     ];
     for v in invalid {
         let csc_d: Result<ClaimsSetClaimsCbor, _> = from_reader(v.clone().as_slice());
@@ -825,10 +852,10 @@ fn ueid_test() {
         intended_use: None,
         location: None,
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
-        ueid: Some(UeidType::Ueid(hex!("02deadbeefdead").to_vec())),
+        ueid: Some(UeidType(hex!("02deadbeefdead").to_vec())),
         uptime: None,
         manifests: None,
         measurements: None,
@@ -871,7 +898,7 @@ fn ueid_test() {
 
 #[test]
 fn uptime_test() {
-    let valid = vec![hex!("A119010B04").to_vec()];
+    let valid = vec![hex!("A119010504").to_vec()];
     for v in valid {
         let csc_d: ClaimsSetClaimsCbor = from_reader(v.clone().as_slice()).unwrap();
         let mut encoded_token = vec![];
@@ -886,8 +913,8 @@ fn uptime_test() {
     }
 
     let invalid = vec![
-        hex!("8119010B04").to_vec(), // map not array
-        hex!("A119010B").to_vec(),   // value too short
+        hex!("8119010504").to_vec(), // map not array
+        hex!("A1190105").to_vec(),   // value too short
     ];
     for v in invalid {
         let csc_d: Result<ClaimsSetClaimsCbor, _> = from_reader(v.clone().as_slice());
@@ -897,7 +924,46 @@ fn uptime_test() {
 
 #[test]
 fn other_test() {
-    // todo!("other_test")
+    let csc = ClaimsSetClaimsCbor {
+        iss: None,
+        sub: None,
+        aud: None,
+        exp: None,
+        nbf: None,
+        iat: None,
+        cti: None,
+        nonce: None,
+        boot_count: None,
+        boot_seed: None,
+        debug_status: None,
+        dloas: None,
+        hardware_model: None,
+        hardware_version: None,
+        intended_use: None,
+        location: None,
+        profile: None,
+        oem_boot: None,
+        sw_name: None,
+        sw_version: None,
+        ueid: None,
+        uptime: None,
+        manifests: None,
+        measurements: None,
+        measurement_results: None,
+        oemid: None,
+        sueids: None,
+        submods: None,
+        other: Some(vec![TupleCbor {
+            key: Value::Integer((-70000).into()),
+            value: Value::Text("custom-claim".to_string()),
+        }]),
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&csc, &mut buf);
+    let decoded: ClaimsSetClaimsCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(csc, decoded);
+    assert!(decoded.other.is_some());
+    assert_eq!(decoded.other.as_ref().unwrap().len(), 1);
 }
 
 #[test]
@@ -919,18 +985,18 @@ fn location_type_test() {
         hardware_version: None,
         intended_use: None,
         location: Some(LocationTypeCbor {
-            latitude: 0,
-            longitude: 1,
-            altitude: Some(2),
-            accuracy: Some(3),
-            altitude_accuracy: Some(4),
-            heading: Some(5),
-            speed: Some(6),
+            latitude: 0.0,
+            longitude: 1.0,
+            altitude: Some(2.0),
+            accuracy: Some(3.0),
+            altitude_accuracy: Some(4.0),
+            heading: Some(5.0),
+            speed: Some(6.0),
             timestamp: Some(TimeCbor::T(Required(1670527898))),
             age: Some(7),
         }),
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
         ueid: None,
@@ -949,10 +1015,13 @@ fn location_type_test() {
         "Encoded ClaimsSetClaims: {:?}",
         buffer_to_hex(encoded_token.as_slice())
     );
-    assert_eq!(
-        encoded_token,
-        hex!("A1190108A9010002010302040305040605070608C11A63923B9A0907").to_vec()
-    );
+    let decoded: ClaimsSetClaimsCbor = from_reader(encoded_token.as_slice()).unwrap();
+    assert_eq!(csc, decoded);
+    let csc_json: ClaimsSetClaims = decoded.try_into().unwrap();
+    let csc_cbor: ClaimsSetClaimsCbor = csc_json.try_into().unwrap();
+    let mut encoded_token2 = vec![];
+    let _ = into_writer(&csc_cbor, &mut encoded_token2);
+    assert_eq!(encoded_token2, encoded_token);
 }
 
 #[test]
@@ -985,7 +1054,7 @@ fn measurement_results_test() {
         intended_use: None,
         location: None,
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
         ueid: None,
@@ -1037,7 +1106,7 @@ fn oemid_test() {
             intended_use: None,
             location: None,
             profile: None,
-            secure_boot: None,
+            oem_boot: None,
             sw_name: None,
             sw_version: None,
             ueid: None,
@@ -1093,7 +1162,7 @@ fn sueids_type_test() {
         intended_use: None,
         location: None,
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
         ueid: None,
@@ -1133,18 +1202,18 @@ fn submods_type_test() {
         hardware_version: None,
         intended_use: None,
         location: Some(LocationTypeCbor {
-            latitude: 0,
-            longitude: 1,
-            altitude: Some(2),
-            accuracy: Some(3),
-            altitude_accuracy: Some(4),
-            heading: Some(5),
-            speed: Some(6),
+            latitude: 0.0,
+            longitude: 1.0,
+            altitude: Some(2.0),
+            accuracy: Some(3.0),
+            altitude_accuracy: Some(4.0),
+            heading: Some(5.0),
+            speed: Some(6.0),
             timestamp: Some(TimeCbor::T(Required(1670527898))),
             age: Some(7),
         }),
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
         ueid: None,
@@ -1158,6 +1227,9 @@ fn submods_type_test() {
         other: None,
     };
     let sm = SubmoduleCbor::ClaimsSet(Box::new(sm_csc));
+    let mut submods = BTreeMap::new();
+    submods.insert("submod1".to_string(), sm);
+    let sm_map = SubmodsMapCbor(submods);
 
     let csc = ClaimsSetClaimsCbor {
         iss: None,
@@ -1177,7 +1249,7 @@ fn submods_type_test() {
         intended_use: None,
         location: None,
         profile: None,
-        secure_boot: None,
+        oem_boot: None,
         sw_name: None,
         sw_version: None,
         ueid: None,
@@ -1187,7 +1259,7 @@ fn submods_type_test() {
         measurement_results: None,
         oemid: None,
         sueids: None,
-        submods: Some(sm),
+        submods: Some(sm_map),
         other: None,
     };
     let mut encoded_token = vec![];
@@ -1201,4 +1273,104 @@ fn submods_type_test() {
     let mut encoded_token2 = vec![];
     let _ = into_writer(&csc_cbor, &mut encoded_token2);
     assert_eq!(encoded_token2, encoded_token);
+}
+
+#[test]
+fn submodule_cbor_try_from_value_test() {
+    use eat::cbor_specific::SelectorCbor;
+
+    // Test 1: Map Value → ClaimsSet
+    // Encode a simple ClaimsSetClaimsCbor with just iss set, then parse as Value, then try_from
+    let csc = ClaimsSetClaimsCbor {
+        iss: Some("test-issuer".to_string()),
+        sub: None,
+        aud: None,
+        exp: None,
+        nbf: None,
+        iat: None,
+        cti: None,
+        nonce: None,
+        boot_count: None,
+        boot_seed: None,
+        debug_status: None,
+        dloas: None,
+        hardware_model: None,
+        hardware_version: None,
+        intended_use: None,
+        location: None,
+        profile: None,
+        oem_boot: None,
+        sw_name: None,
+        sw_version: None,
+        ueid: None,
+        uptime: None,
+        manifests: None,
+        measurements: None,
+        measurement_results: None,
+        oemid: None,
+        sueids: None,
+        submods: None,
+        other: None,
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&csc, &mut buf);
+    let value: Value = from_reader(buf.as_slice()).unwrap();
+    assert!(matches!(&value, Value::Map(_)));
+    let sm: SubmoduleCbor = value.try_into().unwrap();
+    match &sm {
+        SubmoduleCbor::ClaimsSet(cs) => assert_eq!(cs.iss, Some("test-issuer".to_string())),
+        _ => panic!("Expected ClaimsSet variant"),
+    }
+
+    // Test 2: Text Value → JsonTokenInsideCborToken
+    let text_value = Value::Text("eyJhbGciOiJub25lIn0".to_string());
+    let sm: SubmoduleCbor = text_value.try_into().unwrap();
+    match &sm {
+        SubmoduleCbor::SelectorCbor(SelectorCbor::JsonTokenInsideCborToken(s)) => {
+            assert_eq!(s, "eyJhbGciOiJub25lIn0");
+        }
+        _ => panic!("Expected JsonTokenInsideCborToken variant"),
+    }
+
+    // Test 3: Bytes Value → CborTokenInsideCborToken
+    let bytes_value = Value::Bytes(vec![0xA1, 0x01, 0x02]);
+    let sm: SubmoduleCbor = bytes_value.try_into().unwrap();
+    match &sm {
+        SubmoduleCbor::SelectorCbor(SelectorCbor::CborTokenInsideCborToken(b)) => {
+            assert_eq!(b, &vec![0xA1, 0x01, 0x02]);
+        }
+        _ => panic!("Expected CborTokenInsideCborToken variant"),
+    }
+
+    // Test 4: Array Value → DetachedSubmoduleDigest
+    let dsd = DetachedSubmoduleDigestCbor {
+        hash_algorithm: common::TextOrInt::Int(1),
+        digest: vec![0xDE, 0xAD, 0xBE, 0xEF],
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&dsd, &mut buf);
+    let value: Value = from_reader(buf.as_slice()).unwrap();
+    assert!(matches!(&value, Value::Array(_)));
+    let sm: SubmoduleCbor = value.try_into().unwrap();
+    match &sm {
+        SubmoduleCbor::SelectorCbor(SelectorCbor::DetachedSubmoduleDigest(d)) => {
+            assert_eq!(d.digest, vec![0xDE, 0xAD, 0xBE, 0xEF]);
+        }
+        _ => panic!("Expected DetachedSubmoduleDigest variant"),
+    }
+
+    // Test 5: &Value variant
+    let text_value = Value::Text("test-jwt-token".to_string());
+    let sm: SubmoduleCbor = (&text_value).try_into().unwrap();
+    match &sm {
+        SubmoduleCbor::SelectorCbor(SelectorCbor::JsonTokenInsideCborToken(s)) => {
+            assert_eq!(s, "test-jwt-token");
+        }
+        _ => panic!("Expected JsonTokenInsideCborToken variant"),
+    }
+
+    // Test 6: Unsupported type returns error
+    let bad_value = Value::Bool(true);
+    let result: Result<SubmoduleCbor, String> = bad_value.try_into();
+    assert!(result.is_err());
 }

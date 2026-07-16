@@ -1,13 +1,16 @@
 //! Code supporting StructToArray procedural macro
 
+use proc_macro_error2::abort;
 use proc_macro2::TokenStream;
-use proc_macro_error::abort;
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::{DeriveInput, Ident, Lifetime};
 
-use crate::cbor_derive_utils::{extract_type, is_option, is_option_vec, is_vec};
-use crate::default_lifetime;
-use crate::field::StructField;
+use crate::{
+    attributes::TypeAttrs,
+    cbor_derive_utils::{extract_type, is_option, is_option_vec, is_vec},
+    default_lifetime,
+    field::StructField,
+};
 
 /// Derive the `StructToMap` trait for a struct
 pub(crate) struct DeriveStructToArray {
@@ -25,6 +28,9 @@ pub(crate) struct DeriveStructToArray {
 
     /// Name of alternative struct
     alt_struct_name: String,
+
+    /// Struct-level attributes
+    type_attrs: TypeAttrs,
 }
 
 impl DeriveStructToArray {
@@ -44,7 +50,7 @@ impl DeriveStructToArray {
             .next()
             .map(|lt| lt.lifetime.clone());
 
-        // let type_attrs = TypeAttrs::parse(&input.attrs);
+        let type_attrs = TypeAttrs::parse(&input.attrs);
 
         let fields = data.fields.iter().map(StructField::new).collect();
 
@@ -54,6 +60,7 @@ impl DeriveStructToArray {
             fields,
             alt_struct: TokenStream::new(),
             alt_struct_name: String::new(),
+            type_attrs,
         };
 
         state.derive_alt_struct();
@@ -62,13 +69,13 @@ impl DeriveStructToArray {
 
     fn derive_alt_struct(&mut self) {
         self.alt_struct_name = format!("{}Cbor", self.ident);
-        let sname = syn::Ident::new(&self.alt_struct_name, self.ident.span());
+        let sname = Ident::new(&self.alt_struct_name, self.ident.span());
 
         let mut fields = TokenStream::new();
 
         let comment = format!("CBOR encoding/decoding of [{}]", self.ident);
 
-        for (_field_count, field) in (self.fields).iter().enumerate() {
+        for field in (self.fields).iter() {
             let name = &field.ident;
 
             let ty = field.field_type.clone();
@@ -79,7 +86,7 @@ impl DeriveStructToArray {
                     None => panic!("Failed to determine type for field {}", name),
                 };
 
-                let ty2 = syn::Ident::new(&alt_ty, self.ident.span());
+                let ty2 = Ident::new(&alt_ty, self.ident.span());
                 if is_option_vec(&ty) {
                     quote! {
                          /// Defer decoded field
@@ -125,7 +132,7 @@ impl DeriveStructToArray {
     pub fn to_tokens(&self) -> TokenStream {
         let orig_ident = &self.ident;
         let alt_struct_name = format!("{}Cbor", self.ident);
-        let alt_ident = syn::Ident::new(&alt_struct_name, self.ident.span());
+        let alt_ident = Ident::new(&alt_struct_name, self.ident.span());
         let alt_ident_name = format!("{}", alt_ident);
 
         let lifetime = match self.lifetime {
@@ -153,6 +160,18 @@ impl DeriveStructToArray {
         }
 
         let alt_struct = &self.alt_struct;
+
+        let non_empty_ser_check = if self.type_attrs.non_empty {
+            quote! {
+                if v.is_empty() {
+                    return Err(__S::Error::custom(
+                        concat!("non-empty constraint violated: ", #alt_ident_name, " has no present fields")
+                    ));
+                }
+            }
+        } else {
+            quote! {}
+        };
 
         quote! {
             macro_rules! val {
@@ -245,7 +264,7 @@ impl DeriveStructToArray {
                 fn serialize<__S>(
                     &self,
                     __serializer: __S,
-                ) -> serde::__private::Result<__S::Ok, __S::Error>
+                ) -> Result<__S::Ok, __S::Error>
                     where
                         __S: serde::Serializer,
                 {
@@ -255,6 +274,9 @@ impl DeriveStructToArray {
                     };
                     // todo - what about fields that are encoded as NULL?
                     v.retain(|x| *x != Value::Null);
+
+                    #non_empty_ser_check
+
                     let m = Value::Array(v);
                     m.serialize(__serializer)
                 }
@@ -263,7 +285,7 @@ impl DeriveStructToArray {
             impl<'de> Deserialize<'de> for #alt_ident<#lt_params> {
                 fn deserialize<__D>(
                     deserializer: __D,
-                ) -> serde::__private::Result<Self, __D::Error>
+                ) -> Result<Self, __D::Error>
                 where
                     __D: serde::Deserializer<'de>,
                 {
@@ -279,12 +301,11 @@ impl DeriveStructToArray {
                         fn visit_seq<__A>(
                             self,
                             mut __seq: __A,
-                        ) -> serde::__private::Result<Self::Value, __A::Error>
+                        ) -> Result<Self::Value, __A::Error>
                         where
                             __A: serde::de::SeqAccess<'de>,
                         {
-                            let i = __seq.size_hint().unwrap_or_else(|| 0);
-                            let mut values = Vec::with_capacity(size_hint::cautious(__seq.size_hint()));
+                            let mut values = Vec::with_capacity(__seq.size_hint().unwrap_or(0).min(4096));
                             while let Some(value) = __seq.next_element()? {
                                 values.push(value);
                             }

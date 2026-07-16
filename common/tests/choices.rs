@@ -1,7 +1,8 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::value::Value;
-use common::choices::*;
+use ciborium::{de::from_reader, ser::into_writer, value::Value};
+
+use common::choices::{
+    VersionScheme, VersionSchemeCbor, VersionSchemeKnown, VersionSchemeKnownCbor,
+};
 
 #[test]
 fn version_scheme_cbor_test() {

@@ -8,11 +8,11 @@ along with a command line utility to generate and parse artifacts from these spe
 - [cbor_derive](./cbor_derive/index.html) provides procedural macros to enable the use of structures to generate maps and arrays
 - [cfcli](./cfcli/index.html) provides a command line utility to exercise the other repositories
 - [common](./common/index.html) provides a set of definitions that are shared by various specifications
-- [corim](./corim/index.html) provides support for the [Concise Reference Integrity Manifest](https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03) specification
+- [corim](./corim/index.html) provides support for the [Concise Reference Integrity Manifest](https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10) specification
 - [cose](./cose/index.html) provides support for the [CBOR Object Signing and Encryption (COSE)](https://datatracker.ietf.org/doc/html/rfc9052) specification
-- [coswid](./coswid/index.html) provides support for the [Concise Software Identification Tags](https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22) specification
+- [coswid](./coswid/index.html) provides support for the [Concise Software Identification Tags](https://datatracker.ietf.org/doc/html/rfc9393) specification
 - [cots](./cots/index.html) provides support for the [Concise TA Stores](https://datatracker.ietf.org/doc/html/draft-wallace-rats-concise-ta-stores-01) specification
-- [eat](./eat/index.html) provides support for the [Entity Attestation Token](https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat-17) specification
+- [eat](./eat/index.html) provides support for the [Entity Attestation Token](https://datatracker.ietf.org/doc/html/rfc9711) specification
 - [webauthn_asf](./webauthn_asf/index.html) provides support for attestation statement formats as defined in [Web Authentication: An API for accessing Public Key Credentials Level 2](https://www.w3.org/TR/webauthn-2/) specification
 
 CBOR support is provided by the [ciborium](https://crates.io/crates/ciborium) library and JSON support is provided by the [serde-json](https://crates.io/crates/serde_json) library.
@@ -36,7 +36,7 @@ as well to marshal between various Value representations and between the origina
 
 ### Example
 
-The [CoRIM](https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03) specification defines the CorimMetaMap as follows:
+The [CoRIM](https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10) specification defines the CorimMetaMap as follows:
 
 ```text
 corim-meta-map = {
@@ -151,7 +151,7 @@ CBOR with integer map keys: "A200A2006941434D45204C74642E01D8207468747470733A2F2
 
 ## Extensibility
 
-It is common practice for specification authors to make many CDDL definitions extensible. In [coswid](https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22) 
+It is common practice for specification authors to make many CDDL definitions extensible. In [coswid](https://datatracker.ietf.org/doc/html/rfc9393) 
 many structures are extensible in two ways. For example, the `entity-entry` definition shows extensibility via the `global-attributes` group 
 and via the `entity-extension` socket.
 
@@ -213,7 +213,7 @@ will be required in the `cbor_derive` library.
 
 - Extensibility support is currently limited to fields with integer keys.
 
-- Ideally structures could be used to represent groups (like the `filesystem-item` and similar groups in [coswid](https://datatracker.ietf.org/doc/html/draft-ietf-sacm-coswid-22)).
+- Ideally structures could be used to represent groups (like the `filesystem-item` and similar groups in [coswid](https://datatracker.ietf.org/doc/html/rfc9393)).
 An attempt was made to define a StructToGroup macro, but this was not successful. Fields from groups are simply copied into the 
 target structures as a workaround.
 
@@ -246,7 +246,7 @@ in relatively early stages of development (and, correspondingly, so are other im
 
 ## Rust Version
 
-This crate was developed using **Rust 1.63**.
+This crate was developed using **Rust 1.85**.
 
 We may change the MSRV in the future, but it will be accompanied by a minor
 version bump.
@@ -269,7 +269,7 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (badges)
 
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.63+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 
 [//]: # (links)
 

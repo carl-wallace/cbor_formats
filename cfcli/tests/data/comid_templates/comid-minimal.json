@@ -1,18 +1,15 @@
 {
-  "lang": "en-GB",
   "tag-identity": {
     "id": "43BBE37F-2E61-4B33-AED3-53CFF1428B16",
     "version": 0
   },
-  "profiles": "http://arm.com/cca/ssd/1.0",
   "entities": [
     {
       "name": "ACME Ltd.",
       "regid": "https://acme.example",
       "roles": [
         "tagCreator",
-        "creator",
-        "maintainer"
+        "creator"
       ]
     }
   ],
@@ -22,8 +19,8 @@
         "environment": {
           "class": {
             "id": {
-              "type": "psa.impl-id",
-              "value": "YWNtZS1pbXBsZW1lbnRhdGlvbi1pZC0wMDAwMDAwMDE="
+              "type": "uuid",
+              "value": [49, 251, 90, 191, 2, 62, 73, 146, 170, 78, 149, 249, 193, 80, 59, 250]
             },
             "vendor": "ACME",
             "model": "RoadRunner"
@@ -31,14 +28,10 @@
         },
         "measurements": [
           {
-            "key": {
-              "type": "cca.platform-config-id",
-              "value": "cfg v1.0.0"
-            },
             "value": {
-              "raw-value": {
-                "type": "bytes",
-                "value": "cmF3dmFsdWUKcmF3dmFsdWUK"
+              "version": {
+                "version": "1.0.0",
+                "version_scheme": 1
               }
             }
           }
@@ -47,4 +40,3 @@
     ]
   }
 }
-

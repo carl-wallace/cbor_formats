@@ -1,32 +1,43 @@
-//! Map-based structs
+//! Map-based structs from the Entity Attestation Token (EAT) spec ([RFC 9711]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `Claims-Set` | [`ClaimsSetClaims`] / [`ClaimsSetClaimsCbor`] |
+//! | `location-type` | [`LocationType`] / [`LocationTypeCbor`] |
+//! | `sueids-type` | [`SueidsType`] / [`SueidsTypeCbor`] |
+//!
+//! [RFC 9711]: https://datatracker.ietf.org/doc/html/rfc9711
 
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
+use alloc::{
+    collections::BTreeMap,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
 
 use ciborium::{cbor, value::Value};
-use serde::{Deserialize, Deserializer, Serialize};
 use serde::{
-    __private::size_hint,
+    Deserialize, Deserializer, Serialize,
     de::{Error, MapAccess, Visitor},
     ser::Error as OtherError,
 };
 
 use cbor_derive::StructToMap;
-use common::tuple_map::{TupleMap, TupleMapCbor};
-use common::*;
-use corim::choices::ProfileTypeChoice;
+use common::{
+    GeneralProfile,
+    tuple_map::{TupleMap, TupleMapCbor},
+    *,
+};
 
-use crate::arrays::*;
-use crate::cbor_specific::SubmoduleCbor;
-use crate::choices::*;
-use crate::json_specific::Submodule;
+use crate::{arrays::*, cbor_specific::SubmodsMapCbor, choices::*, json_specific::SubmodsMap};
 
 /// JSON encoding/decoding of `Claims-Set-Claims`, see [EAT Section 4.2].
 ///
-/// Use [ClaimsSetClaimsCbor](ClaimsSetClaimsCbor) for CBOR-encoded EATs.
+/// Use [ClaimsSetClaimsCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// string-or-uri = text
@@ -51,21 +62,21 @@ use crate::json_specific::Submodule;
 /// oemid-label            = 258
 /// hardware-model-label   = 259
 /// hardware-version-label = 260
-/// secure-boot-label      = 262
+/// uptime-label           = 261
+/// oem-boot-label         = 262
 /// debug-status-label     = 263
 /// location-label         = 264
 /// profile-label          = 265
 /// submods-label          = 266
-/// uptime-label           =    267
-/// boot-seed-label        =    268
-/// intended-use-label     =    269
-/// dloas-label            =    270
-/// sw-name-label          =    271
-/// sw-version-label       =    272
-/// manifests-label        =    273
-/// measurements-label     =    274
-/// measurement-results-label = 275
-/// boot-count-label       =    276
+/// boot-count-label       = 267
+/// boot-seed-label        = 268
+/// dloas-label            = 269
+/// sw-name-label          = 270
+/// sw-version-label       = 271
+/// manifests-label        = 272
+/// measurements-label     = 273
+/// measurement-results-label = 274
+/// intended-use-label     = 275
 ///
 /// iss-claim-label = 1
 /// sub-claim-label = 2
@@ -107,7 +118,7 @@ use crate::json_specific::Submodule;
 /// $$Claims-Set-Claims //= (submods-label => { + text => Submodule })
 ///
 /// $$Claims-Set-Claims //= (profile-label => general-uri / general-oid)
-/// $$Claims-Set-Claims //= (secure-boot-label => bool)
+/// $$Claims-Set-Claims //= (oem-boot-label => bool)
 /// $$Claims-Set-Claims //= (sw-name-label => tstr )
 /// $$Claims-Set-Claims //= (sw-version-label => sw-version-type)
 /// $$Claims-Set-Claims //= (ueid-label => ueid-type)
@@ -125,73 +136,102 @@ use crate::json_specific::Submodule;
 ///        * Claim-Label .feature "extended-claims-label" => any
 ///    }
 /// ```
-/// [EAT Section 4.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2
+/// [EAT Section 4.2]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2
 #[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ClaimsSetClaims {
     #[cbor(tag = "1", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub iss: Option<String>,
     #[cbor(tag = "2", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sub: Option<String>,
     #[cbor(tag = "3", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub aud: Option<String>,
     #[cbor(tag = "4", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub exp: Option<Time>,
     #[cbor(tag = "5", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub nbf: Option<Time>,
     #[cbor(tag = "6", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub iat: Option<Time>,
     #[cbor(tag = "7", value = "Bytes")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cti: Option<Vec<u8>>,
     #[cbor(tag = "10")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub nonce: Option<NonceType>,
-    #[cbor(tag = "276", value = "Integer")]
+    #[cbor(tag = "267", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub boot_count: Option<u64>,
     #[cbor(tag = "268", value = "Bytes")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub boot_seed: Option<Vec<u8>>,
     #[cbor(tag = "263")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub debug_status: Option<DebugStatusType>,
-    #[cbor(tag = "270", value = "Array", cbor = "true")]
+    #[cbor(tag = "269", value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub dloas: Option<Vec<DloaType>>,
     #[cbor(tag = "259", value = "Bytes")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hardware_model: Option<Vec<u8>>,
     #[cbor(tag = "260", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hardware_version: Option<HardwareVersionType>,
-    #[cbor(tag = "269")]
+    #[cbor(tag = "275")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub intended_use: Option<IntendedUseType>,
     #[cbor(tag = "264", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<LocationType>,
     #[cbor(tag = "265")]
-    pub profile: Option<ProfileTypeChoice>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub profile: Option<GeneralProfile>,
     #[cbor(tag = "262", value = "Bool")]
-    pub secure_boot: Option<bool>,
-    #[cbor(tag = "271", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub oem_boot: Option<bool>,
+    #[cbor(tag = "270", value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sw_name: Option<String>,
-    #[cbor(tag = "272", cbor = "true")]
+    #[cbor(tag = "271", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sw_version: Option<SwVersionType>,
     #[cbor(tag = "256")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ueid: Option<UeidType>,
-    #[cbor(tag = "267", value = "Integer")]
+    #[cbor(tag = "261", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub uptime: Option<u64>,
-    #[cbor(tag = "273", cbor = "true")]
+    #[cbor(tag = "272", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub manifests: Option<ManifestsType>,
-    #[cbor(tag = "274", cbor = "true")]
+    #[cbor(tag = "273", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub measurements: Option<MeasurementsType>,
-    #[cbor(tag = "275", cbor = "true")]
+    #[cbor(tag = "274", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub measurement_results: Option<MeasurementResultsGroupArray>,
     #[cbor(tag = "258")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub oemid: Option<Oemid>,
     #[cbor(tag = "257", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sueids: Option<TupleMap>,
     #[cbor(tag = "266", cbor = "true")]
-    pub submods: Option<Submodule>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub submods: Option<SubmodsMap>,
     #[cbor(value = "Array", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other: Option<Vec<Tuple>>,
 }
 
 /// JSON encoding/decoding of `location-type`, see [EAT Section 4.2.10].
 ///
-/// Use [LocationTypeCbor](LocationTypeCbor) for CBOR-encoded EATs.
+/// Use [LocationTypeCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// location-type = {
@@ -216,50 +256,57 @@ pub struct ClaimsSetClaims {
 /// timestamp         = 8
 /// age               = 9
 /// ```
-/// [EAT Section 4.2.10]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.10
-#[derive(Clone, Debug, Eq, PartialEq, StructToMap, Serialize, Deserialize)]
+/// [EAT Section 4.2.10]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.10
+#[derive(Clone, Debug, PartialEq, StructToMap, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct LocationType {
-    #[cbor(tag = "1", value = "Integer")]
-    pub latitude: u64,
-    #[cbor(tag = "2", value = "Integer")]
-    pub longitude: u64,
-    #[cbor(tag = "3", value = "Integer")]
-    pub altitude: Option<u64>,
-    #[cbor(tag = "4", value = "Integer")]
-    pub accuracy: Option<u64>,
-    #[cbor(tag = "5", value = "Integer")]
-    pub altitude_accuracy: Option<u64>,
-    #[cbor(tag = "6", value = "Integer")]
-    pub heading: Option<u64>,
-    #[cbor(tag = "7", value = "Integer")]
-    pub speed: Option<u64>,
+    #[cbor(tag = "1", value = "Float")]
+    pub latitude: f64,
+    #[cbor(tag = "2", value = "Float")]
+    pub longitude: f64,
+    #[cbor(tag = "3", value = "Float")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub altitude: Option<f64>,
+    #[cbor(tag = "4", value = "Float")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub accuracy: Option<f64>,
+    #[cbor(tag = "5", value = "Float")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub altitude_accuracy: Option<f64>,
+    #[cbor(tag = "6", value = "Float")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub heading: Option<f64>,
+    #[cbor(tag = "7", value = "Float")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub speed: Option<f64>,
     #[cbor(tag = "8", cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub timestamp: Option<Time>,
     #[cbor(tag = "9", value = "Integer")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub age: Option<u64>,
 }
 
 /// JSON encoding/decoding of `sueids-type`, see [EAT Section 4.2.2].
 ///
-/// Use [SwVersionTypeCbor](SwVersionTypeCbor) for CBOR-encoded EATs.
+/// Use [SueidsTypeCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// sueids-type = {
 ///     + tstr => ueid-type
 /// }
 /// ```
-/// [EAT Section 4.2.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.2
-pub struct SueidsType(TupleMap);
+/// [EAT Section 4.2.2]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.2
+pub struct SueidsType(pub TupleMap);
 
 /// CBOR encoding/decoding of `sueids-type`, see [EAT Section 4.2.2].
 ///
-/// Use [SueidsType](SueidsType) for JSON-encoded EATs.
+/// Use [SueidsType] for JSON-encoded EATs.
 ///
 /// ```text
 /// sueids-type = {
 ///     + tstr => ueid-type
 /// }
 /// ```
-/// [EAT Section 4.2.2]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.2
-pub struct SueidsTypeCbor(TupleMapCbor);
+/// [EAT Section 4.2.2]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.2
+pub struct SueidsTypeCbor(pub TupleMapCbor);

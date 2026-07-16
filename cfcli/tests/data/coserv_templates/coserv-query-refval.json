@@ -1,0 +1,21 @@
+{
+  "profile": "tag:example.com,2025:cc-platform#1.0.0",
+  "query": {
+    "artifact_type": 2,
+    "environment_selector": {
+      "class": [
+        {
+          "class": {
+            "id": {
+              "type": "bytes",
+              "value": [0, 17, 34, 51]
+            },
+            "vendor": "ACME",
+            "model": "RoadRunner"
+          }
+        }
+      ]
+    },
+    "result_type": 0
+  }
+}

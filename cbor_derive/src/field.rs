@@ -1,12 +1,14 @@
 //! Structure field processing code adapted from the RustCrypto formats library.
 
+use proc_macro_error2::abort;
 use proc_macro2::TokenStream;
-use proc_macro_error::abort;
 use quote::quote;
 use syn::{Field, Ident, Type};
 
-use crate::attributes::FieldAttrs;
-use crate::cbor_derive_utils::*;
+use crate::{
+    attributes::FieldAttrs,
+    cbor_derive_utils::{extract_type, extract_type_from_option, is_option, is_option_vec, is_vec},
+};
 
 pub type TagNumber = i32;
 
@@ -68,6 +70,13 @@ impl StructField {
                         None => {}
                     };
                 }
+            } else if "Float" == self.attrs.value {
+                quote! {
+                    match &value.#field_ident {
+                        Some(val) => v.push((cval!(#t), val!(Value::Float(*val)))),
+                        None => {}
+                    };
+                }
             } else {
                 quote! {
                     match &value.#field_ident {
@@ -89,6 +98,10 @@ impl StructField {
             // Use the Bytes attribute value to signal this.
             quote! {
                 v.push((cval!(#t), val!(Value::Bytes(value.#field_ident.clone()))));
+            }
+        } else if "Float" == self.attrs.value {
+            quote! {
+                v.push((cval!(#t), val!(Value::Float(value.#field_ident))));
             }
         } else {
             quote! {
@@ -114,7 +127,7 @@ impl StructField {
 
         // get the type for use in constructing a <type>::try_from statement. This may be the inner
         // type of an Option<>, Vec<> or Option<Vec<>>.
-        let mut try_from_type = syn::Ident::new(&field_type_str, field_ident.span());
+        let mut try_from_type = Ident::new(&field_type_str, field_ident.span());
 
         if to_cbor {
             // if we are generating a try_from into CBOR types and the field is a CBOR type (i.e.,
@@ -124,29 +137,40 @@ impl StructField {
                     Some(t) => format!("{}Cbor", t),
                     None => panic!("Failed to determine type for field {}", field_ident),
                 };
-                try_from_type = syn::Ident::new(&x, field_ident.span())
+                try_from_type = Ident::new(&x, field_ident.span())
             };
         }
 
         if self.attrs.cbor.is_some() {
-            //todo error handling in closures
             if is_option_vec(&self.field_type) {
                 quote! {
-                    #field_ident: value.#field_ident.as_ref().map_or_else(|| None, |o| o.iter().map(|oo| Some(#try_from_type::try_from(oo).unwrap().clone())).collect()),
+                    #field_ident: match &value.#field_ident {
+                        Some(o) => {
+                            let items: Result<Vec<_>, String> = o.iter().map(|oo| #try_from_type::try_from(oo).map(|v| v.clone())).collect();
+                            Some(items?)
+                        }
+                        None => None,
+                    },
                 }
             } else if is_option(&self.field_type) {
                 quote! {
-                    #field_ident: value.#field_ident.as_ref().map_or_else(|| None, |o| Some(#try_from_type::try_from(o).unwrap().clone())),
+                    #field_ident: match &value.#field_ident {
+                        Some(o) => Some(#try_from_type::try_from(o)?.clone()),
+                        None => None,
+                    },
                 }
             } else if is_vec(&self.field_type) {
                 quote! {
-                    #field_ident: value.#field_ident.iter().map(|oo| #try_from_type::try_from(oo).unwrap().clone()).collect(),
+                    #field_ident: {
+                        let items: Result<Vec<_>, String> = value.#field_ident.iter().map(|oo| #try_from_type::try_from(oo).map(|v| v.clone())).collect();
+                        items?
+                    },
                 }
             } else {
                 quote! {
                     #field_ident: match #try_from_type::try_from(&value.#field_ident) {
                         Ok(val) => val.clone(),
-                        Err(_) => return Err(format!("Failed to to convert {} to {}", #field_ident_str, #field_type_str))
+                        Err(_) => return Err(format!("Failed to convert {} to {}", #field_ident_str, #field_type_str))
                     },
                 }
             }
@@ -158,7 +182,7 @@ impl StructField {
             quote! {
                 #field_ident: match #try_from_type::try_from(&value.#field_ident) {
                     Ok(val) => val.clone(),
-                    Err(_) => return Err(format!("Failed to to convert {} to {}", #field_ident_str, #field_type_str))
+                    Err(_) => return Err(format!("Failed to convert {} to {}", #field_ident_str, #field_type_str))
                 },
             }
         }
@@ -186,9 +210,9 @@ impl StructField {
         let field_adjusted_nested_type = if let Some(ttt) = field_nested_type {
             if self.attrs.cbor.is_some() {
                 let x = format!("{}Cbor", ttt);
-                Some(syn::Ident::new(&x, field_ident.span()))
+                Some(Ident::new(&x, field_ident.span()))
             } else {
-                Some(syn::Ident::new(&ttt, field_ident.span()))
+                Some(Ident::new(&ttt, field_ident.span()))
             }
         } else {
             None
@@ -200,13 +224,13 @@ impl StructField {
                 None => panic!("Failed to determine type for field {}", field_ident),
             };
 
-            syn::Ident::new(&x, field_ident.span())
+            Ident::new(&x, field_ident.span())
         } else {
             let ty_str = match extract_type(field_type) {
                 Some(t) => t,
                 None => panic!("Failed to determine type for field {}", field_ident),
             };
-            syn::Ident::new(&ty_str, field_ident.span())
+            Ident::new(&ty_str, field_ident.span())
         };
 
         let is_tuple_cbor = "TupleCbor" == format!("{}", f2);
@@ -216,7 +240,9 @@ impl StructField {
             Some(t) => t,
             None => {
                 if !is_tuple_cbor {
-                    panic!("At present, only maps with integer indices are supported by StructToMap (default Ciborium support enables text indices)");
+                    panic!(
+                        "At present, only maps with integer indices are supported by StructToMap (default Ciborium support enables text indices)"
+                    );
                 }
                 66666
             }
@@ -230,19 +256,24 @@ impl StructField {
                 },
             }
         } else if "Bytes" == self.attrs.value {
-            //todo error handling in closures
             if is_option {
                 quote! {
                     #field_ident: match m.get(&#t) {
-                        Some(v) => m.get(&#t).map(|m| m.as_bytes().unwrap().clone()),
+                        Some(v) => match v.as_bytes() {
+                            Some(b) => Some(b.clone()),
+                            None => return Err(format!("Failed to process {} as bytes", #field_ident_str))
+                        },
                         None => None
                     },
                 }
             } else {
                 quote! {
-                    #field_ident: match m.get(&#t).map(|m| m.as_bytes().unwrap().clone()) {
-                        Some(val) => val,
-                        None => return Err(format!("Failed to to process {}", #field_ident_str))
+                    #field_ident: match m.get(&#t) {
+                        Some(v) => match v.as_bytes() {
+                            Some(b) => b.clone(),
+                            None => return Err(format!("Failed to process {} as bytes", #field_ident_str))
+                        },
+                        None => return Err(format!("Failed to process {}", #field_ident_str))
                     },
                 }
             }
@@ -251,47 +282,58 @@ impl StructField {
                 quote! {
                     #field_ident: match m.get(&#t) {
                         Some(v) => match #f2::try_from(
-                            match m[&#t].as_map() {
+                            match v.as_map() {
                             Some(val) => val.clone(),
-                            None => return Err(format!("Failed to to process {} as a map: {:?}", #field_ident_str, v))
+                            None => return Err(format!("Failed to process {} as a map: {:?}", #field_ident_str, v))
                         }
                     ) {
                         Ok(val) => Some(val),
-                        Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                        Err(e) => return Err(format!("Failed to process {} with error: {}", #field_ident_str, e))
                     },
                         None => None
                     },
                 }
             } else {
                 quote! {
-                    #field_ident: match #f2::try_from(
-                            match m[&#t].as_map() {
+                    #field_ident: match m.get(&#t) {
+                        Some(v) => match #f2::try_from(
+                            match v.as_map() {
                             Some(val) => val.clone(),
-                            None => return Err(format!("Failed to to process {} as a map: {:?}", #field_ident_str, m[&#t]))
+                            None => return Err(format!("Failed to process {} as a map: {:?}", #field_ident_str, v))
                         }
                     ) {
                         Ok(val) => val,
-                        Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                        Err(e) => return Err(format!("Failed to process {} with error: {}", #field_ident_str, e))
+                    },
+                        None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                     },
                 }
             }
         } else if "Array" == self.attrs.value {
-            //todo error handling in closures
             if is_option {
                 quote! {
                     #field_ident: match m.get(&#t) {
-                        Some(v) => match m[&#t].as_array() {
-                            Some(a) => Some(a.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone()).unwrap()).collect()),
-                            None => return Err(format!("Failed to to process {} as an array: {:?}", #field_ident_str, m[&#t]))
+                        Some(v) => match v.as_array() {
+                            Some(a) => {
+                                let items: Result<Vec<_>, String> = a.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone())).collect();
+                                Some(items?)
+                            },
+                            None => return Err(format!("Failed to process {} as an array: {:?}", #field_ident_str, v))
                         },
                         None => None
                     },
                 }
             } else {
                 quote! {
-                    #field_ident: match m[&#t].as_array() {
-                        Some(a) => a.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone()).unwrap()).collect(),
-                        None => return Err(format!("Failed to to process {} as an array: {:?}", #field_ident_str, m[&#t]))
+                    #field_ident: match m.get(&#t) {
+                        Some(v) => match v.as_array() {
+                            Some(a) => {
+                                let items: Result<Vec<_>, String> = a.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone())).collect();
+                                items?
+                            },
+                            None => return Err(format!("Failed to process {} as an array: {:?}", #field_ident_str, v))
+                        },
+                        None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                     },
                 }
             }
@@ -302,16 +344,19 @@ impl StructField {
                         Some(v) => Some(
                             match v.as_text() {
                                 Some(val) => val.to_string(),
-                                None => return Err(format!("Failed to to process {} as text: {:?}", #field_ident_str, v))
+                                None => return Err(format!("Failed to process {} as text: {:?}", #field_ident_str, v))
                             }),
                         None => None,
                     },
                 }
             } else {
                 quote! {
-                    #field_ident: match m[&#t].as_text() {
-                        Some(val) => val.to_string(),
-                        None => return Err(format!("Failed to to process {} as text: {:?}", #field_ident_str, m[&#t]))
+                    #field_ident: match m.get(&#t) {
+                        Some(v) => match v.as_text() {
+                            Some(val) => val.to_string(),
+                            None => return Err(format!("Failed to process {} as text: {:?}", #field_ident_str, v))
+                        },
+                        None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                     },
                 }
             }
@@ -324,24 +369,60 @@ impl StructField {
                                 Some(i) => {
                                     match i.try_into() {
                                         Ok(val) => val,
-                                        Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                                        Err(e) => return Err(format!("Failed to process {} with error: {}", #field_ident_str, e))
                                     }
                                 }
-                                None => return Err(format!("Failed to to process {} as an integer", #field_ident_str))
+                                None => return Err(format!("Failed to process {} as an integer", #field_ident_str))
                             }),
                         None => None,
                     },
                 }
             } else {
                 quote! {
-                    #field_ident: match m[&#t].as_integer() {
-                        Some(i) => {
-                            match i.try_into() {
-                                Ok(val) => val,
-                                Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                    #field_ident: match m.get(&#t) {
+                        Some(v) => match v.as_integer() {
+                            Some(i) => {
+                                match i.try_into() {
+                                    Ok(val) => val,
+                                    Err(e) => return Err(format!("Failed to process {} with error: {}", #field_ident_str, e))
+                                }
                             }
-                        }
-                        None => return Err(format!("Failed to to process {} as an integer", #field_ident_str))
+                            None => return Err(format!("Failed to process {} as an integer", #field_ident_str))
+                        },
+                        None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
+                    },
+                }
+            }
+        } else if "Float" == self.attrs.value {
+            // CDDL `number` accepts both float and integer; try as_float() first, fall back to integer
+            if is_option {
+                quote! {
+                    #field_ident: match m.get(&#t) {
+                        Some(v) => Some(
+                            if let Some(val) = v.as_float() {
+                                val
+                            } else if let Some(i) = v.as_integer() {
+                                let iv: i128 = i.into();
+                                iv as f64
+                            } else {
+                                return Err(format!("Failed to process {} as a number", #field_ident_str))
+                            }),
+                        None => None,
+                    },
+                }
+            } else {
+                quote! {
+                    #field_ident: match m.get(&#t) {
+                        Some(v) =>
+                            if let Some(val) = v.as_float() {
+                                val
+                            } else if let Some(i) = v.as_integer() {
+                                let iv: i128 = i.into();
+                                iv as f64
+                            } else {
+                                return Err(format!("Failed to process {} as a number", #field_ident_str))
+                            },
+                        None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                     },
                 }
             }
@@ -352,16 +433,19 @@ impl StructField {
                         Some(v) => Some(
                             match v.as_bool() {
                                 Some(val) => val,
-                                None => return Err(format!("Failed to to process {} as a boolean", #field_ident_str))
+                                None => return Err(format!("Failed to process {} as a boolean", #field_ident_str))
                             }),
                         None => None,
                     },
                 }
             } else {
                 quote! {
-                    #field_ident: match m[&#t].as_bool() {
-                        Some(val) => val,
-                        None => return Err(format!("Failed to to process {} as a boolean", #field_ident_str))
+                    #field_ident: match m.get(&#t) {
+                        Some(v) => match v.as_bool() {
+                            Some(val) => val,
+                            None => return Err(format!("Failed to process {} as a boolean", #field_ident_str))
+                        },
+                        None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                     },
                 }
             }
@@ -371,7 +455,7 @@ impl StructField {
                     Some(v) => {
                         match #f2::try_from(v) {
                             Ok(val) => Some(val),
-                            Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                            Err(e) => return Err(format!("Failed to process {} with error: {}", #field_ident_str, e))
                         }
                     },
                     None => None,
@@ -379,9 +463,12 @@ impl StructField {
             }
         } else {
             quote! {
-                #field_ident: match #f2::try_from(&m[&#t]) {
-                    Ok(v) => v,
-                    Err(e) => return Err(format!("Failed to to process {} with error: {}", #field_ident_str, e))
+                #field_ident: match m.get(&#t) {
+                    Some(v) => match #f2::try_from(v) {
+                        Ok(val) => val,
+                        Err(e) => return Err(format!("Failed to process {} with error: {}", #field_ident_str, e))
+                    },
+                    None => return Err(format!("Missing required field {} (label {})", #field_ident_str, #t))
                 },
             }
         }
@@ -399,6 +486,13 @@ impl StructField {
                         None => {},
                     };
                 }
+            } else if "Float" == self.attrs.value {
+                quote! {
+                    match &value.#f {
+                        Some(val) => v.push(val!(Value::Float(*val))),
+                        None => {},
+                    };
+                }
             } else {
                 quote! {
                     match &value.#f {
@@ -410,6 +504,10 @@ impl StructField {
         } else if "Bytes" == self.attrs.value {
             quote! {
                 v.push(val!(Value::Bytes(value.#f.clone())));
+            }
+        } else if "Float" == self.attrs.value {
+            quote! {
+                v.push(val!(Value::Float(value.#f)));
             }
         } else {
             quote! {
@@ -427,9 +525,9 @@ impl StructField {
         let field_adjusted_nested_type = if let Some(ttt) = field_nested_type {
             if self.attrs.cbor.is_some() {
                 let x = format!("{}Cbor", ttt);
-                Some(syn::Ident::new(&x, field_ident.span()))
+                Some(Ident::new(&x, field_ident.span()))
             } else {
-                Some(syn::Ident::new(&ttt, field_ident.span()))
+                Some(Ident::new(&ttt, field_ident.span()))
             }
         } else {
             None
@@ -440,14 +538,16 @@ impl StructField {
                 Some(t) => format!("{}Cbor", t),
                 None => panic!("Failed to determine type for field {}", field_ident),
             };
-            syn::Ident::new(&x, field_ident.span())
+            Ident::new(&x, field_ident.span())
         } else {
             let ty_str = match extract_type(field_type) {
                 Some(t) => t,
                 None => panic!("Failed to determine type for field {}", field_ident),
             };
-            syn::Ident::new(&ty_str, field_ident.span())
+            Ident::new(&ty_str, field_ident.span())
         };
+
+        let field_name = format!("{}", field_ident);
 
         if "Bytes" == self.attrs.value {
             if is_option {
@@ -456,7 +556,7 @@ impl StructField {
                         Some(val) => {
                             match val.as_bytes() {
                                 Some(val2) => Some(val2.clone()),
-                                None => return Err("".to_string())
+                                None => return Err(format!("failed to decode field {}", #field_name))
                             }
                         },
                         None => None
@@ -464,9 +564,11 @@ impl StructField {
                 }
             } else {
                 quote! {
-                    #field_ident: match v[#index].as_bytes() {
+                    #field_ident: match v.get(#index)
+                        .ok_or_else(|| format!("missing required field {} at index {}", #field_name, #index))?
+                        .as_bytes() {
                         Some(val) => val.clone(),
-                        None => return Err("".to_string())
+                        None => return Err(format!("failed to decode field {}", #field_name))
                     },
                 }
             }
@@ -474,42 +576,15 @@ impl StructField {
             if is_option {
                 quote! {
                     #field_ident: match v.get(#index) {
-                        Ok(val) => {
+                        Some(val) => {
                             match #f2::try_from(
                                 match val.as_map() {
                                     Some(val) => val.clone(),
-                                    None => return Err("".to_string())
+                                    None => return Err(format!("failed to decode field {}", #field_name))
                                 }
                             ){
-                                Ok(val) => val,
-                                Err(_) => return Err("".to_string())
-                            }
-                        },
-                        Err(_) => None
-                    },
-                }
-            } else {
-                quote! {
-                    #field_ident: match #f2::try_from(
-                        match v[#index].as_map() {
-                            Some(val) => val.clone(),
-                            None => return Err("".to_string())
-                        }
-                    ){
-                        Ok(val) => val,
-                        Err(_) => return Err("".to_string())
-                    },
-                }
-            }
-        } else if "Array" == self.attrs.value {
-            //todo error handling in closures
-            if is_option {
-                quote! {
-                    #field_ident: match v.get(#index){
-                        Some(val) => {
-                            match val.as_array(){
-                                Some(val) => Some(val.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone()).unwrap()).collect()),
-                                None => return Err("".to_string())
+                                Ok(val) => Some(val),
+                                Err(_) => return Err(format!("failed to decode field {}", #field_name))
                             }
                         },
                         None => None
@@ -517,9 +592,45 @@ impl StructField {
                 }
             } else {
                 quote! {
-                    #field_ident: match v[#index].as_array(){
-                        Some(val) => val.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone()).unwrap()).collect(),
-                        None => return Err("".to_string())
+                    #field_ident: match #f2::try_from(
+                        match v.get(#index)
+                            .ok_or_else(|| format!("missing required field {} at index {}", #field_name, #index))?
+                            .as_map() {
+                            Some(val) => val.clone(),
+                            None => return Err(format!("failed to decode field {}", #field_name))
+                        }
+                    ){
+                        Ok(val) => val,
+                        Err(_) => return Err(format!("failed to decode field {}", #field_name))
+                    },
+                }
+            }
+        } else if "Array" == self.attrs.value {
+            if is_option {
+                quote! {
+                    #field_ident: match v.get(#index){
+                        Some(val) => {
+                            match val.as_array(){
+                                Some(val) => {
+                                    let items: Result<Vec<_>, String> = val.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone())).collect();
+                                    Some(items?)
+                                },
+                                None => return Err(format!("failed to decode field {}", #field_name))
+                            }
+                        },
+                        None => None
+                    },
+                }
+            } else {
+                quote! {
+                    #field_ident: match v.get(#index)
+                        .ok_or_else(|| format!("missing required field {} at index {}", #field_name, #index))?
+                        .as_array(){
+                        Some(val) => {
+                            let items: Result<Vec<_>, String> = val.into_iter().map(|v| #field_adjusted_nested_type::try_from(v.clone())).collect();
+                            items?
+                        },
+                        None => return Err(format!("failed to decode field {}", #field_name))
                     },
                 }
             }
@@ -530,7 +641,7 @@ impl StructField {
                         Some(v) => {
                             match v.as_text() {
                                 Some(v) => Some(v.to_string()),
-                                None => return Err("".to_string())
+                                None => return Err(format!("failed to decode field {}", #field_name))
                             }
                         },
                         None => None
@@ -538,9 +649,11 @@ impl StructField {
                 }
             } else {
                 quote! {
-                    #field_ident: match v[#index].as_text() {
+                    #field_ident: match v.get(#index)
+                        .ok_or_else(|| format!("missing required field {} at index {}", #field_name, #index))?
+                        .as_text() {
                         Some(v) => v.to_string(),
-                        None => return Err("".to_string())
+                        None => return Err(format!("failed to decode field {}", #field_name))
                     },
                 }
             }
@@ -553,10 +666,10 @@ impl StructField {
                                 Some(i) => {
                                     match i.try_into() {
                                         Ok(val) => val,
-                                        Err(_) => return Err("".to_string())
+                                        Err(_) => return Err(format!("failed to decode field {}", #field_name))
                                     }
                                 },
-                                None => return Err("".to_string())
+                                None => return Err(format!("failed to decode field {}", #field_name))
                             }
                         },
                         None => None
@@ -564,14 +677,49 @@ impl StructField {
                 }
             } else {
                 quote! {
-                    #field_ident: match v[#index].as_integer() {
+                    #field_ident: match v.get(#index)
+                        .ok_or_else(|| format!("missing required field {} at index {}", #field_name, #index))?
+                        .as_integer() {
                         Some(i) => {
                             match i.try_into() {
                                 Ok(val) => val,
-                                Err(_) => return Err("".to_string())
+                                Err(_) => return Err(format!("failed to decode field {}", #field_name))
                             }
                         },
-                        None => return Err("".to_string())
+                        None => return Err(format!("failed to decode field {}", #field_name))
+                    },
+                }
+            }
+        } else if "Float" == self.attrs.value {
+            // CDDL `number` accepts both float and integer; try as_float() first, fall back to integer
+            if is_option {
+                quote! {
+                    #field_ident: match v.get(#index) {
+                        Some(v) => Some(
+                            if let Some(val) = v.as_float() {
+                                val
+                            } else if let Some(i) = v.as_integer() {
+                                let iv: i128 = i.into();
+                                iv as f64
+                            } else {
+                                return Err(format!("failed to decode field {}", #field_name))
+                            }),
+                        None => None
+                    },
+                }
+            } else {
+                quote! {
+                    #field_ident: {
+                        let fv = v.get(#index)
+                            .ok_or_else(|| format!("missing required field {} at index {}", #field_name, #index))?;
+                        if let Some(val) = fv.as_float() {
+                            val
+                        } else if let Some(i) = fv.as_integer() {
+                            let iv: i128 = i.into();
+                            iv as f64
+                        } else {
+                            return Err(format!("failed to decode field {}", #field_name))
+                        }
                     },
                 }
             }
@@ -582,7 +730,7 @@ impl StructField {
                         Some(v) => {
                             match v.as_bool() {
                                 Some(v) => v,
-                                None => return Err("".to_string())
+                                None => return Err(format!("failed to decode field {}", #field_name))
                             }
                         },
                         None => None
@@ -590,9 +738,11 @@ impl StructField {
                 }
             } else {
                 quote! {
-                    #field_ident: match v[#index].as_bool() {
+                    #field_ident: match v.get(#index)
+                        .ok_or_else(|| format!("missing required field {} at index {}", #field_name, #index))?
+                        .as_bool() {
                         Some(v) => v,
-                        None => return Err("".to_string())
+                        None => return Err(format!("failed to decode field {}", #field_name))
                     },
                 }
             }
@@ -601,7 +751,7 @@ impl StructField {
                 #field_ident: match v.get(#index) {
                         Some(val) => { match #f2::try_from(val.clone()) {
                             Ok(val2) => Some(val2),
-                            Err(_) => return Err("".to_string())
+                            Err(_) => return Err(format!("failed to decode field {}", #field_name))
                         }
                     },
                     None => None
@@ -609,9 +759,13 @@ impl StructField {
             }
         } else {
             quote! {
-                #field_ident: match #f2::try_from(v[#index].clone()) {
+                #field_ident: match #f2::try_from(
+                    v.get(#index)
+                        .ok_or_else(|| format!("missing required field {} at index {}", #field_name, #index))?
+                        .clone()
+                ) {
                     Ok(v) => v,
-                    Err(_) => return Err("".to_string())
+                    Err(_) => return Err(format!("failed to decode field {}", #field_name))
                 },
             }
         }

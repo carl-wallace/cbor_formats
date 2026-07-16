@@ -1,16 +1,25 @@
-//! General-purpose TupleMap and TupleMapCbor types
+//! General-purpose TupleMap and TupleMapCbor types for representing CBOR maps with tagged entries.
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | generic map of key-value pairs | [`TupleMap`] / [`TupleMapCbor`] |
 
-use crate::tuple::*;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
-use ciborium::value::Value;
+use alloc::{
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
-use serde::de::MapAccess;
-use serde::ser::Error as OtherError;
-use serde::ser::SerializeMap;
-use serde::{Deserialize, Serialize};
-use serde::{__private::size_hint, de::Error, de::Visitor};
 
+use ciborium::value::Value;
+use serde::{
+    Deserialize, Serialize, de::Error, de::MapAccess, de::Visitor, ser::Error as OtherError,
+    ser::SerializeMap,
+};
+
+use crate::tuple::{Tuple, TupleCbor};
+
+/// A collection of [`Tuple`] key-value pairs, representing a generic map structure.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct TupleMap {
@@ -26,49 +35,29 @@ pub struct TupleMapCbor {
 impl TryFrom<TupleMapCbor> for TupleMap {
     type Error = String;
     fn try_from(value: TupleMapCbor) -> Result<Self, Self::Error> {
-        Ok(TupleMap {
-            tuples: value
-                .tuples
-                .iter()
-                .map(|m| Tuple::try_from(m).unwrap())
-                .collect(),
-        })
+        let tuples: Result<Vec<_>, _> = value.tuples.iter().map(Tuple::try_from).collect();
+        Ok(TupleMap { tuples: tuples? })
     }
 }
 impl TryFrom<TupleMap> for TupleMapCbor {
     type Error = String;
     fn try_from(value: TupleMap) -> Result<Self, Self::Error> {
-        Ok(TupleMapCbor {
-            tuples: value
-                .tuples
-                .iter()
-                .map(|m| TupleCbor::try_from(m).unwrap())
-                .collect(),
-        })
+        let tuples: Result<Vec<_>, _> = value.tuples.iter().map(TupleCbor::try_from).collect();
+        Ok(TupleMapCbor { tuples: tuples? })
     }
 }
 impl TryFrom<&TupleMapCbor> for TupleMap {
     type Error = String;
     fn try_from(value: &TupleMapCbor) -> Result<Self, Self::Error> {
-        Ok(TupleMap {
-            tuples: value
-                .tuples
-                .iter()
-                .map(|m| Tuple::try_from(m).unwrap())
-                .collect(),
-        })
+        let tuples: Result<Vec<_>, _> = value.tuples.iter().map(Tuple::try_from).collect();
+        Ok(TupleMap { tuples: tuples? })
     }
 }
 impl TryFrom<&TupleMap> for TupleMapCbor {
     type Error = String;
     fn try_from(value: &TupleMap) -> Result<Self, Self::Error> {
-        Ok(TupleMapCbor {
-            tuples: value
-                .tuples
-                .iter()
-                .map(|m| TupleCbor::try_from(m).unwrap())
-                .collect(),
-        })
+        let tuples: Result<Vec<_>, _> = value.tuples.iter().map(TupleCbor::try_from).collect();
+        Ok(TupleMapCbor { tuples: tuples? })
     }
 }
 impl TryFrom<Value> for TupleMapCbor {
@@ -77,9 +66,9 @@ impl TryFrom<Value> for TupleMapCbor {
         match value {
             Value::Array(s) => match Self::try_from(s) {
                 Ok(val) => Ok(val),
-                Err(_) => Err("Failed to parse TupleCbor".to_string()),
+                Err(_) => Err("Failed to parse TupleMapCbor".to_string()),
             },
-            _ => Err("Failed to parse TupleCbor".to_string()),
+            _ => Err("Failed to parse TupleMapCbor".to_string()),
         }
     }
 }
@@ -89,9 +78,9 @@ impl TryFrom<&Value> for TupleMapCbor {
         match value {
             Value::Array(s) => match Self::try_from(s.clone()) {
                 Ok(val) => Ok(val),
-                Err(_) => Err("Failed to parse TupleCbor".to_string()),
+                Err(_) => Err("Failed to parse TupleMapCbor".to_string()),
             },
-            _ => Err("Failed to parse TupleCbor".to_string()),
+            _ => Err("Failed to parse TupleMapCbor".to_string()),
         }
     }
 }
@@ -99,22 +88,18 @@ impl TryFrom<&TupleMapCbor> for Vec<(Value, Value)> {
     type Error = String;
     fn try_from(value: &TupleMapCbor) -> Result<Self, Self::Error> {
         let mut v = ::alloc::vec::Vec::new();
+        #[allow(unused_imports)]
+        use ::ciborium::value::Value::Null as null;
         for i in &value.tuples {
-            let v1 = match {
-                #[allow(unused_imports)]
-                use ::ciborium::value::Value::Null as null;
-                ::ciborium::value::Value::serialized(&i.key)
-            } {
+            let key_res = ::ciborium::value::Value::serialized(&i.key);
+            let v1 = match key_res {
                 Ok(v) => v,
-                Err(_) => return Err("Failed to parse TupleCbor".to_string()),
+                Err(_) => return Err("Failed to parse TupleMapCbor".to_string()),
             };
-            let v2 = match {
-                #[allow(unused_imports)]
-                use ::ciborium::value::Value::Null as null;
-                ::ciborium::value::Value::serialized(&i.value)
-            } {
+            let val_res = ::ciborium::value::Value::serialized(&i.value);
+            let v2 = match val_res {
                 Ok(v) => v,
-                Err(_) => return Err("Failed to parse TupleCbor".to_string()),
+                Err(_) => return Err("Failed to parse TupleMapCbor".to_string()),
             };
             v.push((v1, v2));
         }
@@ -124,13 +109,12 @@ impl TryFrom<&TupleMapCbor> for Vec<(Value, Value)> {
 impl TryFrom<Vec<Value>> for TupleMapCbor {
     type Error = String;
     fn try_from(v: Vec<Value>) -> Result<Self, Self::Error> {
-        Ok(TupleMapCbor {
-            tuples: v.iter().map(|m| TupleCbor::try_from(m).unwrap()).collect(),
-        })
+        let tuples: Result<Vec<_>, _> = v.iter().map(TupleCbor::try_from).collect();
+        Ok(TupleMapCbor { tuples: tuples? })
     }
 }
-impl serde::Serialize for TupleMapCbor {
-    fn serialize<__S>(&self, __serializer: __S) -> serde::__private::Result<__S::Ok, __S::Error>
+impl Serialize for TupleMapCbor {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
     {
@@ -140,7 +124,9 @@ impl serde::Serialize for TupleMapCbor {
                 return Err(__S::Error::custom(e));
             }
         };
-        let mut m = __serializer.serialize_map(Some(v.len())).unwrap();
+        let mut m = __serializer.serialize_map(Some(v.len())).map_err(|e| {
+            __S::Error::custom(alloc::format!("Failed to start map serialization: {e}"))
+        })?;
         for i in &v {
             match TupleCbor::try_from(i.clone()) {
                 Ok(tmc) => {
@@ -157,7 +143,7 @@ impl serde::Serialize for TupleMapCbor {
     }
 }
 impl<'de> Deserialize<'de> for TupleMapCbor {
-    fn deserialize<__D>(deserializer: __D) -> serde::__private::Result<Self, __D::Error>
+    fn deserialize<__D>(deserializer: __D) -> Result<Self, __D::Error>
     where
         __D: serde::Deserializer<'de>,
     {
@@ -173,7 +159,7 @@ impl<'de> Deserialize<'de> for TupleMapCbor {
             where
                 A: MapAccess<'de>,
             {
-                let mut values = Vec::with_capacity(size_hint::cautious(map.size_hint()));
+                let mut values = Vec::with_capacity(map.size_hint().unwrap_or(0).min(4096));
                 while let Some(value) = map.next_entry()? {
                     values.push(value);
                 }

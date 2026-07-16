@@ -1,18 +1,30 @@
+use ciborium::{
+    de::from_reader,
+    ser::into_writer,
+    tag::Required,
+    value::{Integer, Value},
+};
+
+use common::{
+    OidType, UeidType, UuidType,
+    choices::{VersionScheme, VersionSchemeCbor, VersionSchemeKnownCbor},
+};
+use corim::choices::{
+    ClassIdTypeChoice, ClassIdTypeChoiceCbor, CorimIdTypeChoice, CorimRoleTypeChoiceCbor,
+    CryptoKeyTypeChoice, DomainTypeChoice, EntityNameTypeChoice, GroupIdTypeChoice,
+    InstanceIdTypeChoice, MeasuredElementTypeChoice, MeasuredElementTypeChoiceCbor,
+    ProfileTypeChoice, ProfileTypeChoiceCbor, SvnTypeChoice, TagIdTypeChoice, TagIdTypeChoiceCbor,
+    TagRelTypeChoice, TagVersionType,
+};
+
 use crate::utils::buffer_to_hex;
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::tag::Required;
-use ciborium::value::{Integer, Value};
-use common::choices::*;
-use common::{IntType, OidType, UeidType, UuidType};
-use corim::choices::*;
 
 mod utils;
 
 #[test]
 fn class_id_type_choice_test() {
     let v = vec![0x01, 0x02, 0x03];
-    let fab = ClassIdTypeChoiceCbor::Oid(Required(OidType::Oid(v)));
+    let fab = ClassIdTypeChoiceCbor::oid(Required(OidType(v)));
     let mut encoded_token = vec![];
     into_writer(&fab, &mut encoded_token).unwrap();
 
@@ -21,7 +33,7 @@ fn class_id_type_choice_test() {
     let fab_c: ClassIdTypeChoiceCbor = fab_j.try_into().unwrap();
     assert_eq!(fab, fab_c);
 
-    let fab2 = ClassIdTypeChoiceCbor::Uuid(Required(UuidType::Uuid(vec![
+    let fab2 = ClassIdTypeChoiceCbor::uuid(Required(UuidType(vec![
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ])));
     let mut encoded_token2 = vec![];
@@ -32,7 +44,7 @@ fn class_id_type_choice_test() {
     let fab2_c: ClassIdTypeChoiceCbor = fab2_j.try_into().unwrap();
     assert_eq!(fab2, fab2_c);
 
-    let fab3 = ClassIdTypeChoiceCbor::Int(Required(IntType::Int([0x01].to_vec())));
+    let fab3 = ClassIdTypeChoiceCbor::bytes(Required(common::BytesType([0x01].to_vec())));
     let mut encoded_token3 = vec![];
     into_writer(&fab3, &mut encoded_token3).unwrap();
 
@@ -44,7 +56,6 @@ fn class_id_type_choice_test() {
 
 #[test]
 fn corim_id_type_choice_test() {
-    use common::*;
     let mut encoded_token = vec![];
     let citc = CorimIdTypeChoice::Str("bah".to_string());
     into_writer(&citc, &mut encoded_token).unwrap();
@@ -52,7 +63,7 @@ fn corim_id_type_choice_test() {
     assert_eq!(citc, citc_d);
 
     let mut encoded_token2 = vec![];
-    let citc2 = CorimIdTypeChoice::Uuid(UuidType::Uuid(vec![
+    let citc2 = CorimIdTypeChoice::Uuid(UuidType(vec![
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ]));
     into_writer(&citc2, &mut encoded_token2).unwrap();
@@ -62,21 +73,20 @@ fn corim_id_type_choice_test() {
 
 #[test]
 fn corim_role_type_choice_test() {
-    let cr = CorimRoleTypeChoiceKnownCbor::Creator;
+    let cr = CorimRoleTypeChoiceCbor::Value(CorimRoleTypeChoiceCbor::MANIFEST_CREATOR);
     let mut encoded_token = vec![];
     into_writer(&cr, &mut encoded_token).unwrap();
     println!(
         "Encoded CorimRoleTypeChoiceCbor: {:?}",
         buffer_to_hex(encoded_token.as_slice())
     );
-    let cr_d: CorimRoleTypeChoiceKnownCbor = from_reader(encoded_token.clone().as_slice()).unwrap();
+    let cr_d: CorimRoleTypeChoiceCbor = from_reader(encoded_token.clone().as_slice()).unwrap();
     assert_eq!(cr, cr_d);
 
     let vcr = vec![
-        CorimRoleTypeChoiceCbor::Known(CorimRoleTypeChoiceKnownCbor::Creator),
-        CorimRoleTypeChoiceCbor::Known(CorimRoleTypeChoiceKnownCbor::TagCreator),
-        CorimRoleTypeChoiceCbor::Known(CorimRoleTypeChoiceKnownCbor::Maintainer),
-        CorimRoleTypeChoiceCbor::Extensions(55),
+        CorimRoleTypeChoiceCbor::Value(CorimRoleTypeChoiceCbor::MANIFEST_CREATOR),
+        CorimRoleTypeChoiceCbor::Value(CorimRoleTypeChoiceCbor::MANIFEST_SIGNER),
+        CorimRoleTypeChoiceCbor::Value(55),
     ];
     let mut encoded_token2 = vec![];
     into_writer(&vcr, &mut encoded_token2).unwrap();
@@ -150,7 +160,7 @@ fn domain_type_choice_test() {
     let fab_c: DomainTypeChoice = fab_j;
     assert_eq!(fab, fab_c);
 
-    let fab2 = DomainTypeChoice::Uuid(Required(UuidType::Uuid(vec![
+    let fab2 = DomainTypeChoice::Uuid(Required(UuidType(vec![
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ])));
     let mut encoded_token2 = vec![];
@@ -182,7 +192,7 @@ fn entity_name_type_choice_test() {
 
 #[test]
 fn group_id_type_choice_test() {
-    let fab2 = GroupIdTypeChoice::Uuid(Required(UuidType::Uuid(vec![
+    let fab2 = GroupIdTypeChoice::Uuid(Required(UuidType(vec![
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ])));
     let mut encoded_token2 = vec![];
@@ -196,7 +206,7 @@ fn group_id_type_choice_test() {
 
 #[test]
 fn instance_id_type_choice_test() {
-    let fab = InstanceIdTypeChoice::Uuid(Required(UuidType::Uuid(vec![
+    let fab = InstanceIdTypeChoice::Uuid(Required(UuidType(vec![
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ])));
     let mut encoded_token = vec![];
@@ -207,7 +217,7 @@ fn instance_id_type_choice_test() {
     let fab_c: InstanceIdTypeChoice = fab_j;
     assert_eq!(fab, fab_c);
 
-    let fab2 = InstanceIdTypeChoice::Ueid(Required(UeidType::Ueid(vec![
+    let fab2 = InstanceIdTypeChoice::Ueid(Required(UeidType(vec![
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ])));
     let mut encoded_token2 = vec![];
@@ -222,7 +232,7 @@ fn instance_id_type_choice_test() {
 #[test]
 fn measured_element_type_choice_test() {
     let v = vec![0x01, 0x02, 0x03];
-    let fab = MeasuredElementTypeChoiceCbor::Oid(Required(OidType::Oid(v)));
+    let fab = MeasuredElementTypeChoiceCbor::Oid(Required(OidType(v)));
     let mut encoded_token = vec![];
     into_writer(&fab, &mut encoded_token).unwrap();
 
@@ -231,7 +241,7 @@ fn measured_element_type_choice_test() {
     let fab_c: MeasuredElementTypeChoiceCbor = fab_j.try_into().unwrap();
     assert_eq!(fab, fab_c);
 
-    let fab2 = MeasuredElementTypeChoiceCbor::Uuid(Required(UuidType::Uuid(vec![
+    let fab2 = MeasuredElementTypeChoiceCbor::Uuid(Required(UuidType(vec![
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ])));
     let mut encoded_token2 = vec![];
@@ -246,7 +256,7 @@ fn measured_element_type_choice_test() {
 #[test]
 fn profile_type_choice_test() {
     let v = vec![0x01, 0x02, 0x03];
-    let fab = ProfileTypeChoiceCbor::Oid(Required(OidType::Oid(v)));
+    let fab = ProfileTypeChoiceCbor::Oid(Required(OidType(v)));
     let mut encoded_token = vec![];
     into_writer(&fab, &mut encoded_token).unwrap();
 
@@ -288,7 +298,6 @@ fn svn_type_choice_test() {
 
 #[test]
 fn tag_id_type_choice_test() {
-    use common::*;
     let titc = TagIdTypeChoiceCbor::Str("bah".to_string());
     let mut encoded_token = vec![];
     into_writer(&titc, &mut encoded_token).unwrap();
@@ -299,7 +308,7 @@ fn tag_id_type_choice_test() {
     assert_eq!(titc, titc_cbor);
 
     let mut encoded_token2 = vec![];
-    let titc2 = TagIdTypeChoiceCbor::Uuid(UuidType::Uuid(vec![
+    let titc2 = TagIdTypeChoiceCbor::Uuid(UuidType(vec![
         104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 104, 101, 108, 108, 111, 112,
     ]));
     into_writer(&titc2, &mut encoded_token2).unwrap();
@@ -312,7 +321,7 @@ fn tag_id_type_choice_test() {
 
 #[test]
 fn tag_rel_type_choice_test() {
-    let rtc = TagRelTypeChoice::Known(TagRelTypeChoiceKnown::Replaces);
+    let rtc = TagRelTypeChoice::Value(TagRelTypeChoice::REPLACES);
     let mut encoded_token = vec![];
     into_writer(&rtc, &mut encoded_token).unwrap();
     assert_eq!([0x01], encoded_token.as_slice());
@@ -326,7 +335,7 @@ fn tag_rel_type_choice_test() {
     into_writer(&rtc_cbor, &mut encoded_token2).unwrap();
     assert_eq!([0x01], encoded_token2.as_slice());
 
-    let rtc2 = TagRelTypeChoice::Extensions(32);
+    let rtc2 = TagRelTypeChoice::Value(32);
     let mut encoded_token = vec![];
     into_writer(&rtc2, &mut encoded_token).unwrap();
     assert_eq!([0x18, 0x20], encoded_token.as_slice());
@@ -385,8 +394,8 @@ fn version_scheme_test() {
     assert_eq!(vs3, vs_cbor3);
 
     let unknown = 99999;
-    let unknown_as_int: Integer = unknown.try_into().unwrap();
-    let unknown_as_value: Value = unknown_as_int.try_into().unwrap();
+    let unknown_as_int: Integer = unknown.into();
+    let unknown_as_value: Value = unknown_as_int.into();
     let vs4: VersionSchemeCbor = unknown_as_value.try_into().unwrap();
     assert_eq!(vs4, VersionSchemeCbor::IntExtensions(99999));
     let mut encoded_token4 = vec![];

@@ -1,7 +1,20 @@
-//! Choice-based structs
+//! Choice-based types from the Entity Attestation Token (EAT) spec ([RFC 9711]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `debug-status-type` | [`DebugStatusType`] |
+//! | `intended-use-type` | [`IntendedUseType`] |
+//! | `oemid` | [`Oemid`] |
+//! | `result-type` | [`ResultType`] |
+//!
+//! [RFC 9711]: https://datatracker.ietf.org/doc/html/rfc9711
 
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 
 use ciborium::value::Value;
 use num_enum::TryFromPrimitive;
@@ -33,7 +46,7 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 /// disabled-permanently           = 3
 /// disabled-fully-and-permanently = 4
 /// ```
-/// [EAT Section 4.2.9]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.9
+/// [EAT Section 4.2.9]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.9
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -82,7 +95,7 @@ impl TryFrom<&Value> for DebugStatusType {
 /// csr          = 4
 /// pop          = 5
 /// ```
-/// [EAT Section 4.3.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.3.3
+/// [EAT Section 4.3.3]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.3.3
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -155,7 +168,7 @@ impl TryFrom<&Value> for IntendedUseType {
 /// ```text
 /// oemid-label => oemid-pen / oemid-ieee / oemid-random
 /// ```
-/// [EAT Section 4.2.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.3
+/// [EAT Section 4.2.3]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.3
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -213,23 +226,23 @@ impl TryFrom<&Value> for Oemid {
 /// CBOR and JSON encoding/decoding of `result-type`, see [EAT Section 4.2.17].
 ///
 /// ```text
-/// result-type = comparison-successful /
+/// result-type = comparison-success /
 ///               comparison-fail /
 ///               comparison-not-run /
 ///               measurement-absent
 ///
-/// comparison-successful    = 1
+/// comparison-success       = 1
 /// comparison-fail          = 2
 /// comparison-not-run       = 3
 /// measurement-absent       = 4
 /// ```
-/// [EAT Section 4.2.17]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.17
+/// [EAT Section 4.2.17]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.17
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 #[repr(i8)]
 pub enum ResultType {
-    Successful = 1,
+    Success = 1,
     Fail = 2,
     NotRun = 3,
     Absent = 4,

@@ -2,33 +2,40 @@
 name = "corim"
 description = "CBOR-focused encoders/decoders for CoRIM structures"
 license = "Apache-2.0 OR MIT"
-repository = "https://github.com/carl-wallace/cbor-formats/tree/main/cbor_derive"
+repository = "https://github.com/carl-wallace/cbor-formats/tree/main/corim"
 categories = ["cryptography", "data-structures", "encoding", "no-std", "parser-implementations"]
-keywords = ["cbor", "json", "crypto", "ietf", "corim", "eat"]
+keywords = ["cbor", "json", "corim", "coswid", "eat"]
 readme = "README.md"
-version = "0.1.0"
-edition = "2021"
-rust-version = "1.63"
+version = "0.1.1"
+edition = "2024"
+rust-version = "1.85.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+default = []
+crypto = ["cose_crypto"]
+pqc = ["cose_crypto/pqc"]
+
 [dependencies]
-cbor_derive = { version = "0.1.0", path = "../cbor_derive" }
-common = { version = "0.1.0", path = "../common" }
-coswid = { version = "0.1.0", path = "../coswid" }
-ciborium = "0.2.0"
+cbor_derive = { version = "0.1.1", path = "../cbor_derive" }
+common = { version = "0.1.1", path = "../common" }
+cose = { version = "0.1.1", path = "../cose" }
+cose_crypto = { version = "0.1.1", path = "../cose_crypto", optional = true }
+coswid = { version = "0.1.1", path = "../coswid" }
+ciborium = "0.2.2"
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
 serde_bytes = "0.11"
-serde_json = "1.0.89"
-serde_repr = "0.1.9"
+serde_json = "1.0.149"
+serde_repr = "0.1.20"
 subtle-encoding = {version = "0.5.1", default-features = false, features = ["hex", "alloc"]}
-hex-literal = "0.3.4"
-num_enum = "0.5.7"
-serde-enum-str = {version = "0.3.2", default-features = false}
+hex-literal = "1.1.0"
+num_enum = "0.7.6"
+serde-enum-str = {version = "0.5.0", default-features = false}
 
 [dev-dependencies]
-lazy_static = "1.4.0"
-uuid = "1.2.2"
+lazy_static = "1.5.0"
+uuid = "1.23.0"
 
 [package.metadata.docs.rs]
 all-features = true

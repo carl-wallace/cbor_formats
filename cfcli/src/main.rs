@@ -1,18 +1,55 @@
+//! Test utility for cbor_formats workspace
+
+#![forbid(unsafe_code)]
+#![warn(
+    clippy::alloc_instead_of_core,
+    clippy::mod_module_files,
+    clippy::std_instead_of_alloc,
+    clippy::std_instead_of_core,
+    clippy::unwrap_used,
+    missing_docs,
+    rust_2018_idioms,
+    unused_lifetimes,
+    unused_qualifications
+)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
+#![doc = include_str!("../README.md")]
+
 use clap::Parser;
+
 mod args;
+mod cbor_diag;
 mod comid;
 mod corim;
+mod coserv;
 mod coswid;
 mod cots;
+mod diag;
+mod diag_parse;
+mod ear;
 mod eat;
+mod key_utils;
 mod utils;
 
 use crate::comid::comid_main;
 use crate::corim::corim_main;
+use crate::coserv::coserv_main;
 use crate::coswid::coswid_main;
 use crate::cots::cots_main;
+use crate::diag::diag_main;
+use crate::ear::ear_main;
 use crate::eat::eat_main;
-use args::*;
+use args::{
+    CfcliArgs, ComidCommand, ComidCreateSubcommand, ComidSubCommands, Commands, CorimCommand,
+    CorimCreateSubcommand, CorimExtractSubcommand, CorimSignSubcommand, CorimSubCommands,
+    CorimVerifySubcommand, CoservCommand, CoservCreateSubcommand, CoservExtractSubcommand,
+    CoservSignSubcommand, CoservSubCommands, CoservVerifySubcommand, CoswidCommand,
+    CoswidCreateSubcommand, CoswidSubCommands, CotsCommand, CotsCreateSubcommand, CotsSubCommands,
+    DiagCommand, DiagSubCommands, DisplaySubcommand, EarCommand, EarCreateSubcommand,
+    EarExtractSubcommand, EarSignSubcommand, EarSubCommands, EarVerifySubcommand, EatCommand,
+    EatCreateSubcommand, EatExtractSubcommand, EatSignSubcommand, EatSubCommands,
+    EatVerifySubcommand, SigningFormat,
+};
 use clap::CommandFactory;
 use std::env;
 
@@ -29,8 +66,11 @@ fn main() {
     match &args.command {
         Commands::Comid(c) => comid_main(c),
         Commands::Corim(c) => corim_main(c),
+        Commands::Coserv(c) => coserv_main(c),
         Commands::Coswid(c) => coswid_main(c),
         Commands::Cots(c) => cots_main(c),
+        Commands::Ear(c) => ear_main(c),
         Commands::Eat(c) => eat_main(c),
+        Commands::Diag(c) => diag_main(c),
     }
 }

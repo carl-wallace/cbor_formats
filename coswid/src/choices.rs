@@ -1,34 +1,39 @@
-//! Choice-based structs from the Concise Software Identification Tags (CoSWID) spec
+//! Choice-based types from the Concise Software Identification Tags (CoSWID) spec ([RFC 9393]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `payload-or-evidence` | [`PayloadOrEvidence`] |
+//! | `$role` | [`Role`] / [`RoleKnown`] |
+//! | `one-or-more<role>` | [`OneOrMoreRole`] |
+//! | `$ownership` | [`Ownership`] / [`OwnershipKnown`] |
+//! | `$rel` | [`Rel`] / [`RelKnown`] |
+//! | `$use-choice` | [`UseChoice`] / [`UseChoiceKnown`] |
+//!
+//! [RFC 9393]: https://datatracker.ietf.org/doc/html/rfc9393
+
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 
 use ciborium::value::Value;
+use num_enum::TryFromPrimitive;
 use serde::{Deserialize, Serialize};
-
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::maps::{EvidenceEntry, PayloadEntry};
-use common::IntType;
-use num_enum::TryFromPrimitive;
-use serde_repr::Deserialize_repr;
-use serde_repr::Serialize_repr;
 
 // payload-or-evidence //= ( payload => payload-entry )
 // payload-or-evidence //= ( evidence => evidence-entry )
+/// Represents the CoSWID `payload-or-evidence` choice, which carries either a payload entry or an evidence entry.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 pub enum PayloadOrEvidence {
     Payload(PayloadEntry),
     Evidence(EvidenceEntry),
-}
-
-/// label = text / int
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-#[allow(missing_docs)]
-pub enum Label {
-    Text(String),
-    Integer(IntType),
 }
 
 // version scheme is defined in the corim crate
@@ -55,6 +60,7 @@ pub enum Role {
     IntExtensions(i64),
 }
 
+/// Well-known integer values for the CoSWID `$role` choice as defined in RFC 9393 Section 2.6.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -101,6 +107,7 @@ impl TryFrom<&Value> for Role {
     }
 }
 
+/// Represents one or more CoSWID `$role` values, supporting both singular and array forms.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -109,14 +116,14 @@ pub enum OneOrMoreRole {
     More(Vec<Role>),
 }
 
-//todo closure error handling
 impl TryFrom<Value> for OneOrMoreRole {
     type Error = String;
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Array(v) => Ok(OneOrMoreRole::More(
-                v.iter().map(|m| Role::try_from(m).unwrap()).collect(),
-            )),
+            Value::Array(v) => {
+                let roles: Result<Vec<_>, _> = v.iter().map(Role::try_from).collect();
+                Ok(OneOrMoreRole::More(roles?))
+            }
             Value::Integer(i) => match <ciborium::value::Integer as TryInto<i64>>::try_into(i) {
                 Ok(vs) => match RoleKnown::try_from(vs) {
                     Ok(val) => Ok(OneOrMoreRole::One(Role::Known(val))),
@@ -132,9 +139,10 @@ impl TryFrom<&Value> for OneOrMoreRole {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Array(v) => Ok(OneOrMoreRole::More(
-                v.iter().map(|m| Role::try_from(m).unwrap()).collect(),
-            )),
+            Value::Array(v) => {
+                let roles: Result<Vec<_>, _> = v.iter().map(Role::try_from).collect();
+                Ok(OneOrMoreRole::More(roles?))
+            }
             Value::Integer(i) => match <ciborium::value::Integer as TryInto<i64>>::try_into(*i) {
                 Ok(vs) => match RoleKnown::try_from(vs) {
                     Ok(val) => Ok(OneOrMoreRole::One(Role::Known(val))),
@@ -148,14 +156,15 @@ impl TryFrom<&Value> for OneOrMoreRole {
 }
 
 // ; ownership indices
-// shared=1
+// abandon=1
 // private=2
-// abandon=3
+// shared=3
 //
-// $ownership /= shared
-// $ownership /= private
 // $ownership /= abandon
+// $ownership /= private
+// $ownership /= shared
 // $ownership /= int / text
+/// Represents the CoSWID `$ownership` choice indicating software ownership status (e.g., abandon, private, shared).
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -165,14 +174,15 @@ pub enum Ownership {
     IntExtensions(i64),
 }
 
+/// Well-known integer values for the CoSWID `$ownership` choice as defined in RFC 9393 Section 2.7.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[serde(untagged)]
 #[allow(missing_docs)]
 #[repr(i64)]
 pub enum OwnershipKnown {
-    Shared = 1,
+    Abandon = 1,
     Private = 2,
-    Abandon = 3,
+    Shared = 3,
 }
 
 impl TryFrom<Value> for Ownership {
@@ -233,6 +243,7 @@ impl TryFrom<&Value> for Ownership {
 // $rel /= supersedes
 // $rel /= supplemental
 // $rel /= -256..64436 / text
+/// Represents the CoSWID `$rel` choice describing the relationship type in a link entry.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -242,6 +253,7 @@ pub enum Rel {
     IntExtensions(i64),
 }
 
+/// Well-known integer values for the CoSWID `$rel` choice as defined in RFC 9393 Section 2.7.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -302,6 +314,7 @@ impl TryFrom<&Value> for Rel {
 // $use /= required
 // $use /= recommended
 // $use /= int / text
+/// Represents the CoSWID `$use` choice indicating whether a link target is optional, required, or recommended.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -311,6 +324,7 @@ pub enum UseChoice {
     IntExtensions(i64),
 }
 
+/// Well-known integer values for the CoSWID `$use` choice as defined in RFC 9393 Section 2.7.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[serde(untagged)]
 #[allow(missing_docs)]

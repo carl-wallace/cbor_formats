@@ -1,13 +1,16 @@
 //! Code supporting StructToArray procedural macro
 
+use proc_macro_error2::abort;
 use proc_macro2::TokenStream;
-use proc_macro_error::abort;
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::{DeriveInput, Ident, Lifetime};
 
-use crate::cbor_derive_utils::{extract_type, is_option, is_option_vec, is_vec};
-use crate::default_lifetime;
-use crate::field::StructField;
+use crate::{
+    attributes::TypeAttrs,
+    cbor_derive_utils::{extract_type, is_option, is_option_vec, is_vec},
+    default_lifetime,
+    field::StructField,
+};
 
 /// Derive the `StructToMap` trait for a struct
 pub(crate) struct DeriveStructToMap {
@@ -25,6 +28,9 @@ pub(crate) struct DeriveStructToMap {
 
     /// Name of alternative struct
     alt_struct_name: String,
+
+    /// Struct-level attributes
+    type_attrs: TypeAttrs,
 }
 
 impl DeriveStructToMap {
@@ -44,7 +50,7 @@ impl DeriveStructToMap {
             .next()
             .map(|lt| lt.lifetime.clone());
 
-        // let type_attrs = TypeAttrs::parse(&input.attrs);
+        let type_attrs = TypeAttrs::parse(&input.attrs);
 
         let fields = data.fields.iter().map(StructField::new).collect();
 
@@ -54,6 +60,7 @@ impl DeriveStructToMap {
             fields,
             alt_struct: TokenStream::new(),
             alt_struct_name: String::new(),
+            type_attrs,
         };
 
         state.derive_alt_struct();
@@ -62,13 +69,16 @@ impl DeriveStructToMap {
 
     fn derive_alt_struct(&mut self) {
         self.alt_struct_name = format!("{}Cbor", self.ident);
-        let sname = syn::Ident::new(&self.alt_struct_name, self.ident.span());
+        let sname = Ident::new(&self.alt_struct_name, self.ident.span());
 
         let mut fields = TokenStream::new();
 
-        let comment = format!("Supports CBOR encoding/decoding of the corresponding map type, which is described in [{}]", self.ident);
+        let comment = format!(
+            "Supports CBOR encoding/decoding of the corresponding map type, which is described in [{}]",
+            self.ident
+        );
 
-        for (_field_count, field) in (self.fields).iter().enumerate() {
+        for field in (self.fields).iter() {
             let name = &field.ident;
 
             let ty = field.field_type.clone();
@@ -78,7 +88,7 @@ impl DeriveStructToMap {
                     Some(t) => format!("{}Cbor", t),
                     None => panic!("Failed to determine type for field {}", name),
                 };
-                let ty2 = syn::Ident::new(&alt_ty, self.ident.span());
+                let ty2 = Ident::new(&alt_ty, self.ident.span());
                 if is_option_vec(&ty) {
                     quote! {
                          /// Defer decoded field
@@ -123,7 +133,7 @@ impl DeriveStructToMap {
     pub fn to_tokens(&self) -> TokenStream {
         let ident2 = &self.ident;
         let alt_struct_name = format!("{}Cbor", self.ident);
-        let ident = syn::Ident::new(&alt_struct_name, self.ident.span());
+        let ident = Ident::new(&alt_struct_name, self.ident.span());
         let ident_name = format!("{}", ident);
 
         let lifetime = match self.lifetime {
@@ -154,6 +164,18 @@ impl DeriveStructToMap {
             from_cbor.push(field.to_try_from_tokens(false));
         }
         let alt_struct = &self.alt_struct;
+
+        let non_empty_ser_check = if self.type_attrs.non_empty {
+            quote! {
+                if v.is_empty() {
+                    return Err(__S::Error::custom(
+                        concat!("non-empty constraint violated: ", #ident_name, " has no present fields")
+                    ));
+                }
+            }
+        } else {
+            quote! {}
+        };
 
         let tsindices = quote! {
             let indices = vec![#(#vindices)*];
@@ -260,10 +282,10 @@ impl DeriveStructToMap {
                             Some(i) => {
                                 match i.try_into() {
                                     Ok(ival) => ival,
-                                    Err(_) => return Err("".to_string())
+                                    Err(_) => return Err(format!("map key integer out of range while parsing {}", #ident_name))
                                 }
                             }
-                            None => return Err("".to_string())
+                            None => return Err(format!("expected integer map key while parsing {}", #ident_name))
                         };
                         // accumulate duplicates as TupleCbor items
                         if indices.contains(&index) && !m.contains_key(&index) {
@@ -293,10 +315,10 @@ impl DeriveStructToMap {
                             Some(i) => {
                                 match i.try_into() {
                                     Ok(ival) => ival,
-                                    Err(_) => return Err("".to_string())
+                                    Err(_) => return Err(format!("map key integer out of range while parsing {}", #ident_name))
                                 }
                             }
-                            None => return Err("".to_string())
+                            None => return Err(format!("expected integer map key while parsing {}", #ident_name))
                         };
                         // accumulate duplicates as TupleCbor items
                         if indices.contains(&index) && !m.contains_key(&index) {
@@ -318,7 +340,7 @@ impl DeriveStructToMap {
                 fn serialize<__S>(
                     &self,
                     __serializer: __S,
-                ) -> serde::__private::Result<__S::Ok, __S::Error>
+                ) -> Result<__S::Ok, __S::Error>
                     where
                         __S: serde::Serializer,
                 {
@@ -326,6 +348,8 @@ impl DeriveStructToMap {
                         Ok(r) => r,
                         Err(e) => {return  Err(__S::Error::custom(e));}
                     };
+
+                    #non_empty_ser_check
 
                     let m = Value::Map(v);
                     m.serialize(__serializer)
@@ -354,7 +378,7 @@ impl DeriveStructToMap {
                             where
                                 A: MapAccess<'de>,
                         {
-                            let mut values = Vec::with_capacity(size_hint::cautious(map.size_hint()));
+                            let mut values = Vec::with_capacity(map.size_hint().unwrap_or(0).min(4096));
                             while let Some(value) = map.next_entry()? {
                                 values.push(value);
                             }

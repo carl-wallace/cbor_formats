@@ -1,35 +1,59 @@
-//! Array-based structs
+//! Array-based structs from the Entity Attestation Token (EAT) spec ([RFC 9711]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `Detached-Submodule-Digest` | [`DetachedSubmoduleDigest`] / [`DetachedSubmoduleDigestCbor`] |
+//! | `dloa-type` | [`DloaType`] / [`DloaTypeCbor`] |
+//! | `hardware-version-type` | [`HardwareVersionType`] / [`HardwareVersionTypeCbor`] |
+//! | `sw-version-type` | [`SwVersionType`] / [`SwVersionTypeCbor`] |
+//! | `individual-result` | [`IndividualResult`] / [`IndividualResultCbor`] |
+//! | `manifests-type` | [`ManifestsType`] / [`ManifestsTypeCbor`] |
+//! | `manifest-format` | [`ManifestFormat`] / [`ManifestFormatCbor`] |
+//! | `measurements-type` | [`MeasurementsType`] / [`MeasurementsTypeCbor`] |
+//! | `measurements-format` | [`MeasurementsFormat`] / [`MeasurementsFormatCbor`] |
+//! | `measurement-results-group` | [`MeasurementResultsGroup`] / [`MeasurementResultsGroupCbor`] |
+//! | `[ + measurement-results-group ]` | [`MeasurementResultsGroupArray`] / [`MeasurementResultsGroupArrayCbor`] |
+//! | `Nested-Token` (JSON) | [`NestedToken`] |
+//! | `Nested-Token` (CBOR) | [`NestedTokenCbor`] |
+//! | `Wrapped-Claims-Set` (JSON) | [`WrappedClaimsSet`] |
+//! | `Wrapped-Claims-Set` (CBOR) | [`WrappedClaimsSetCbor`] |
+//! | `Detached-EAT-Bundle` | [`DetachedEatBundle`] / [`DetachedEatBundleCbor`] |
+//!
+//! [RFC 9711]: https://datatracker.ietf.org/doc/html/rfc9711
 
-use alloc::boxed::Box;
-use alloc::format;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
+use alloc::{
+    boxed::Box,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData, ops::Deref};
 
+use base64::{Engine, engine::general_purpose::STANDARD};
 use ciborium::{cbor, value::Value};
-use serde::ser::Error as OtherError;
-use serde::{Deserialize, Serialize};
-use serde::{__private::size_hint, de::Error, de::Visitor};
+use serde::{Deserialize, Serialize, de::Error, de::Visitor, ser::Error as OtherError};
 
-use crate::cbor_specific::SelectorCbor;
-use crate::choices::*;
-use crate::json_specific::*;
 use cbor_derive::StructToArray;
 use common::{choices::*, *};
+
+use crate::{cbor_specific::SelectorCbor, choices::*, json_specific::*};
 
 /// JSON encoding/decoding of `JSON-Selector` options suitable for inclusion in a `Detached-EAT-Bundle`
 ///
 /// `Nested-Token` is defined in [EAT Section 4.2.18] and is defined as a `JSON-Selector` for JSON-encoded EATs.
 /// The `JSON-Selector` choice in two places: in the definition of Submodule, in the definition of
 /// Detached-EAT-Bundle (as part of NestedToken). Where used within a DEB, the  Detached-EAT-Bundle
-/// option MUST NOT be used. This structure is used in the DEB context. Use [JsonSelector](JsonSelector)
-/// for submodule claims. Use [NestedTokenCbor](NestedTokenCbor) for CBOR-encoded EATs.
+/// option MUST NOT be used. This structure is used in the DEB context. Use [JsonSelector]
+/// for submodule claims. Use [NestedTokenCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// Nested-Token = JSON-Selector
 /// ```
 ///
-/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
+/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.18
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct NestedToken(pub Box<SelectorForDeb>);
 impl TryFrom<NestedTokenCbor> for NestedToken {
@@ -47,7 +71,7 @@ impl TryFrom<NestedTokenCbor> for NestedToken {
                 let sfd = SelectorForDeb {
                     token_type: JsonSelectorType::Cbor,
                     nested_token: JsonSelectorForDebValue::CborTokenInsideJsonToken(
-                        base64::encode(v),
+                        STANDARD.encode(v),
                     ),
                 };
                 Ok(NestedToken(Box::new(sfd)))
@@ -56,11 +80,9 @@ impl TryFrom<NestedTokenCbor> for NestedToken {
                 let sfd = SelectorForDeb {
                     token_type: JsonSelectorType::Digest,
                     nested_token: {
-                        match dsm.try_into() {
-                            Ok(dsm_value) => {
-                                JsonSelectorForDebValue::DetachedSubmoduleDigest(dsm_value)
-                            }
-                            Err(e) => return Err(e),
+                        {
+                            let dsm_value = dsm.try_into()?;
+                            JsonSelectorForDebValue::DetachedSubmoduleDigest(dsm_value)
                         }
                     },
                 };
@@ -84,7 +106,7 @@ impl TryFrom<&NestedTokenCbor> for NestedToken {
                 let sfd = SelectorForDeb {
                     token_type: JsonSelectorType::Cbor,
                     nested_token: JsonSelectorForDebValue::CborTokenInsideJsonToken(
-                        base64::encode(v),
+                        STANDARD.encode(v),
                     ),
                 };
                 Ok(NestedToken(Box::new(sfd)))
@@ -93,11 +115,9 @@ impl TryFrom<&NestedTokenCbor> for NestedToken {
                 let sfd = SelectorForDeb {
                     token_type: JsonSelectorType::Digest,
                     nested_token: {
-                        match dsm.try_into() {
-                            Ok(dsm_value) => {
-                                JsonSelectorForDebValue::DetachedSubmoduleDigest(dsm_value)
-                            }
-                            Err(e) => return Err(e),
+                        {
+                            let dsm_value = dsm.try_into()?;
+                            JsonSelectorForDebValue::DetachedSubmoduleDigest(dsm_value)
                         }
                     },
                 };
@@ -114,26 +134,26 @@ impl TryFrom<&NestedTokenCbor> for NestedToken {
 /// CBOR-Nested-Token = JSON-Token-Inside-CBOR-Token / CBOR-Token-Inside-CBOR-Token
 /// Nested-Token = CBOR-Nested-Token
 /// ```
-/// This library defines the [SelectorCbor](`SelectorCbor`) in place of `CBOR-Nested-Token` to simplify
-/// the definition of a [DetachedEatBundle](`DetachedEatBundle`) that can be used with JSON or CBOR.
+/// This library defines the [SelectorCbor] in place of `CBOR-Nested-Token` to simplify
+/// the definition of a [DetachedEatBundle] that can be used with JSON or CBOR.
 /// See the [cbor_specific module](../cbor_specific/index.html) for this crate for more details.
-/// Use [NestedToken](NestedToken) for JSON-encoded EATs.
+/// Use [NestedToken] for JSON-encoded EATs.
 /// ```text
 /// CBOR-Selector = CBOR-Nested-Token / Detached-Submodule-Digest
 /// ```
-/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
+/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.18
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct NestedTokenCbor(pub SelectorCbor);
 impl TryFrom<Value> for NestedTokenCbor {
     type Error = String;
     fn try_from(_value: Value) -> Result<Self, Self::Error> {
-        todo!()
+        Err("NestedTokenCbor deserialization from CBOR Value is not yet implemented".to_string())
     }
 }
 impl TryFrom<&Value> for NestedTokenCbor {
     type Error = String;
     fn try_from(_value: &Value) -> Result<Self, Self::Error> {
-        todo!()
+        Err("NestedTokenCbor deserialization from CBOR Value is not yet implemented".to_string())
     }
 }
 impl TryFrom<NestedToken> for NestedTokenCbor {
@@ -150,7 +170,7 @@ impl TryFrom<&NestedToken> for NestedTokenCbor {
             JsonSelectorForDebValue::JwtMessage(s) => Ok(NestedTokenCbor(
                 SelectorCbor::JsonTokenInsideCborToken(s.to_string()),
             )),
-            JsonSelectorForDebValue::CborTokenInsideJsonToken(s) => match base64::decode(s) {
+            JsonSelectorForDebValue::CborTokenInsideJsonToken(s) => match STANDARD.decode(s) {
                 Ok(v) => Ok(NestedTokenCbor(SelectorCbor::CborTokenInsideCborToken(v))),
                 Err(e) => Err(e.to_string()),
             },
@@ -168,7 +188,7 @@ impl TryFrom<&NestedToken> for NestedTokenCbor {
 /// JSON encoding/decoding of `json-wrapped-claims-set`, see [EAT Section 5]
 ///
 /// The `json-wrapped-claims-set` type used as the JSON part of a JC<> production that defines the
-/// `detached-claims-set` field of `Detached-EAT-Bundle`. Use [WrappedClaimsSetCbor](WrappedClaimsSetCbor)
+/// `detached-claims-set` field of `Detached-EAT-Bundle`. Use [WrappedClaimsSetCbor]
 /// for CBOR-encoded EATs.
 ///
 /// ```text
@@ -182,26 +202,26 @@ impl TryFrom<&NestedToken> for NestedTokenCbor {
 /// ]
 /// ```
 ///
-/// [EAT Section 5]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-5
+/// [EAT Section 5]: https://datatracker.ietf.org/doc/html/rfc9711#section-5
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct WrappedClaimsSet(pub String);
 impl TryFrom<WrappedClaimsSetCbor> for WrappedClaimsSet {
     type Error = String;
     fn try_from(value: WrappedClaimsSetCbor) -> Result<Self, Self::Error> {
-        Ok(WrappedClaimsSet(base64::encode(value.0)))
+        Ok(WrappedClaimsSet(STANDARD.encode(value.0)))
     }
 }
 impl TryFrom<&WrappedClaimsSetCbor> for WrappedClaimsSet {
     type Error = String;
     fn try_from(value: &WrappedClaimsSetCbor) -> Result<Self, Self::Error> {
-        Ok(WrappedClaimsSet(base64::encode(value.0.clone())))
+        Ok(WrappedClaimsSet(STANDARD.encode(value.0.clone())))
     }
 }
 
 /// CBOR encoding/decoding of `cbor-wrapped-claims-set`, see [EAT Section 5]
 ///
 /// The `cbor-wrapped-claims-set` type is used as the CBOR part of a JC<> production that defines the
-/// `detached-claims-set` field of `Detached-EAT-Bundle`. Use [WrappedClaimsSet](WrappedClaimsSet)
+/// `detached-claims-set` field of `Detached-EAT-Bundle`. Use [WrappedClaimsSet]
 /// for JSON-encoded EATs.
 ///
 /// ```text
@@ -215,7 +235,7 @@ impl TryFrom<&WrappedClaimsSetCbor> for WrappedClaimsSet {
 /// ]
 /// ```
 ///
-/// [EAT Section 5]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-5
+/// [EAT Section 5]: https://datatracker.ietf.org/doc/html/rfc9711#section-5
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct WrappedClaimsSetCbor(pub Vec<u8>);
 impl TryFrom<Value> for WrappedClaimsSetCbor {
@@ -239,7 +259,7 @@ impl TryFrom<&Value> for WrappedClaimsSetCbor {
 impl TryFrom<WrappedClaimsSet> for WrappedClaimsSetCbor {
     type Error = String;
     fn try_from(value: WrappedClaimsSet) -> Result<Self, Self::Error> {
-        match base64::decode(value.0) {
+        match STANDARD.decode(value.0) {
             Ok(v) => Ok(WrappedClaimsSetCbor(v)),
             Err(e) => Err(e.to_string()),
         }
@@ -248,7 +268,7 @@ impl TryFrom<WrappedClaimsSet> for WrappedClaimsSetCbor {
 impl TryFrom<&WrappedClaimsSet> for WrappedClaimsSetCbor {
     type Error = String;
     fn try_from(value: &WrappedClaimsSet) -> Result<Self, Self::Error> {
-        match base64::decode(&value.0) {
+        match STANDARD.decode(&value.0) {
             Ok(v) => Ok(WrappedClaimsSetCbor(v)),
             Err(e) => Err(e.to_string()),
         }
@@ -257,7 +277,7 @@ impl TryFrom<&WrappedClaimsSet> for WrappedClaimsSetCbor {
 
 /// JSON encoding/decoding of `Detached-EAT-Bundle`, see [EAT Section 5].
 ///
-/// Use [DetachedEatBundleCbor](DetachedEatBundleCbor) for CBOR-encoded EATs.
+/// Use [DetachedEatBundleCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// Detached-EAT-Bundle = [
@@ -268,7 +288,7 @@ impl TryFrom<&WrappedClaimsSet> for WrappedClaimsSetCbor {
 ///     }
 /// ]
 /// ```
-/// [EAT Section 5]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-5
+/// [EAT Section 5]: https://datatracker.ietf.org/doc/html/rfc9711#section-5
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct DetachedEatBundle {
@@ -280,7 +300,7 @@ pub struct DetachedEatBundle {
 
 /// JSON encoding/decoding of `Detached-Submodule-Digest`, see [EAT Section 4.2.18].
 ///
-/// Use [DetachedSubmoduleDigestCbor](DetachedSubmoduleDigestCbor) for CBOR-encoded EATs.
+/// Use [DetachedSubmoduleDigestCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// Detached-Submodule-Digest = [
@@ -288,7 +308,7 @@ pub struct DetachedEatBundle {
 ///    digest         : binary-data
 /// ]
 /// ```
-/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
+/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.18
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct DetachedSubmoduleDigest {
@@ -299,7 +319,7 @@ pub struct DetachedSubmoduleDigest {
 
 /// JSON encoding/decoding of `dloa-type`, see [EAT Section 4.2.14].
 ///
-/// Use [DloaTypeCbor](DloaTypeCbor) for CBOR-encoded EATs.
+/// Use [DloaTypeCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// dloa-type = [
@@ -308,7 +328,7 @@ pub struct DetachedSubmoduleDigest {
 ///     ? dloa_application_label: text
 /// ]
 /// ```
-/// [EAT Section 4.2.14]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.14
+/// [EAT Section 4.2.14]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.14
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct DloaType {
@@ -317,12 +337,13 @@ pub struct DloaType {
     #[cbor(value = "Text")]
     pub dloa_platform_label: String,
     #[cbor(value = "Text")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub dloa_application_label: Option<String>,
 }
 
 /// JSON encoding/decoding of `hardware-version-type`, see [EAT Section 4.2.5].
 ///
-/// Use [HardwareVersionTypeCbor](HardwareVersionTypeCbor) for CBOR-encoded EATs.
+/// Use [HardwareVersionTypeCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// hardware-version-type = [
@@ -330,27 +351,28 @@ pub struct DloaType {
 ///     ? scheme:  $version-scheme
 /// ]
 /// ```
-/// [EAT Section 4.2.5]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.5
+/// [EAT Section 4.2.5]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.5
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct HardwareVersionType {
     #[cbor(value = "Text")]
     pub version: String,
     #[cbor(cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub scheme: Option<VersionScheme>,
 }
 
 /// JSON encoding/decoding of `individual-result`, see [EAT Section 4.2.17].
 ///
-/// Use [IndividualResultCbor](IndividualResultCbor) for CBOR-encoded EATs.
+/// Use [IndividualResultCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// individual-result = [
-///     results-id: tstr / binary-data,
-///     result:     result-type,
+///     result-id: tstr / binary-data,
+///     result:    result-type,
 /// ]
 /// ```
-/// [EAT Section 4.2.17]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.17
+/// [EAT Section 4.2.17]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.17
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct IndividualResult {
@@ -360,24 +382,24 @@ pub struct IndividualResult {
 
 /// JSON encoding/decoding of `manifests-type`, see [EAT Section 4.2.15].
 ///
-/// Use [ManifestsTypeCbor](ManifestsTypeCbor) for CBOR-encoded EATs.
+/// Use [ManifestsTypeCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// manifests-type = [+ manifest-format]
 /// ```
-/// [EAT Section 4.2.15]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.15
+/// [EAT Section 4.2.15]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.15
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ManifestsType(pub Vec<ManifestFormat>);
 
 /// CBOR encoding/decoding of `manifests-type`, see [EAT Section 4.2.15].
 ///
-/// Use [ManifestsType](ManifestsType) for JSON-encoded EATs.
+/// Use [ManifestsType] for JSON-encoded EATs.
 ///
 /// ```text
 /// manifests-type = [+ manifest-format]
 /// ```
-/// [EAT Section 4.2.15]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.15
+/// [EAT Section 4.2.15]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.15
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ManifestsTypeCbor(pub Vec<ManifestFormatCbor>);
@@ -387,11 +409,10 @@ impl TryFrom<&Value> for ManifestsTypeCbor {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Array(v) => Ok(ManifestsTypeCbor(
-                v.iter()
-                    .map(|m| ManifestFormatCbor::try_from(m).unwrap())
-                    .collect(),
-            )),
+            Value::Array(v) => {
+                let items: Result<Vec<_>, _> = v.iter().map(ManifestFormatCbor::try_from).collect();
+                Ok(ManifestsTypeCbor(items?))
+            }
             _ => Err("Failed to parse value as an array for EnvironmentGroupListCbor".to_string()),
         }
     }
@@ -432,7 +453,7 @@ impl TryFrom<&ManifestsTypeCbor> for ManifestsType {
 
 /// JSON encoding/decoding of `manifest-format`, see [EAT Section 4.2.15].
 ///
-/// Use [ManifestFormatCbor](ManifestFormatCbor) for CBOR-encoded EATs.
+/// Use [ManifestFormatCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// The $manifest-body-json and $manifest-body-cbor distill down to text or binary,
@@ -446,7 +467,7 @@ impl TryFrom<&ManifestsTypeCbor> for ManifestsType {
 ///                         $manifest-body-cbor >
 /// ]
 /// ```
-/// [EAT Section 4.2.15]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.15
+/// [EAT Section 4.2.15]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.15
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct ManifestFormat {
@@ -457,24 +478,24 @@ pub struct ManifestFormat {
 
 /// JSON encoding/decoding of `measurements-type`, see [EAT Section 4.2.16].
 ///
-/// Use [MeasurementsTypeCbor](MeasurementsTypeCbor) for CBOR-encoded EATs.
+/// Use [MeasurementsTypeCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// measurements-type = [+ measurements-format]
 /// ```
-/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.16
+/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.16
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct MeasurementsType(pub Vec<MeasurementsFormat>);
 
 /// CBOR encoding/decoding of `measurements-type`, see [EAT Section 4.2.16].
 ///
-/// Use [MeasurementsType](MeasurementsType) for JSON-encoded EATs.
+/// Use [MeasurementsType] for JSON-encoded EATs.
 ///
 /// ```text
 /// measurements-type = [+ measurements-format]
 /// ```
-/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.16
+/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.16
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct MeasurementsTypeCbor(pub Vec<MeasurementsFormatCbor>);
@@ -484,11 +505,11 @@ impl TryFrom<&Value> for MeasurementsTypeCbor {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Array(v) => Ok(MeasurementsTypeCbor(
-                v.iter()
-                    .map(|m| MeasurementsFormatCbor::try_from(m).unwrap())
-                    .collect(),
-            )),
+            Value::Array(v) => {
+                let items: Result<Vec<_>, _> =
+                    v.iter().map(MeasurementsFormatCbor::try_from).collect();
+                Ok(MeasurementsTypeCbor(items?))
+            }
             _ => Err("Failed to parse value as an array for EnvironmentGroupListCbor".to_string()),
         }
     }
@@ -529,7 +550,7 @@ impl TryFrom<&MeasurementsTypeCbor> for MeasurementsType {
 
 /// JSON encoding/decoding of `measurements-format`, see [EAT Section 4.2.16].
 ///
-/// Use [MeasurementsFormatCbor](MeasurementsFormatCbor) for CBOR-encoded EATs.
+/// Use [MeasurementsFormatCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// For the moment, the $measurements-body-cbor socket is not supported and instead
@@ -540,7 +561,7 @@ impl TryFrom<&MeasurementsTypeCbor> for MeasurementsType {
 ///     content-format: $measurements-body-cbor
 /// ]
 /// ```
-/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.16
+/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.16
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct MeasurementsFormat {
@@ -551,24 +572,24 @@ pub struct MeasurementsFormat {
 
 /// JSON encoding/decoding of `measurements-type`, see [EAT Section 4.2.16].
 ///
-/// Use [MeasurementResultsGroupArrayCbor](MeasurementResultsGroupArrayCbor) for CBOR-encoded EATs.
+/// Use [MeasurementResultsGroupArrayCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// measurements-type = [+ measurements-format]
 /// ```
-/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.16
+/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.16
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct MeasurementResultsGroupArray(pub Vec<MeasurementResultsGroup>);
 
 /// CBOR encoding/decoding of `measurements-type`, see [EAT Section 4.2.16].
 ///
-/// Use [MeasurementResultsGroupArray](MeasurementResultsGroupArray) for JSON-encoded EATs.
+/// Use [MeasurementResultsGroupArray] for JSON-encoded EATs.
 ///
 /// ```text
 /// measurements-type = [+ measurements-format]
 /// ```
-/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.16
+/// [EAT Section 4.2.16]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.16
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct MeasurementResultsGroupArrayCbor(pub Vec<MeasurementResultsGroupCbor>);
@@ -584,11 +605,13 @@ impl TryFrom<&Value> for MeasurementResultsGroupArrayCbor {
     type Error = String;
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Array(v) => Ok(MeasurementResultsGroupArrayCbor(
-                v.iter()
-                    .map(|m| MeasurementResultsGroupCbor::try_from(m).unwrap())
-                    .collect(),
-            )),
+            Value::Array(v) => {
+                let items: Result<Vec<_>, _> = v
+                    .iter()
+                    .map(MeasurementResultsGroupCbor::try_from)
+                    .collect();
+                Ok(MeasurementResultsGroupArrayCbor(items?))
+            }
             _ => Err("Failed to parse value as an array for EnvironmentGroupListCbor".to_string()),
         }
     }
@@ -629,7 +652,7 @@ impl TryFrom<&MeasurementResultsGroupArrayCbor> for MeasurementResultsGroupArray
 
 /// JSON encoding/decoding of `measurement-results-group`, see [EAT Section 4.2.17].
 ///
-/// Use [MeasurementResultsGroupCbor](MeasurementResultsGroupCbor) for CBOR-encoded EATs.
+/// Use [MeasurementResultsGroupCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// measurement-results-group = [
@@ -637,7 +660,7 @@ impl TryFrom<&MeasurementResultsGroupArrayCbor> for MeasurementResultsGroupArray
 ///     measurement-results: [ + individual-result ]
 /// ]
 /// ```
-/// [EAT Section 4.2.17]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.17
+/// [EAT Section 4.2.17]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.17
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct MeasurementResultsGroup {
@@ -649,7 +672,7 @@ pub struct MeasurementResultsGroup {
 
 /// JSON encoding/decoding of `sw-version-type`, see [EAT Section 4.2.7].
 ///
-/// Use [SwVersionTypeCbor](SwVersionTypeCbor) for CBOR-encoded EATs.
+/// Use [SwVersionTypeCbor] for CBOR-encoded EATs.
 ///
 /// ```text
 /// sw-version-type = [
@@ -657,12 +680,13 @@ pub struct MeasurementResultsGroup {
 ///     ? scheme:  $version-scheme ; As defined by CoSWID
 /// ]
 /// ```
-/// [EAT Section 4.2.7]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.7
+/// [EAT Section 4.2.7]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.7
 #[derive(Clone, Debug, PartialEq, StructToArray, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct SwVersionType {
     #[cbor(value = "Text")]
     pub version: String,
     #[cbor(cbor = "true")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub scheme: Option<VersionScheme>,
 }

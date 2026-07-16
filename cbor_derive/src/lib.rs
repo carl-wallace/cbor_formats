@@ -1,7 +1,17 @@
+#![forbid(unsafe_code)]
+#![warn(
+    clippy::alloc_instead_of_core,
+    clippy::mod_module_files,
+    clippy::std_instead_of_alloc,
+    clippy::std_instead_of_core,
+    clippy::unwrap_used,
+    missing_docs,
+    rust_2018_idioms,
+    unused_lifetimes,
+    unused_qualifications
+)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
-#![forbid(unsafe_code)]
-#![warn(missing_docs, rust_2018_idioms)]
 
 use proc_macro2::Span;
 use quote::quote;
@@ -15,17 +25,19 @@ fn default_lifetime() -> proc_macro2::TokenStream {
 
 mod attributes;
 mod cbor_derive_utils;
+mod enum_to_choice;
 mod field;
 mod struct_to_array;
 mod struct_to_map;
 mod struct_to_one_or_more;
 
+use crate::enum_to_choice::DeriveEnumToChoice;
 use crate::struct_to_array::DeriveStructToArray;
 use crate::struct_to_map::DeriveStructToMap;
 use crate::struct_to_one_or_more::DeriveStructToOneOrMore;
 use proc_macro::TokenStream;
-use proc_macro_error::proc_macro_error;
-use syn::{parse_macro_input, DeriveInput};
+use proc_macro_error2::proc_macro_error;
+use syn::{DeriveInput, parse_macro_input};
 
 /// The `StructToMap` derive macro marshals data from a structure into a `Vec<(Value, Value)>` for use with
 /// the [ciborium](https://crates.io/crates/ciborium) library. For each structure the following artifacts are generated:
@@ -80,7 +92,7 @@ pub fn derive_struct_to_map(input: TokenStream) -> TokenStream {
 ///
 /// use ciborium::{cbor, value::Value};
 /// use serde::{Serialize, Deserialize};
-/// use serde::__private::{PhantomData, size_hint};
+/// use core::marker::PhantomData;
 /// use serde::de::{Visitor, Error as OtherError};
 /// use serde::ser::Error;
 ///
@@ -106,7 +118,6 @@ pub fn derive_struct_to_map(input: TokenStream) -> TokenStream {
 /// use hex_literal::hex;
 ///
 /// use common::arrays::{HashEntry, HashEntryCbor};
-
 ///
 /// let some_bytes = hex!("a200c11a637cffdc01c11a637d0decffa200c11a637cffdc01c11a637d0decff");
 /// let scratch = HashEntryCbor {
@@ -145,4 +156,66 @@ pub fn derive_struct_to_array(input: TokenStream) -> TokenStream {
 pub fn derive_struct_to_one_or_more(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     DeriveStructToOneOrMore::new(input).to_tokens().into()
+}
+
+/// The `EnumToChoice` derive macro generates `TryFrom<Value>` and `TryFrom<&Value>`
+/// implementations for enums representing CDDL choice types (`/` operator).
+///
+/// ## Variant attributes
+///
+/// Variants with one unnamed field dispatch on CBOR value type or tag:
+///
+/// - `#[cbor(tag = "N")]` — Match `Value::Tag(N, inner)`, construct via `TryFrom` on inner value
+/// - `#[cbor(tag = "N", cbor = "true")]` — Match tag N, deserialize via ciborium serde (for `Required<T, N>` types)
+/// - `#[cbor(value = "Text")]` — Match `Value::Text` (also: Bytes, Integer, Bool, Map, Array)
+/// - `#[cbor(socket = "true")]` — Catch-all for CDDL `$` sockets: captures unmatched `Value::Tag` as `TupleCbor`
+/// - No attribute — Try `TryFrom<&Value>` on the variant's inner type (fallback)
+///
+/// Unit variants map to integer constants (for CDDL `&(name: N)` groups):
+///
+/// - `#[cbor(tag = "N")]` on a unit variant — Maps this variant to integer value N
+///
+/// ## Struct-level attributes
+///
+/// - `#[cbor(companion = "true")]` — Auto-generate a `*Cbor` companion enum with:
+///   - `Required<T, N>` wrappers for `tag + cbor` variants
+///   - `Value(i8)` + associated constants for integer-unit variants
+///   - Bidirectional `TryFrom` conversions between JSON and CBOR forms
+///   - `TryFrom<Value>` for the companion
+///
+/// ## Examples
+///
+/// Tagged choice with auto-generated companion:
+/// ```ignore
+/// #[derive(EnumToChoice)]
+/// #[cbor(companion = "true")]
+/// #[serde(tag = "type", content = "value")]
+/// enum ClassIdTypeChoice {
+///     #[cbor(tag = "111", cbor = "true")]
+///     oid(OidType),
+///     #[cbor(tag = "37", cbor = "true")]
+///     uuid(UuidType),
+/// }
+/// // Generates ClassIdTypeChoiceCbor with Required<OidType, 111>, Required<UuidType, 37>
+/// ```
+///
+/// Integer enum with auto-generated companion:
+/// ```ignore
+/// #[derive(EnumToChoice)]
+/// #[cbor(companion = "true")]
+/// enum CorimRoleTypeChoice {
+///     #[cbor(tag = "0")]
+///     TagCreator,
+///     #[cbor(tag = "1")]
+///     ManifestCreator,
+///     #[serde(other)]
+///     other(String),
+/// }
+/// // Generates CorimRoleTypeChoiceCbor with Value(i8) + TAG_CREATOR, MANIFEST_CREATOR constants
+/// ```
+#[proc_macro_derive(EnumToChoice, attributes(cbor))]
+#[proc_macro_error]
+pub fn derive_enum_to_choice(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    DeriveEnumToChoice::new(input).to_tokens().into()
 }

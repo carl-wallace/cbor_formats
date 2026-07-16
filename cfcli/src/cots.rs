@@ -1,42 +1,40 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use cots::arrays::*;
-use std::fs;
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
+//! CoTS (Concise Trust Anchor Store) create and display operations.
 
-use crate::utils::find_files;
-use crate::{CotsCommand, CotsCreateSubcommand, CotsSubCommands, DisplaySubcommand};
+use std::{fs, fs::File, io::Write, path::Path};
 
+use ciborium::{de::from_reader, ser::into_writer};
+
+use cots::arrays::{ConciseTaStores, ConciseTaStoresCbor};
+
+use crate::{
+    CotsCommand, CotsCreateSubcommand, CotsSubCommands, DisplaySubcommand, utils::find_files,
+};
+
+/// Dispatch CoTS subcommands.
 pub fn cots_main(args: &CotsCommand) {
-    //todo cfcli support
-    println!("{:?}", args);
     match &args.command {
         CotsSubCommands::Create(c) => cots_create(c),
         CotsSubCommands::Display(c) => cots_display(c),
         CotsSubCommands::CreateStore(_) => {
-            todo!("cfcli support")
+            println!("CoTS create-store is not yet implemented");
         }
         CotsSubCommands::CreateCorim(_) => {
-            todo!("cfcli support")
+            println!("CoTS create-corim is not yet implemented");
         }
     }
 }
 
+/// Create CBOR-encoded CoTS files from JSON templates.
 fn cots_create(args: &CotsCreateSubcommand) {
-    if args.template.is_none()
-        && (args.template_dir.is_none() || args.template_dir.as_ref().unwrap().is_empty())
-    {
+    if args.template.is_none() && args.template_dir.as_ref().is_none_or(|d| d.is_empty()) {
         println!("No templates supplied");
         return;
     }
 
     let mut files = vec![];
-    match &args.template {
-        Some(f) => files.push(f.clone()),
-        None => {}
-    };
+    if let Some(f) = &args.template {
+        files.push(f.clone());
+    }
 
     if let Some(f) = args.template_dir.as_ref() {
         find_files(f, "json", &mut files)
@@ -49,7 +47,12 @@ fn cots_create(args: &CotsCreateSubcommand) {
     }
 }
 
+/// Decode and display a CBOR-encoded CoTS as JSON.
 fn cots_display(args: &DisplaySubcommand) {
+    if matches!(args.format, crate::args::DisplayFormat::Diag) {
+        crate::cbor_diag::display_diag(&args.file_to_display);
+        return;
+    }
     let data = match fs::read(&args.file_to_display) {
         Ok(b) => b,
         Err(e) => {
@@ -94,6 +97,7 @@ fn cots_display(args: &DisplaySubcommand) {
     println!("{}", json);
 }
 
+/// Convert a single CoTS JSON template to a CBOR-encoded file.
 fn cots_template_to_cbor(template_file: &String, output_dir: &Path) {
     let data = match fs::read_to_string(template_file) {
         Ok(s) => s,
@@ -149,11 +153,24 @@ fn cots_template_to_cbor(template_file: &String, output_dir: &Path) {
     };
 
     let output_path = Path::new(output_dir);
-    let mut output_pathbuf = output_path.join(template_filename.to_str().unwrap());
+    let filename_str = match template_filename.to_str() {
+        Some(s) => s,
+        None => {
+            println!("Failed to convert filename to string");
+            return;
+        }
+    };
+    let mut output_pathbuf = output_path.join(filename_str);
     output_pathbuf.set_extension("cbor");
 
-    let mut output_file = File::create(output_pathbuf).unwrap();
-    output_file
-        .write_all(encoded_token.as_slice())
-        .expect("Unable to write manifest file");
+    let mut output_file = match File::create(&output_pathbuf) {
+        Ok(f) => f,
+        Err(e) => {
+            println!("Failed to create output file {:?}: {}", output_pathbuf, e);
+            return;
+        }
+    };
+    if let Err(e) = output_file.write_all(encoded_token.as_slice()) {
+        println!("Failed to write CoTS file {:?}: {}", output_pathbuf, e);
+    }
 }

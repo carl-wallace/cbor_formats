@@ -1,13 +1,22 @@
-//! Choice-based structs from the Concise Trust Anchor Store (CoTS) spec
-
-use ciborium::value::Value;
-use serde::{Deserialize, Serialize};
+//! Choice-based types from the Concise Trust Anchor Store (CoTS) spec
+//! ([draft-ietf-rats-concise-ta-stores]).
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `$pkix-ta-type` | [`PkixTaType`] / [`PkixTaTypeKnown`] |
+//! | `tas-list-purpose` | [`TasListPurpose`] |
+//!
+//! [draft-ietf-rats-concise-ta-stores]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-concise-ta-stores
 
 use alloc::string::{String, ToString};
 
+use ciborium::value::Value;
 use num_enum::TryFromPrimitive;
-use serde_repr::Deserialize_repr;
-use serde_repr::Serialize_repr;
+use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
+
 // $concise-tag-type-choice /= #6.999(bytes .cbor concise-ta-stores)
 
 // $pkix-ta-type /= tastore.pkix-cert-type
@@ -16,6 +25,9 @@ use serde_repr::Serialize_repr;
 // tastore.pkix-cert-type = 0
 // tastore.pkix-tainfo-type = 1
 // tastore.pkix-spki-type = 2
+/// Represents the type of a PKIX trust anchor in a Concise TA Store.
+///
+/// Wraps the known variants defined by `$pkix-ta-type` in the CoTS specification.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -23,6 +35,7 @@ pub enum PkixTaType {
     Known(PkixTaTypeKnown),
 }
 
+/// Known PKIX trust anchor type values: certificate, TrustAnchorInfo, or SubjectPublicKeyInfo.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -70,6 +83,9 @@ impl TryFrom<&Value> for PkixTaType {
 // $tas-list-purpose /= "eat"
 // $tas-list-purpose /= "key-attestation"
 // $tas-list-purpose /= "certificate"
+/// Represents the intended purpose of a trust anchor store list in the CoTS specification.
+///
+/// Defined by `$tas-list-purpose` with values such as "cots", "corim", "eat", etc.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]

@@ -1,6 +1,4 @@
-use std::fs::File;
-use std::io::Read;
-use std::path::Path;
+use std::{fs::File, io::Read, path::Path};
 
 #[allow(dead_code)]
 pub fn buffer_to_hex(buffer: &[u8]) -> String {

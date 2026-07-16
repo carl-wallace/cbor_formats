@@ -1,7 +1,15 @@
 {
   "tag-identity": {
-    "id": "1D5A8C7C-1C70-4C56-937E-3C5713AE5A83"
+    "id": "1D5A8C7C-1C70-4C56-937E-3C5713AE5A83",
+    "version": 0
   },
+  "entities": [
+    {
+      "name": "DICE Manufacturer",
+      "regid": "https://dice.example",
+      "roles": ["tagCreator", "creator"]
+    }
+  ],
   "triples": {
     "reference-values": [
       {
@@ -9,7 +17,7 @@
           "class": {
             "id": {
               "type": "uuid",
-              "value": "DD6661F0-0928-4401-966B-589EA74E3272"
+              "value": [221, 102, 97, 240, 9, 40, 68, 1, 150, 107, 88, 158, 167, 78, 50, 114]
             },
             "model": "FMC",
             "layer": 0,
@@ -19,17 +27,15 @@
         "measurements": [
           {
             "value": {
-              "op-flags": [
-                "notSecure",
-                "debug"
-              ],
+              "svn": {"@@TAGGED@@": [552, 10]},
               "digests": [
-                "sha-256:RKozavTLFKh5Qy5T3WVxx/qbzK+3X0iCWSYtbqOk2Rs="
-              ],
-              "svn": {
-                "type": "exact-value",
-                "value": 10
-              }
+                {
+                  "hash_alg_id": 1,
+                  "hash_value": [68, 170, 51, 106, 244, 203, 20, 168, 121, 67, 46, 83,
+                    221, 101, 113, 199, 250, 155, 204, 175, 183, 95, 72, 130,
+                    89, 38, 45, 110, 163, 164, 217, 27]
+                }
+              ]
             }
           }
         ]
@@ -39,7 +45,7 @@
           "class": {
             "id": {
               "type": "uuid",
-              "value": "FFDA7CF3-2333-4A91-99A8-068626203ACA"
+              "value": [255, 218, 124, 243, 35, 51, 74, 145, 153, 168, 6, 134, 38, 32, 58, 202]
             },
             "model": "L1",
             "layer": 1,
@@ -49,18 +55,21 @@
         "measurements": [
           {
             "value": {
-              "op-flags": [
-                "notSecure",
-                "debug"
-              ],
+              "svn": {"@@TAGGED@@": [552, 2]},
               "digests": [
-                "sha-256:h0KPxSKAPTEGXnvOPPA/5HUJZjHl4Hu9eg/eYMTPJcc=",
-                "sha-256:VgXOanU71cskR7hhl418y0an8zsD772wLJYg2o6awD0="
-              ],
-              "svn": {
-                "type": "exact-value",
-                "value": 2
-              }
+                {
+                  "hash_alg_id": 1,
+                  "hash_value": [135, 66, 143, 197, 34, 128, 61, 49, 6, 94, 123, 206,
+                    60, 240, 63, 228, 117, 9, 102, 49, 229, 224, 123, 189,
+                    122, 15, 222, 96, 196, 207, 37, 199]
+                },
+                {
+                  "hash_alg_id": 1,
+                  "hash_value": [86, 5, 206, 106, 117, 59, 213, 203, 36, 71, 184, 97,
+                    151, 141, 124, 203, 70, 167, 243, 59, 3, 239, 189, 176,
+                    44, 150, 32, 218, 142, 154, 192, 61]
+                }
+              ]
             }
           }
         ]

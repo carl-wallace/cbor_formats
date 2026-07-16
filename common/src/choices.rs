@@ -1,14 +1,23 @@
-//! General-purpose choice types
+//! General-purpose choice types used across multiple specifications.
+//!
+//! This module implements the following CDDL productions:
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `$version-scheme` | [`VersionScheme`] / [`VersionSchemeCbor`] |
+//! | known version scheme values | [`VersionSchemeKnown`] / [`VersionSchemeKnownCbor`] |
+
+use alloc::{
+    format,
+    string::{String, ToString},
+};
 
 use ciborium::value::Value;
 use num_enum::TryFromPrimitive;
 use serde::{Deserialize, Serialize};
-use serde_repr::Deserialize_repr;
-use serde_repr::Serialize_repr;
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use alloc::string::{String, ToString};
-
-/// The `version-scheme` socket is defined in [CoRIM Section 3.1.4.1.5.3].
+/// The `version-scheme` socket is defined in [CoRIM Section 5.1.4.5.3].
 ///
 /// ```text
 /// $version-scheme /= &(multipartnumeric: 1)
@@ -19,7 +28,7 @@ use alloc::string::{String, ToString};
 /// $version-scheme /= int / text
 /// ```
 ///
-/// [CoRIM Section 3.1.4.1.5.3]: https://datatracker.ietf.org/doc/html/draft-birkholz-rats-corim-03#section-3.1.4.1.5.3
+/// [CoRIM Section 5.1.4.5.3]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-corim-10#section-5.1.4.5.3
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 #[serde(untagged)]
@@ -66,9 +75,14 @@ impl TryFrom<Value> for VersionScheme {
                     Ok(val) => Ok(Self::Known(val)),
                     Err(_) => Ok(Self::IntExtensions(vs)),
                 },
-                Err(_) => Err("".to_string()),
+                Err(_) => {
+                    Err("Failed to parse VersionScheme integer: value out of i64 range".to_string())
+                }
             },
-            _ => Err("".to_string()),
+            _ => Err(format!(
+                "Failed to parse VersionScheme: expected text or integer, got {:?}",
+                value
+            )),
         }
     }
 }
@@ -82,13 +96,19 @@ impl TryFrom<&Value> for VersionScheme {
                     Ok(val) => Ok(Self::Known(val)),
                     Err(_) => Ok(Self::IntExtensions(vs)),
                 },
-                Err(_) => Err("".to_string()),
+                Err(_) => {
+                    Err("Failed to parse VersionScheme integer: value out of i64 range".to_string())
+                }
             },
-            _ => Err("".to_string()),
+            _ => Err(format!(
+                "Failed to parse VersionScheme: expected text or integer, got {:?}",
+                value
+            )),
         }
     }
 }
 
+/// Well-known version scheme identifiers as defined in the CoSWID/CoRIM specifications.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[allow(missing_docs)]
 #[repr(i64)]
@@ -124,6 +144,7 @@ impl TryFrom<&VersionSchemeKnownCbor> for VersionSchemeKnown {
     }
 }
 
+/// CBOR-encoded version scheme, supporting known schemes, text, or integer extensions.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 #[serde(untagged)]
@@ -168,9 +189,14 @@ impl TryFrom<Value> for VersionSchemeCbor {
                     Ok(val) => Ok(Self::Known(val)),
                     Err(_) => Ok(Self::IntExtensions(vs)),
                 },
-                Err(_) => Err("".to_string()),
+                Err(_) => Err(
+                    "Failed to parse VersionSchemeCbor integer: value out of i64 range".to_string(),
+                ),
             },
-            _ => Err("".to_string()),
+            _ => Err(format!(
+                "Failed to parse VersionSchemeCbor: expected text or integer, got {:?}",
+                value
+            )),
         }
     }
 }
@@ -184,13 +210,19 @@ impl TryFrom<&Value> for VersionSchemeCbor {
                     Ok(val) => Ok(Self::Known(val)),
                     Err(_) => Ok(Self::IntExtensions(vs)),
                 },
-                Err(_) => Err("".to_string()),
+                Err(_) => Err(
+                    "Failed to parse VersionSchemeCbor integer: value out of i64 range".to_string(),
+                ),
             },
-            _ => Err("".to_string()),
+            _ => Err(format!(
+                "Failed to parse VersionSchemeCbor: expected text or integer, got {:?}",
+                value
+            )),
         }
     }
 }
 
+/// CBOR-encoded well-known version scheme identifiers, mirroring [`VersionSchemeKnown`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize_repr, Deserialize_repr, TryFromPrimitive)]
 #[allow(missing_docs)]
 #[repr(i64)]

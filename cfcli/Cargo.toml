@@ -1,21 +1,33 @@
 [package]
 name = "cfcli"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "CLI utility for working with CBOR-encoded attestation and supply chain integrity formats"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/carl-wallace/cbor-formats/tree/main/cfcli"
+categories = ["command-line-utilities", "cryptography", "encoding"]
+keywords = ["cbor", "corim", "eat", "cose", "cli"]
+readme = "README.md"
+version = "0.1.1"
+edition = "2024"
+rust-version = "1.85.0"
 
 [dependencies]
-cbor_derive = { version = "0.1.0", path = "../cbor_derive" }
-common = { version = "0.1.0", path = "../common" }
-corim = { version = "0.1.0", path = "../corim" }
-coswid = { version = "0.1.0", path = "../coswid" }
-cots = { version = "0.1.0", path = "../cots" }
-eat = { version = "0.1.0", path = "../eat" }
-clap = {version = "3.2.23", default-features = false, features=["std", "derive"]}
+cbor_derive = { version = "0.1.1", path = "../cbor_derive" }
+common = { version = "0.1.1", path = "../common" }
+ar4si = { version = "0.1.1", path = "../ar4si" }
+ear = { version = "0.1.1", path = "../ear" }
+corim = { version = "0.1.1", path = "../corim" }
+coserv = { version = "0.1.1", path = "../coserv" }
+cose = { version = "0.1.1", path = "../cose" }
+cose_crypto = { version = "0.1.1", path = "../cose_crypto" }
+coswid = { version = "0.1.1", path = "../coswid" }
+cots = { version = "0.1.1", path = "../cots" }
+eat = { version = "0.1.1", path = "../eat" }
+jose = { version = "0.1.1", path = "../jose" }
+base64ct = { version = "1.7", features = ["alloc"] }
+clap = {version = "4.6.0", default-features = false, features=["std", "derive", "help", "usage", "error-context"]}
 walkdir = { version = "2"}
-ciborium = "0.2.0"
+ciborium = "0.2.2"
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
 serde_bytes = "0.11"
-serde_json = "1.0.89"
+serde_json = "1.0.149"
 

@@ -1,16 +1,24 @@
-//! General-purpose Tuple and TupleCbor types
+//! General-purpose Tuple and TupleCbor types for representing CBOR tagged key-value pairs.
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | generic key-value pair (tag + value) | [`Tuple`] / [`TupleCbor`] |
 
-use alloc::boxed::Box;
-use alloc::string::{String, ToString};
-use alloc::{vec, vec::Vec};
-use ciborium::value::{Integer, Value};
+use alloc::{
+    boxed::Box,
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
-use serde::de::Error;
-use serde::de::VariantAccess;
-use serde::de::Visitor;
-use serde::ser::Error as OtherError;
-use serde::{de, Deserialize, Serialize};
 
+use ciborium::value::{Integer, Value};
+use serde::{
+    Deserialize, Serialize, de, de::Error, de::VariantAccess, de::Visitor, ser::Error as OtherError,
+};
+
+/// A key-value pair represented as two CBOR `Value` items, used for generic tagged entries.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(missing_docs)]
 pub struct Tuple {
@@ -101,40 +109,38 @@ impl TryFrom<&TupleCbor> for Vec<Value> {
     type Error = String;
     fn try_from(value: &TupleCbor) -> Result<Self, Self::Error> {
         let mut v = ::alloc::vec::Vec::new();
-        v.push(
-            match {
-                #[allow(unused_imports)]
-                use ::ciborium::value::Value::Null as null;
-                ::ciborium::value::Value::serialized(&value.key)
-            } {
-                Ok(v) => v,
-                Err(_) => return Err("Failed to parse TupleCbor".to_string()),
-            },
-        );
-        v.push(
-            match {
-                #[allow(unused_imports)]
-                use ::ciborium::value::Value::Null as null;
-                ::ciborium::value::Value::serialized(&value.value)
-            } {
-                Ok(v) => v,
-                Err(_) => return Err("Failed to parse TupleCbor".to_string()),
-            },
-        );
+        #[allow(unused_imports)]
+        use ::ciborium::value::Value::Null as null;
+        let key_val = ::ciborium::value::Value::serialized(&value.key);
+        match key_val {
+            Ok(val) => v.push(val),
+            Err(_) => return Err("Failed to parse TupleCbor".to_string()),
+        }
+        let value_val = ::ciborium::value::Value::serialized(&value.value);
+        match value_val {
+            Ok(val) => v.push(val),
+            Err(_) => return Err("Failed to parse TupleCbor".to_string()),
+        }
         Ok(v)
     }
 }
 impl TryFrom<Vec<Value>> for TupleCbor {
     type Error = String;
     fn try_from(v: Vec<Value>) -> Result<Self, Self::Error> {
+        if v.len() < 2 {
+            return Err(format!(
+                "TupleCbor requires at least 2 elements, got {}",
+                v.len()
+            ));
+        }
         Ok(TupleCbor {
-            key: v[0usize].clone(),
-            value: v[1usize].clone(),
+            key: v[0].clone(),
+            value: v[1].clone(),
         })
     }
 }
-impl serde::Serialize for TupleCbor {
-    fn serialize<__S>(&self, __serializer: __S) -> serde::__private::Result<__S::Ok, __S::Error>
+impl Serialize for TupleCbor {
+    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
     where
         __S: serde::Serializer,
     {
@@ -144,15 +150,12 @@ impl serde::Serialize for TupleCbor {
                 return Err(__S::Error::custom(e));
             }
         };
-        // let t: u64 = v[0].as_integer().unwrap().try_into().unwrap();
-        // let val = Value::Tag(t, Box::new(v[1].clone()));
-        // __serializer.serialize_some(&val)
         let i = match v[0].as_integer() {
             Some(i) => i,
             None => {
                 return Err(__S::Error::custom(
                     "Failed to parse tag value as an integer",
-                ))
+                ));
             }
         };
 
@@ -166,7 +169,7 @@ impl serde::Serialize for TupleCbor {
     }
 }
 impl<'de> Deserialize<'de> for TupleCbor {
-    fn deserialize<__D>(deserializer: __D) -> serde::__private::Result<Self, __D::Error>
+    fn deserialize<__D>(deserializer: __D) -> Result<Self, __D::Error>
     where
         __D: serde::Deserializer<'de>,
     {
@@ -181,13 +184,10 @@ impl<'de> Deserialize<'de> for TupleCbor {
             fn visit_enum<A: de::EnumAccess<'de>>(self, acc: A) -> Result<Self::Value, A::Error> {
                 struct Inner;
 
-                impl<'de> serde::de::Visitor<'de> for Inner {
+                impl<'de> Visitor<'de> for Inner {
                     type Value = Value;
 
-                    fn expecting(
-                        &self,
-                        formatter: &mut core::fmt::Formatter<'_>,
-                    ) -> core::fmt::Result {
+                    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                         write!(formatter, "a valid CBOR item")
                     }
 
@@ -198,10 +198,10 @@ impl<'de> Deserialize<'de> for TupleCbor {
                     ) -> Result<Self::Value, A::Error> {
                         let tag: u64 = acc
                             .next_element()?
-                            .ok_or_else(|| de::Error::custom("expected tag"))?;
+                            .ok_or_else(|| Error::custom("expected tag"))?;
                         let val = acc
                             .next_element()?
-                            .ok_or_else(|| de::Error::custom("expected val"))?;
+                            .ok_or_else(|| Error::custom("expected val"))?;
                         Ok(Value::Tag(tag, Box::new(val)))
                     }
                 }
@@ -220,16 +220,14 @@ impl<'de> Deserialize<'de> for TupleCbor {
                     Some(t) => t,
                     None => return Err(__D::Error::custom("Failed to parse tag value")),
                 };
-                match Integer::try_from(t.0) {
-                    Ok(i) => {
-                        let v0 = Value::Integer(i);
-                        let vals = vec![v0, t.1.clone()];
-                        match TupleCbor::try_from(vals) {
-                            Ok(r) => Ok(r),
-                            Err(e) => Err(__D::Error::custom(e)),
-                        }
+                {
+                    let i = Integer::from(t.0);
+                    let v0 = Value::Integer(i);
+                    let vals = vec![v0, t.1.clone()];
+                    match TupleCbor::try_from(vals) {
+                        Ok(r) => Ok(r),
+                        Err(e) => Err(__D::Error::custom(e)),
                     }
-                    Err(e) => Err(__D::Error::custom(e)),
                 }
             }
             Err(e) => Err(__D::Error::custom(e)),

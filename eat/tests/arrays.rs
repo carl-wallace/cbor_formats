@@ -1,32 +1,102 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::value::Value;
-use common::TextOrBinary;
 use std::path::Path;
 
-use eat::arrays::*;
+use ciborium::{de::from_reader, ser::into_writer, value::Value};
+
+use common::TextOrBinary;
+use eat::arrays::{
+    DetachedSubmoduleDigest, DetachedSubmoduleDigestCbor, DloaType, DloaTypeCbor,
+    HardwareVersionType, HardwareVersionTypeCbor, IndividualResult, IndividualResultCbor,
+    ManifestFormat, ManifestFormatCbor, MeasurementResultsGroup, MeasurementResultsGroupCbor,
+    MeasurementsFormat, MeasurementsFormatCbor, SwVersionType, SwVersionTypeCbor,
+};
 
 mod utils;
 use utils::*;
 
 #[test]
 fn detached_submodule_digest_test() {
-    // todo!("detached_submodule_digest_test")
+    let dsd = DetachedSubmoduleDigestCbor {
+        hash_algorithm: common::TextOrInt::Int(1),
+        digest: vec![0xAA; 32],
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&dsd, &mut buf);
+    let decoded: DetachedSubmoduleDigestCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(dsd, decoded);
+
+    let json: DetachedSubmoduleDigest = decoded.try_into().unwrap();
+    let cbor_roundtrip: DetachedSubmoduleDigestCbor = json.try_into().unwrap();
+    let mut buf2 = vec![];
+    let _ = into_writer(&cbor_roundtrip, &mut buf2);
+    assert_eq!(buf, buf2);
 }
 
 #[test]
 fn dloa_type_test() {
-    // todo!("dloa_type_test")
+    let dloa = DloaTypeCbor {
+        dloa_registrar: "https://registrar.example.com".to_string(),
+        dloa_platform_label: "platform-label-001".to_string(),
+        dloa_application_label: Some("app-label-001".to_string()),
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&dloa, &mut buf);
+    let decoded: DloaTypeCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(dloa, decoded);
+
+    // Test without optional field
+    let dloa2 = DloaTypeCbor {
+        dloa_registrar: "https://registrar.example.com".to_string(),
+        dloa_platform_label: "platform-label-001".to_string(),
+        dloa_application_label: None,
+    };
+    let mut buf2 = vec![];
+    let _ = into_writer(&dloa2, &mut buf2);
+    let decoded2: DloaTypeCbor = from_reader(buf2.as_slice()).unwrap();
+    assert_eq!(dloa2, decoded2);
+
+    let json: DloaType = decoded.try_into().unwrap();
+    let cbor_roundtrip: DloaTypeCbor = json.try_into().unwrap();
+    let mut buf3 = vec![];
+    let _ = into_writer(&cbor_roundtrip, &mut buf3);
+    assert_eq!(buf, buf3);
 }
 
 #[test]
 fn hardware_version_type_test() {
-    // todo!("hardware_version_type_test")
+    let hwv = HardwareVersionTypeCbor {
+        version: "1.2.3".to_string(),
+        scheme: None,
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&hwv, &mut buf);
+    let decoded: HardwareVersionTypeCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(hwv, decoded);
+
+    let json: HardwareVersionType = decoded.try_into().unwrap();
+    assert_eq!(json.version, "1.2.3");
+    let cbor_roundtrip: HardwareVersionTypeCbor = json.try_into().unwrap();
+    let mut buf2 = vec![];
+    let _ = into_writer(&cbor_roundtrip, &mut buf2);
+    assert_eq!(buf, buf2);
 }
 
 #[test]
 fn individual_result_test() {
-    // todo!("individual_result_test")
+    use eat::choices::ResultType;
+    let ir = IndividualResultCbor {
+        results_id: TextOrBinary::Text("test-result-001".to_string()),
+        result: ResultType::Success,
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&ir, &mut buf);
+    let decoded: IndividualResultCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(ir, decoded);
+
+    let json: IndividualResult = decoded.try_into().unwrap();
+    let cbor_roundtrip: IndividualResultCbor = json.try_into().unwrap();
+    let mut buf2 = vec![];
+    let _ = into_writer(&cbor_roundtrip, &mut buf2);
+    assert_eq!(buf, buf2);
 }
 
 #[test]
@@ -376,10 +446,42 @@ fn measurements_test() {
 
 #[test]
 fn measurement_results_group_test() {
-    // todo!("measurement_results_group_test")
+    use eat::choices::ResultType;
+    let mrg = MeasurementResultsGroupCbor {
+        measurement_system: "test-system".to_string(),
+        measurement_results: vec![IndividualResultCbor {
+            results_id: TextOrBinary::Text("result-1".to_string()),
+            result: ResultType::Success,
+        }],
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&mrg, &mut buf);
+    let decoded: MeasurementResultsGroupCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(mrg, decoded);
+
+    let json: MeasurementResultsGroup = decoded.try_into().unwrap();
+    assert_eq!(json.measurement_system, "test-system");
+    let cbor_roundtrip: MeasurementResultsGroupCbor = json.try_into().unwrap();
+    let mut buf2 = vec![];
+    let _ = into_writer(&cbor_roundtrip, &mut buf2);
+    assert_eq!(buf, buf2);
 }
 
 #[test]
 fn sw_version_type_test() {
-    // todo!("sw_version_type_test")
+    let swv = SwVersionTypeCbor {
+        version: "3.1.4".to_string(),
+        scheme: None,
+    };
+    let mut buf = vec![];
+    let _ = into_writer(&swv, &mut buf);
+    let decoded: SwVersionTypeCbor = from_reader(buf.as_slice()).unwrap();
+    assert_eq!(swv, decoded);
+
+    let json: SwVersionType = decoded.try_into().unwrap();
+    assert_eq!(json.version, "3.1.4");
+    let cbor_roundtrip: SwVersionTypeCbor = json.try_into().unwrap();
+    let mut buf2 = vec![];
+    let _ = into_writer(&cbor_roundtrip, &mut buf2);
+    assert_eq!(buf, buf2);
 }

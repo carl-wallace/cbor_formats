@@ -1,8 +1,7 @@
-use ciborium::de::from_reader;
-use ciborium::ser::into_writer;
-use ciborium::value::Value;
-use common::arrays::*;
+use ciborium::{de::from_reader, ser::into_writer, value::Value};
 use hex_literal::hex;
+
+use common::arrays::{HashEntry, HashEntryCbor};
 
 #[test]
 fn hash_entry_cbor_test() {

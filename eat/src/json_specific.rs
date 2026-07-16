@@ -3,7 +3,7 @@
 //! In order to support the submodules claim, the Entity Attestation Token (EAT) specification provides
 //! a set of CBOR-specific definitions and a set of JSON-specific definitions.
 //!
-//! The JSON-specific definitions from [Section 7.3.3](https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#name-json-specific-cddl) are below.
+//! The JSON-specific definitions from [Section 7.3.3](https://datatracker.ietf.org/doc/html/rfc9711#name-json-specific-cddl) are below.
 //!
 //! ```text
 //! $JSON-Selector-Value /= JWT-Message / CBOR-Token-Inside-JSON-Token / Detached-EAT-Bundle / Detached-Submodule-Digest
@@ -17,17 +17,33 @@
 //!
 //! This module provides support for JSON-encoded Submodule claims. See [cbor_specific](../cbor_specific/index.html) module for
 //! details regarding support for CBOR-encoded Submodule claims.
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `$JSON-Selector-Type` | [`JsonSelectorType`] |
+//! | `$JSON-Selector-Value` | [`JsonSelectorValue`] |
+//! | `JSON-Selector` | [`JsonSelector`] |
+//! | `$JSON-Selector-Value` (for-deb variant) | [`JsonSelectorForDebValue`] |
+//! | `Selector-For-Deb` | [`SelectorForDeb`] |
+//! | `Submodule` (JSON) | [`Submodule`] |
 
-use alloc::boxed::Box;
-use alloc::string::String;
+use alloc::{
+    boxed::Box,
+    collections::BTreeMap,
+    format,
+    string::{String, ToString},
+    vec::Vec,
+};
 use core::ops::Deref;
 
-use serde::__private::de::Content;
+use base64::{Engine, engine::general_purpose::STANDARD};
 use serde::{Deserialize, Serialize};
 
-use crate::arrays::{DetachedEatBundle, DetachedSubmoduleDigest};
-use crate::cbor_specific::{SelectorCbor, SubmoduleCbor};
-use crate::maps::{ClaimsSetClaims, ClaimsSetClaimsCbor};
+use crate::{
+    arrays::{DetachedEatBundle, DetachedSubmoduleDigest},
+    cbor_specific::{SelectorCbor, SubmodsMapCbor, SubmoduleCbor},
+    maps::{ClaimsSetClaims, ClaimsSetClaimsCbor},
+};
 
 // EAT-JSON-Token = $EAT-JSON-Token-Formats
 //
@@ -38,13 +54,13 @@ use crate::maps::{ClaimsSetClaims, ClaimsSetClaimsCbor};
 // Nested-Token = JSON-Selector
 
 /// Represents values used to indicate type of nested token in JSON-Selector as defined in [EAT Section 4.2.18].
-/// Note, while this enum is extensible the related [JsonSelectorValue](JsonSelectorValue) type is not, at present.
+/// Note, while this enum is extensible the related [JsonSelectorValue] type is not, at present.
 ///
 /// ```text
 /// $JSON-Selector-Type /= "JWT" / "CBOR" / "BUNDLE" / "DIGEST"
 /// ```
 ///
-/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
+/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.18
 #[derive(
     Clone,
     Debug,
@@ -77,7 +93,7 @@ pub enum JsonSelectorType {
 ///                   Detached-Submodule-Digest
 /// ```
 ///
-/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
+/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.18
 #[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -87,72 +103,37 @@ pub enum JsonSelectorValue {
     DetachedEatBundle(DetachedEatBundle),
     DetachedSubmoduleDigest(DetachedSubmoduleDigest),
 }
-impl<'de> serde::Deserialize<'de> for JsonSelectorValue {
-    fn deserialize<__D>(__deserializer: __D) -> Result<Self, __D::Error>
-    where
-        __D: serde::Deserializer<'de>,
-    {
-        let __content = match <Content<'_> as serde::Deserialize>::deserialize(__deserializer) {
-            Ok(__val) => __val,
-            Err(__err) => {
-                return Err(__err);
-            }
-        };
-        match &__content {
-            Content::Str(s) => {
-                // could use regex crate, but that requires std
-                let num = s.matches('.').count();
-                if 2 == num || 4 == num {
-                    if let Ok(__ok) = Result::map(
-                        <String as serde::Deserialize>::deserialize(
-                            serde::__private::de::ContentRefDeserializer::<__D::Error>::new(
-                                &__content,
-                            ),
-                        ),
-                        JsonSelectorValue::JwtMessage,
-                    ) {
-                        return Ok(__ok);
-                    }
-                }
-                if let Ok(__ok) = Result::map(
-                    <String as serde::Deserialize>::deserialize(
-                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
-                    ),
-                    JsonSelectorValue::CborTokenInsideJsonToken,
-                ) {
-                    return Ok(__ok);
-                }
-            }
-            Content::Map(_) => {
-                if let Ok(__ok) = Result::map(
-                    <DetachedEatBundle as serde::Deserialize>::deserialize(
-                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
-                    ),
-                    JsonSelectorValue::DetachedEatBundle,
-                ) {
-                    return Ok(__ok);
-                }
-                if let Ok(__ok) = Result::map(
-                    <DetachedSubmoduleDigest as serde::Deserialize>::deserialize(
-                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
-                    ),
-                    JsonSelectorValue::DetachedSubmoduleDigest,
-                ) {
-                    return Ok(__ok);
-                }
-            }
-            _ => {}
-        }
-        Err(serde::de::Error::custom(
-            "data did not match any variant of untagged enum JsonSelectorValue",
-        ))
+/// Deserialize a `JsonSelectorValue` given the `token_type` discriminator.
+///
+/// This avoids the fragile dot-counting heuristic for distinguishing JWT from
+/// base64-encoded CBOR tokens — the `token_type` field tells us unambiguously.
+fn deserialize_selector_value(
+    token_type: &JsonSelectorType,
+    value: serde_json::Value,
+) -> Result<JsonSelectorValue, String> {
+    match token_type {
+        JsonSelectorType::Jwt => match value {
+            serde_json::Value::String(s) => Ok(JsonSelectorValue::JwtMessage(s)),
+            _ => Err("JWT selector value must be a string".to_string()),
+        },
+        JsonSelectorType::Cbor => match value {
+            serde_json::Value::String(s) => Ok(JsonSelectorValue::CborTokenInsideJsonToken(s)),
+            _ => Err("CBOR selector value must be a base64-encoded string".to_string()),
+        },
+        JsonSelectorType::Bundle => serde_json::from_value::<DetachedEatBundle>(value)
+            .map(JsonSelectorValue::DetachedEatBundle)
+            .map_err(|e| format!("Failed to parse DetachedEatBundle: {e}")),
+        JsonSelectorType::Digest => serde_json::from_value::<DetachedSubmoduleDigest>(value)
+            .map(JsonSelectorValue::DetachedSubmoduleDigest)
+            .map_err(|e| format!("Failed to parse DetachedSubmoduleDigest: {e}")),
+        JsonSelectorType::Other(t) => Err(format!("Unknown JSON-Selector-Type: {t}")),
     }
 }
 
 /// Provides token_type and nested_token for JSON-encoded submodules
 ///
 /// The `JSON-Selector` array is defined in [EAT Section 4.2.18] and represents a token type and a
-/// nested taken values suitable for use in representing a JSON-encoded submodule claim.
+/// nested token values suitable for use in representing a JSON-encoded submodule claim.
 ///
 /// ```text
 /// JSON-Selector = [
@@ -160,16 +141,55 @@ impl<'de> serde::Deserialize<'de> for JsonSelectorValue {
 ///    nested-token : $JSON-Selector-Value
 /// ]
 /// ```
-/// [SelectorForDeb](SelectorForDeb) is used for DetachedEATBundles.
+/// [SelectorForDeb] is used for DetachedEATBundles.
 ///
-/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/draft-ietf-rats-eat#section-4.2.18
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+/// [EAT Section 4.2.18]: https://datatracker.ietf.org/doc/html/rfc9711#section-4.2.18
+#[derive(Clone, Debug, PartialEq)]
 #[allow(missing_docs)]
 pub struct JsonSelector {
     pub token_type: JsonSelectorType,
     pub nested_token: JsonSelectorValue,
 }
+impl Serialize for JsonSelector {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        use serde::ser::SerializeSeq;
+        let mut seq = serializer.serialize_seq(Some(2))?;
+        seq.serialize_element(&self.token_type)?;
+        seq.serialize_element(&self.nested_token)?;
+        seq.end()
+    }
+}
+impl<'de> Deserialize<'de> for JsonSelector {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let arr = <Vec<serde_json::Value>>::deserialize(deserializer)?;
+        if arr.len() != 2 {
+            return Err(serde::de::Error::custom(format!(
+                "JSON-Selector must be a 2-element array, got {}",
+                arr.len()
+            )));
+        }
+        let token_type: JsonSelectorType =
+            serde_json::from_value(arr[0].clone()).map_err(serde::de::Error::custom)?;
+        let nested_token = deserialize_selector_value(&token_type, arr[1].clone())
+            .map_err(serde::de::Error::custom)?;
 
+        Ok(JsonSelector {
+            token_type,
+            nested_token,
+        })
+    }
+}
+
+/// Represents JSON-Selector values for use within a Detached-EAT-Bundle per RFC 9711.
+///
+/// Unlike [JsonSelectorValue], this excludes the `DetachedEatBundle` variant since a DEB
+/// cannot contain another DEB.
 #[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -178,69 +198,89 @@ pub enum JsonSelectorForDebValue {
     CborTokenInsideJsonToken(String),
     DetachedSubmoduleDigest(DetachedSubmoduleDigest),
 }
-impl<'de> serde::Deserialize<'de> for JsonSelectorForDebValue {
-    fn deserialize<__D>(__deserializer: __D) -> Result<Self, __D::Error>
-    where
-        __D: serde::Deserializer<'de>,
-    {
-        let __content = match <Content<'_> as serde::Deserialize>::deserialize(__deserializer) {
-            Ok(__val) => __val,
-            Err(__err) => {
-                return Err(__err);
+/// Deserialize a `JsonSelectorForDebValue` given the `token_type` discriminator.
+///
+/// Like [`deserialize_selector_value`] but excludes the `DetachedEatBundle` variant
+/// since a DEB cannot contain another DEB.
+fn deserialize_selector_for_deb_value(
+    token_type: &JsonSelectorType,
+    value: serde_json::Value,
+) -> Result<JsonSelectorForDebValue, String> {
+    match token_type {
+        JsonSelectorType::Jwt => match value {
+            serde_json::Value::String(s) => Ok(JsonSelectorForDebValue::JwtMessage(s)),
+            _ => Err("JWT selector value must be a string".to_string()),
+        },
+        JsonSelectorType::Cbor => match value {
+            serde_json::Value::String(s) => {
+                Ok(JsonSelectorForDebValue::CborTokenInsideJsonToken(s))
             }
-        };
-        match &__content {
-            Content::Str(s) => {
-                // could use regex crate, but that requires std
-                let num = s.matches('.').count();
-                if 2 == num || 4 == num {
-                    if let Ok(__ok) = Result::map(
-                        <String as serde::Deserialize>::deserialize(
-                            serde::__private::de::ContentRefDeserializer::<__D::Error>::new(
-                                &__content,
-                            ),
-                        ),
-                        JsonSelectorForDebValue::JwtMessage,
-                    ) {
-                        return Ok(__ok);
-                    }
-                }
-                if let Ok(__ok) = Result::map(
-                    <String as serde::Deserialize>::deserialize(
-                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
-                    ),
-                    JsonSelectorForDebValue::CborTokenInsideJsonToken,
-                ) {
-                    return Ok(__ok);
-                }
-            }
-            Content::Map(_) => {
-                if let Ok(__ok) = Result::map(
-                    <DetachedSubmoduleDigest as serde::Deserialize>::deserialize(
-                        serde::__private::de::ContentRefDeserializer::<__D::Error>::new(&__content),
-                    ),
-                    JsonSelectorForDebValue::DetachedSubmoduleDigest,
-                ) {
-                    return Ok(__ok);
-                }
-            }
-            _ => {}
+            _ => Err("CBOR selector value must be a base64-encoded string".to_string()),
+        },
+        JsonSelectorType::Digest => serde_json::from_value::<DetachedSubmoduleDigest>(value)
+            .map(JsonSelectorForDebValue::DetachedSubmoduleDigest)
+            .map_err(|e| format!("Failed to parse DetachedSubmoduleDigest: {e}")),
+        JsonSelectorType::Bundle => {
+            Err("BUNDLE selector type is not permitted inside a Detached-EAT-Bundle".to_string())
         }
-        Err(serde::de::Error::custom(
-            "data did not match any variant of untagged enum JsonSelectorValue",
-        ))
+        JsonSelectorType::Other(t) => Err(format!("Unknown JSON-Selector-Type: {t}")),
     }
 }
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+
+/// JSON-Selector variant for use within a Detached-EAT-Bundle per RFC 9711.
+///
+/// Similar to [JsonSelector] but uses [JsonSelectorForDebValue] to exclude the
+/// `DetachedEatBundle` option.
+#[derive(Clone, Debug, PartialEq)]
 #[allow(missing_docs)]
 pub struct SelectorForDeb {
     pub token_type: JsonSelectorType,
     pub nested_token: JsonSelectorForDebValue,
 }
+impl Serialize for SelectorForDeb {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        use serde::ser::SerializeSeq;
+        let mut seq = serializer.serialize_seq(Some(2))?;
+        seq.serialize_element(&self.token_type)?;
+        seq.serialize_element(&self.nested_token)?;
+        seq.end()
+    }
+}
+impl<'de> Deserialize<'de> for SelectorForDeb {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let arr = <Vec<serde_json::Value>>::deserialize(deserializer)?;
+        if arr.len() != 2 {
+            return Err(serde::de::Error::custom(format!(
+                "Selector-For-Deb must be a 2-element array, got {}",
+                arr.len()
+            )));
+        }
+        let token_type: JsonSelectorType =
+            serde_json::from_value(arr[0].clone()).map_err(serde::de::Error::custom)?;
+        let nested_token = deserialize_selector_for_deb_value(&token_type, arr[1].clone())
+            .map_err(serde::de::Error::custom)?;
+
+        Ok(SelectorForDeb {
+            token_type,
+            nested_token,
+        })
+    }
+}
 
 // $$Claims-Set-Claims //= (submods-label => { + text => Submodule })
 //
 // Submodule = Claims-Set / JSON-Selector
+
+/// Represents a JSON-encoded EAT Submodule as defined in RFC 9711 Section 4.2.18.
+///
+/// A Submodule is either a nested Claims-Set or a JSON-Selector. Use [SubmoduleCbor]
+/// for CBOR-encoded EATs.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(missing_docs)]
@@ -251,8 +291,8 @@ pub enum Submodule {
 }
 impl TryFrom<SubmoduleCbor> for Submodule {
     type Error = String;
-    fn try_from(_value: SubmoduleCbor) -> Result<Self, Self::Error> {
-        todo!()
+    fn try_from(value: SubmoduleCbor) -> Result<Self, Self::Error> {
+        (&value).try_into()
     }
 }
 impl TryFrom<&SubmoduleCbor> for Submodule {
@@ -261,14 +301,13 @@ impl TryFrom<&SubmoduleCbor> for Submodule {
         match value {
             SubmoduleCbor::ClaimsSet(b) => {
                 let cs: &ClaimsSetClaimsCbor = b.deref();
-                //todo unwrap
-                let cs_json: ClaimsSetClaims = cs.try_into().unwrap();
+                let cs_json: ClaimsSetClaims = cs.try_into()?;
                 Ok(Submodule::ClaimsSet(Box::new(cs_json)))
             }
             SubmoduleCbor::SelectorCbor(SelectorCbor::CborTokenInsideCborToken(b)) => {
                 let js = JsonSelector {
                     token_type: JsonSelectorType::Cbor,
-                    nested_token: JsonSelectorValue::CborTokenInsideJsonToken(base64::encode(b)),
+                    nested_token: JsonSelectorValue::CborTokenInsideJsonToken(STANDARD.encode(b)),
                 };
                 Ok(Submodule::JsonSelector(js))
             }
@@ -280,15 +319,40 @@ impl TryFrom<&SubmoduleCbor> for Submodule {
                 Ok(Submodule::JsonSelector(js))
             }
             SubmoduleCbor::SelectorCbor(SelectorCbor::DetachedSubmoduleDigest(dsm)) => {
-                //todo unwrap
                 let js = JsonSelector {
-                    token_type: JsonSelectorType::Bundle,
-                    nested_token: JsonSelectorValue::DetachedSubmoduleDigest(
-                        dsm.try_into().unwrap(),
-                    ),
+                    token_type: JsonSelectorType::Digest,
+                    nested_token: JsonSelectorValue::DetachedSubmoduleDigest(dsm.try_into()?),
                 };
                 Ok(Submodule::JsonSelector(js))
             }
         }
+    }
+}
+
+/// JSON encoding/decoding of the submods map: `{ + text => Submodule }`.
+///
+/// RFC 9711 Section 4.2.18 defines the submodules claim as a map of named submodules:
+/// ```text
+/// $$Claims-Set-Claims //= (submods-label => { + text => Submodule })
+/// ```
+/// Use [SubmodsMapCbor] for CBOR-encoded EATs.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct SubmodsMap(pub BTreeMap<String, Submodule>);
+
+impl TryFrom<SubmodsMapCbor> for SubmodsMap {
+    type Error = String;
+    fn try_from(value: SubmodsMapCbor) -> Result<Self, Self::Error> {
+        (&value).try_into()
+    }
+}
+impl TryFrom<&SubmodsMapCbor> for SubmodsMap {
+    type Error = String;
+    fn try_from(value: &SubmodsMapCbor) -> Result<Self, Self::Error> {
+        let mut map = BTreeMap::new();
+        for (k, v) in &value.0 {
+            let submod = Submodule::try_from(v)?;
+            map.insert(k.clone(), submod);
+        }
+        Ok(SubmodsMap(map))
     }
 }

@@ -1,0 +1,46 @@
+[package]
+name = "coserv"
+description = "CBOR-focused encoders/decoders for CoSERV structures"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/carl-wallace/cbor-formats/tree/main/coserv"
+categories = ["cryptography", "data-structures", "encoding", "no-std", "parser-implementations"]
+keywords = ["cbor", "json", "corim", "coserv", "rats"]
+readme = "README.md"
+version = "0.1.1"
+edition = "2024"
+rust-version = "1.85.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = []
+crypto = ["cose_crypto"]
+pqc = ["cose_crypto/pqc"]
+
+[dependencies]
+cbor_derive = { version = "0.1.1", path = "../cbor_derive" }
+common = { version = "0.1.1", path = "../common" }
+cmw = { version = "0.1.1", path = "../cmw" }
+cose = { version = "0.1.1", path = "../cose" }
+cose_crypto = { version = "0.1.1", path = "../cose_crypto", optional = true }
+corim = { version = "0.1.1", path = "../corim" }
+cots = { version = "0.1.1", path = "../cots" }
+ciborium = "0.2.2"
+serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
+serde_bytes = "0.11"
+serde_json = "1.0.149"
+serde_repr = "0.1.20"
+subtle-encoding = {version = "0.5.1", default-features = false, features = ["hex", "alloc"]}
+hex-literal = "1.1.0"
+num_enum = "0.7.6"
+
+[dev-dependencies]
+cose_crypto = { version = "0.1.1", path = "../cose_crypto" }
+lazy_static = "1.5.0"
+p256 = "0.14.0-rc.8"
+rand = "0.10"
+uuid = "1.23.0"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

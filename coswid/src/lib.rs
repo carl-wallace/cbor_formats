@@ -1,8 +1,75 @@
+#![forbid(unsafe_code)]
+#![warn(
+    clippy::alloc_instead_of_core,
+    clippy::mod_module_files,
+    clippy::std_instead_of_alloc,
+    clippy::std_instead_of_core,
+    clippy::unwrap_used,
+    missing_docs,
+    rust_2018_idioms,
+    unused_lifetimes,
+    unused_qualifications
+)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
-#![forbid(unsafe_code)]
-#![warn(missing_docs, rust_2018_idioms)]
+//!
+//! ## CDDL-to-Rust Type Mapping
+//!
+//! The following table maps CDDL productions from
+//! [RFC 9393 Section 2.10](https://datatracker.ietf.org/doc/html/rfc9393#section-2.10)
+//! to their Rust implementations, organized by specification section.
+//!
+//! ### CoSWID Tag ([Section 2.3](https://datatracker.ietf.org/doc/html/rfc9393#section-2.3))
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `concise-swid-tag` | [`maps::ConciseSwidTag`] / [`maps::ConciseSwidTagCbor`] |
+//!
+//! ### Entity ([Section 2.6](https://datatracker.ietf.org/doc/html/rfc9393#section-2.6))
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `entity-entry` | [`maps::EntityEntry`] / [`maps::EntityEntryCbor`] |
+//! | `one-or-more<entity-entry>` | [`maps::OneOrMoreEntityEntry`] / [`maps::OneOrMoreEntityEntryCbor`] |
+//! | `$role` / known roles | [`choices::Role`] / [`choices::RoleKnown`] |
+//! | `one-or-more<role>` | [`choices::OneOrMoreRole`] |
+//!
+//! ### Links ([Section 2.7](https://datatracker.ietf.org/doc/html/rfc9393#section-2.7))
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `link-entry` | [`maps::LinkEntry`] / [`maps::LinkEntryCbor`] |
+//! | `one-or-more<link-entry>` | [`maps::OneOrMoreLinkEntry`] / [`maps::OneOrMoreLinkEntryCbor`] |
+//! | `$ownership` / known values | [`choices::Ownership`] / [`choices::OwnershipKnown`] |
+//! | `$rel` / known values | [`choices::Rel`] / [`choices::RelKnown`] |
+//! | `$use-choice` / known values | [`choices::UseChoice`] / [`choices::UseChoiceKnown`] |
+//!
+//! ### Software Meta ([Section 2.8](https://datatracker.ietf.org/doc/html/rfc9393#section-2.8))
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `software-meta-entry` | [`maps::SoftwareMetaEntry`] / [`maps::SoftwareMetaEntryCbor`] |
+//! | `one-or-more<software-meta-entry>` | [`maps::OneOrMoreSoftwareMetaEntry`] / [`maps::OneOrMoreSoftwareMetaEntryCbor`] |
+//!
+//! ### Resources and Evidence ([Section 2.9](https://datatracker.ietf.org/doc/html/rfc9393#section-2.9))
+//!
+//! | CDDL | Rust |
+//! |------|------|
+//! | `path-elements-group` | [`maps::PathElementsGroup`] / [`maps::PathElementsGroupCbor`] |
+//! | `resource-collection` | [`maps::ResourceCollection`] / [`maps::ResourceCollectionCbor`] |
+//! | `file-entry` | [`maps::FileEntry`] / [`maps::FileEntryCbor`] |
+//! | `one-or-more<file-entry>` | [`maps::OneOrMoreFileEntry`] / [`maps::OneOrMoreFileEntryCbor`] |
+//! | `directory-entry` | [`maps::DirectoryEntry`] / [`maps::DirectoryEntryCbor`] |
+//! | `one-or-more<directory-entry>` | [`maps::OneOrMoreDirectoryEntry`] / [`maps::OneOrMoreDirectoryEntryCbor`] |
+//! | `process-entry` | [`maps::ProcessEntry`] / [`maps::ProcessEntryCbor`] |
+//! | `one-or-more<process-entry>` | [`maps::OneOrMoreProcessEntry`] / [`maps::OneOrMoreProcessEntryCbor`] |
+//! | `resource-entry` | [`maps::ResourceEntry`] / [`maps::ResourceEntryCbor`] |
+//! | `one-or-more<resource-entry>` | [`maps::OneOrMoreResourceEntry`] / [`maps::OneOrMoreResourceEntryCbor`] |
+//! | `payload-entry` | [`maps::PayloadEntry`] / [`maps::PayloadEntryCbor`] |
+//! | `evidence-entry` | [`maps::EvidenceEntry`] / [`maps::EvidenceEntryCbor`] |
+//! | `payload-or-evidence` | [`choices::PayloadOrEvidence`] |
 #![allow(clippy::derive_partial_eq_without_eq)]
+#![allow(unexpected_cfgs)]
 #![cfg_attr(not(feature = "std"), no_std)]
 extern crate alloc;
 

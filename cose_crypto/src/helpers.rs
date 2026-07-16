@@ -1,0 +1,131 @@
+//! Internal helper functions for COSE structure construction.
+
+use alloc::{string::ToString, vec::Vec};
+
+use common::TextOrInt;
+use cose::{
+    choices::EmptyOrSerializedMap,
+    maps::{HeaderMap, HeaderMapCbor},
+};
+
+use crate::{algorithm::CoseAlgorithm, error::CoseCryptoError};
+
+/// Serialize a `HeaderMap` into `EmptyOrSerializedMap`.
+/// If the header map has no fields set, returns `Empty`.
+pub fn serialize_protected(hdr: &HeaderMap) -> Result<EmptyOrSerializedMap, CoseCryptoError> {
+    let cbor: HeaderMapCbor =
+        HeaderMapCbor::try_from(hdr).map_err(|e| CoseCryptoError::CborError(e.to_string()))?;
+    let mut buf = Vec::new();
+    ciborium::ser::into_writer(&cbor, &mut buf)
+        .map_err(|e| CoseCryptoError::CborError(e.to_string()))?;
+    Ok(EmptyOrSerializedMap::SerializedMap(buf))
+}
+
+/// Create an empty protected header.
+pub fn empty_protected() -> EmptyOrSerializedMap {
+    EmptyOrSerializedMap::Empty(Vec::new())
+}
+
+/// Deserialize protected header bytes into a `HeaderMapCbor`.
+pub fn deserialize_protected(
+    protected: &EmptyOrSerializedMap,
+) -> Result<Option<HeaderMapCbor>, CoseCryptoError> {
+    match protected {
+        EmptyOrSerializedMap::SerializedMap(bytes) => {
+            let hdr: HeaderMapCbor = ciborium::de::from_reader(bytes.as_slice())
+                .map_err(|e| CoseCryptoError::InvalidProtectedHeader(e.to_string()))?;
+            Ok(Some(hdr))
+        }
+        EmptyOrSerializedMap::Empty(_) => Ok(None),
+    }
+}
+
+/// Extract the algorithm from an `EmptyOrSerializedMap` protected header.
+pub fn extract_algorithm(
+    protected: &EmptyOrSerializedMap,
+) -> Result<CoseAlgorithm, CoseCryptoError> {
+    let hdr = deserialize_protected(protected)?.ok_or(CoseCryptoError::MissingAlgorithm)?;
+    match &hdr.alg_id {
+        Some(toi) => CoseAlgorithm::from_text_or_int(toi),
+        None => Err(CoseCryptoError::MissingAlgorithm),
+    }
+}
+
+/// Extract IV from protected and unprotected headers.
+///
+/// Per RFC 9052 Section 3.1, at most one of IV and Partial IV may be present
+/// across the entire security layer (both protected and unprotected headers
+/// combined). This function enforces that constraint and returns an error if
+/// more than one is found.
+pub fn extract_iv(
+    protected: &EmptyOrSerializedMap,
+    unprotected: &HeaderMapCbor,
+) -> Result<Vec<u8>, CoseCryptoError> {
+    let prot = deserialize_protected(protected)?;
+
+    // Collect all IV/Partial IV values present across both headers
+    let unp_iv = unprotected.iv.as_ref();
+    let unp_piv = unprotected.partial_iv.as_ref();
+    let prot_iv = prot.as_ref().and_then(|h| h.iv.as_ref());
+    let prot_piv = prot.as_ref().and_then(|h| h.partial_iv.as_ref());
+
+    let count = [
+        unp_iv.is_some(),
+        unp_piv.is_some(),
+        prot_iv.is_some(),
+        prot_piv.is_some(),
+    ]
+    .iter()
+    .filter(|&&b| b)
+    .count();
+
+    if count > 1 {
+        return Err(CoseCryptoError::InvalidProtectedHeader(
+            "at most one of IV and Partial IV is permitted across protected and unprotected headers"
+                .to_string(),
+        ));
+    }
+
+    unp_iv
+        .or(unp_piv)
+        .or(prot_iv)
+        .or(prot_piv)
+        .cloned()
+        .ok_or(CoseCryptoError::MissingField(
+            "IV or Partial IV".to_string(),
+        ))
+}
+
+/// Get the raw bytes from an `EmptyOrSerializedMap`.
+pub fn protected_bytes(protected: &EmptyOrSerializedMap) -> &[u8] {
+    match protected {
+        EmptyOrSerializedMap::SerializedMap(b) => b.as_slice(),
+        EmptyOrSerializedMap::Empty(b) => b.as_slice(),
+    }
+}
+
+/// Create a `HeaderMap` with just the algorithm set.
+pub fn header_with_algorithm(alg: CoseAlgorithm) -> HeaderMap {
+    HeaderMap {
+        alg_id: Some(TextOrInt::Int(alg.to_i64())),
+        criticality: None,
+        content_type: None,
+        key_id: None,
+        iv: None,
+        partial_iv: None,
+        other: None,
+    }
+}
+
+/// Create an empty `HeaderMap`.
+pub fn empty_header() -> HeaderMap {
+    HeaderMap {
+        alg_id: None,
+        criticality: None,
+        content_type: None,
+        key_id: None,
+        iv: None,
+        partial_iv: None,
+        other: None,
+    }
+}
