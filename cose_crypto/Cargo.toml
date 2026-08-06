@@ -30,7 +30,7 @@ ecdsa = { version = "0.17.0-rc.16", default-features = false, optional = true }
 elliptic-curve = { version = "0.14.0-rc.16", default-features = false, optional = true }
 
 # EdDSA
-ed25519-dalek = { version = "3.0.0-pre.6", features = ["fast", "zeroize", "rand_core"] }
+ed25519-dalek = { version = "3.0.0", features = ["fast", "zeroize", "rand_core"] }
 
 # HMAC
 hmac = "0.13.0"
@@ -57,5 +57,5 @@ hex = "0.4"
 hex-literal = "1.1.0"
 p256 = { version = "0.14.0-rc.8", features = ["ecdsa"] }
 p384 = { version = "0.14.0-rc.8", features = ["ecdsa"] }
-ed25519-dalek = { version = "3.0.0-pre.6", features = ["fast", "zeroize", "rand_core"] }
+ed25519-dalek = { version = "3.0.0", features = ["fast", "zeroize", "rand_core"] }
 rand = "0.10"
