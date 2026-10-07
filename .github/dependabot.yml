@@ -1,0 +1,27 @@
+# Dependency updates, monthly, one grouped pull request.
+#
+# This crate is a library, so updates move Cargo.lock only (lockfile-only): CI then tests against
+# current dependencies without raising the minimum versions published in Cargo.toml, which is a
+# decision for a release rather than routine churn.
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: monthly
+    versioning-strategy: lockfile-only
+    open-pull-requests-limit: 3
+    groups:
+      cargo:
+        patterns:
+          - "*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 2
+    groups:
+      actions:
+        patterns:
+          - "*"

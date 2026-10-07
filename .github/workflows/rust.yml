@@ -36,6 +36,10 @@ jobs:
           components: rustfmt
       - run: cargo fmt --all -- --check
 
+  # Builds the library crates that support no_std (std is a default feature) for a non-host
+  # target. cbor_derive (a proc macro), cose_crypto and jose are std-only, and cfcli is a
+  # binary. thumbv7em-none-eabi is not built: ciborium-io and serde_core still come in with
+  # std enabled, so these crates do not yet build for a target without std.
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -44,7 +48,6 @@ jobs:
           - 1.89.0 # MSRV
           - stable
         target:
-          - thumbv7em-none-eabi
           - wasm32-unknown-unknown
     steps:
       - uses: actions/checkout@v4
@@ -53,6 +56,22 @@ jobs:
           toolchain: ${{ matrix.rust }}
           targets: ${{ matrix.target }}
       - name: Build
-        run: cargo build --verbose
+        run: >-
+          cargo build --verbose --target ${{ matrix.target }} --no-default-features
+          -p ar4si -p cmw -p common -p coserv -p corim -p cose -p coswid -p cots
+          -p ear -p eat -p epoch_markers -p etime -p webauthn_asf
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - 1.89.0 # MSRV
+          - stable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
       - name: Run tests
         run: cargo test --verbose
