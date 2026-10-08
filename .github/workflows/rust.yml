@@ -5,6 +5,9 @@ on:
     branches: [ "main", "no_std" ]
   pull_request:
     branches: [ "main" ]
+  # Manual re-runs via `gh workflow run rust.yml` (available once this file is
+  # on the default branch).
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
