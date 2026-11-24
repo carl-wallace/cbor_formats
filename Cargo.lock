@@ -257,14 +257,11 @@ dependencies = [
  "common",
  "cose",
  "cose_crypto",
- "hex-literal",
  "lazy_static",
  "num_enum",
  "serde",
  "serde_bytes",
- "serde_json",
  "serde_repr",
- "subtle-encoding",
 ]
 
 [[package]]
@@ -314,14 +311,12 @@ dependencies = [
 name = "cose"
 version = "0.1.1"
 dependencies = [
- "base64",
  "cbor_derive",
  "ciborium",
  "common",
  "hex-literal",
  "num_enum",
  "serde",
- "serde-enum-str",
  "serde_bytes",
  "serde_json",
  "serde_repr",
@@ -577,7 +572,6 @@ dependencies = [
  "cbor_derive",
  "ciborium",
  "common",
- "corim",
  "hex-literal",
  "serde",
  "serde_bytes",
@@ -591,7 +585,6 @@ dependencies = [
  "cbor_derive",
  "ciborium",
  "common",
- "corim",
  "hex-literal",
  "num_enum",
  "serde",
@@ -688,8 +681,6 @@ dependencies = [
  "ciborium",
  "hex-literal",
  "serde",
- "serde_bytes",
- "serde_json",
 ]
 
 [[package]]
@@ -1496,11 +1487,8 @@ dependencies = [
  "cbor_derive",
  "ciborium",
  "common",
- "hex-literal",
  "serde",
  "serde_bytes",
- "serde_json",
- "subtle-encoding",
 ]
 
 [[package]]

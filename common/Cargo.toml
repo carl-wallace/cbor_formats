@@ -15,14 +15,16 @@ rust-version = "1.89.0"
 [dependencies]
 cbor_derive = { version = "0.1.1", path = "../cbor_derive" }
 ciborium = "0.2.2"
-subtle-encoding = {version = "0.5.1", default-features = false, features = ["hex", "alloc"]}
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
-hex-literal = "1.1.0"
 serde_bytes = "0.11"
-serde_json = "1.0.149"
 serde_repr = "0.1.20"
 num_enum = "0.7.6"
 #serde-enum-str = {version = "0.2.5", default-features = false}
+
+[dev-dependencies]
+subtle-encoding = {version = "0.5.1", default-features = false, features = ["hex", "alloc"]}
+hex-literal = "1.1.0"
+serde_json = "1.0.149"
 
 [package.metadata.docs.rs]
 all-features = true
